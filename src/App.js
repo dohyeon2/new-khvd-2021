@@ -19,6 +19,9 @@ function App() {
             </EditorContainer>
           </div>
         </Route>
+        <Route path="/login" exact>
+          <MyDashboard />
+        </Route>
         <Route path="/my-dashboard" exact>
           <MyDashboard />
         </Route>
