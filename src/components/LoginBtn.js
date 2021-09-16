@@ -21,8 +21,11 @@ function LoginBtn() {
         //데이터 서버에 로그인합니다.
         if (IsKHUEmail(googleLoginResponse.profileObj.email)) {
             const userData = await axios.post(apiURI + 'khvd/v1/signon', {
-                id_token: googleLoginResponse.tokenObj.id_token
+                id_token: googleLoginResponse.tokenObj.id_token,
+                tokenExist: localStorage.getItem("khvd_user_token") ? true : false,
             });
+            const token = userData?.data?.data?.tokenObj?.data?.token;
+            token && localStorage.setItem("khvd_user_token", token);
             dispatchUserToRedux(userData.data);
         } else {
             window.alert("경희대학교 이메일로 로그인해주세요.");
@@ -39,6 +42,11 @@ function LoginBtn() {
         console.log(response);
     }
 
+    const responseGoogleLogOutSuccess = async () => {
+        localStorage.removeItem("khvd_user_token");
+        dispatch(setUser());
+        dispatch(setUserSuccess(null));
+    }
     function IsKHUEmail(email) {
         //경희대학교 이메일이 맞는지 확인합니다.
         const host = email.split("@")[1];
@@ -50,7 +58,6 @@ function LoginBtn() {
         return (<div>Loading...</div>);
     }
 
-    console.log(user);
     if (!user.data) {
         return (
             <GoogleLogin
@@ -64,10 +71,7 @@ function LoginBtn() {
         );
     }
 
-    return (<GoogleLogout onLogoutSuccess={() => {
-        dispatch(setUser());
-        dispatch(setUserSuccess(null));
-    }} />);
+    return (<GoogleLogout onLogoutSuccess={responseGoogleLogOutSuccess} />);
 
 }
 

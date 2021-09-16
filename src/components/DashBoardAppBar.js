@@ -2,26 +2,29 @@ import React from 'react';
 import styled from 'styled-components';
 import LoginBtn from './LoginBtn';
 
-const DashBoardAppBarContainer = styled.div`
+const DashboardAppBarContainer = styled.div`
     position:sticky;
     top:0;
     left:0;
     right:0;
     padding:.5rem;
-    border:1px solid #ccc;
+    background-color: #444;
+    border-bottom:1px solid #555;
+    color:#fff;
     display: flex;
     justify-content: space-between;
+    align-items: center;
 `;
 
-function DashBoardAppBar() {
+function DashboardAppBar() {
     return (
-        <DashBoardAppBarContainer>
-            <div></div>
+        <DashboardAppBarContainer className="dashboard-appbar">
+            <div>KHVD 2021 GRAD. DASHBOARD</div>
             <div>
                 <LoginBtn />
             </div>
-        </DashBoardAppBarContainer>
+        </DashboardAppBarContainer>
     );
 }
 
-export default DashBoardAppBar;
+export default DashboardAppBar;
