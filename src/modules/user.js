@@ -13,7 +13,7 @@ export const setUserError = (error) => ({ type: SET_USER_ERROR, payload: error }
 // 초기 상태
 const initialState = {
     loading: false,
-    user: null,
+    data: null,
     error: false,
 };
 

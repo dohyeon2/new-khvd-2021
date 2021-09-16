@@ -1,7 +1,9 @@
 import React from 'react';
 import styled from 'styled-components';
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector } from 'react-redux';
 import LoginBtn from '../components/LoginBtn';
+import Loading from '../components/Loading';
+import DashBoardAppBar from '../components/DashBoardAppBar';
 
 const DashBoardContainer = styled.div`
 
@@ -10,10 +12,9 @@ const DashBoardContainer = styled.div`
 function MyDashboard() {
     //global states
     const { user } = useSelector(s => s);
-    const dispatch = useDispatch();
 
     if (user.loading) {
-        return (<div>Loading...</div>);
+        return (<Loading />);
     }
 
     if (!user.data) {
@@ -22,7 +23,7 @@ function MyDashboard() {
 
     return (
         <DashBoardContainer>
-            <LoginBtn />
+            <DashBoardAppBar />
         </DashBoardContainer>
     );
 }
