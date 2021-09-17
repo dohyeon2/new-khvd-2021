@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { setUser, setUserSuccess } from '../modules/user';
-import { googleAPIClientID } from '../vars/credential';
+import { web } from '../vars/credential.json';
 import { GoogleLogin, GoogleLogout } from 'react-google-login';
 import { apiURI } from '../vars/api';
 import axios from 'axios';
@@ -24,9 +24,14 @@ function LoginBtn() {
                 id_token: googleLoginResponse.tokenObj.id_token,
                 tokenExist: localStorage.getItem("khvd_user_token") ? true : false,
             });
-            const token = userData?.data?.data?.tokenObj?.data?.token;
+            const token = userData?.data?.wordpressData?.data?.tokenObj?.data?.token;
             token && localStorage.setItem("khvd_user_token", token);
-            dispatchUserToRedux(userData.data);
+            dispatchUserToRedux({
+                googleData: googleLoginResponse,
+                wordpressData: userData.data,
+            });
+            console.log(googleLoginResponse.tokenObj);
+            localStorage.setItem("google_access_token", googleLoginResponse.tokenObj.access_token);
         } else {
             window.alert("경희대학교 이메일로 로그인해주세요.");
         }
@@ -61,11 +66,12 @@ function LoginBtn() {
     if (!user.data) {
         return (
             <GoogleLogin
-                clientId={googleAPIClientID}
+                clientId={web.client_id}
                 buttonText="Login"
                 onSuccess={responseGoogleOnSuccess}
                 onFailure={responseGoogleOnFail}
                 cookiePolicy={'single_host_origin'}
+                scope={"profile email https://www.googleapis.com/auth/drive"}
                 isSignedIn={true}
             />
         );

@@ -1,1 +1,1 @@
-export const apiURI = "http://data.khvd.kr/wp-json/";
+export const apiURI = "https://data.khvd.kr/wp-json/";

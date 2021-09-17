@@ -3,8 +3,8 @@ import styled from 'styled-components';
 import { useSelector } from 'react-redux';
 import LoginBtn from '../components/LoginBtn';
 import Loading from '../components/Loading';
-import DashboardAppBar from '../components/DashBoardAppBar';
-import DashboardSideMenu from '../components/DashBaordSideMenu';
+import DashboardAppBar from '../components/DashboardAppBar';
+import DashboardSideMenu from '../components/DashboardSideMenu';
 
 const DashboardContainer = styled.div`
     position: absolute;
@@ -24,15 +24,17 @@ const DashboardContainer = styled.div`
         flex-shrink: 0;
     }
     .dashboard-body{
-        background-color: #222;
-        color:#fff;
+        background-color: #fff;
         flex-grow: 1;
         align-items: stretch;
         overflow-y: auto;
     }
+    .dashboard-sidemenu{
+        flex-shrink: 0;
+    }
 `;
 
-function MyDashboard() {
+function MyDashboard({ children }) {
     //global states
     const { user } = useSelector(s => s);
 
@@ -50,7 +52,7 @@ function MyDashboard() {
             <div className="dashboard-layout">
                 <DashboardSideMenu />
                 <div className="dashboard-body">
-
+                    {children}
                 </div>
             </div>
         </DashboardContainer>
