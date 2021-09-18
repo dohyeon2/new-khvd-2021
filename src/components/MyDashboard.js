@@ -28,6 +28,14 @@ const DashboardContainer = styled.div`
         flex-grow: 1;
         align-items: stretch;
         overflow-y: auto;
+        position: relative;
+        &>div{
+            position: absolute;
+            left:0;
+            right:0;
+            top:0;
+            bottom:0;
+        }
     }
     .dashboard-sidemenu{
         flex-shrink: 0;
@@ -52,7 +60,9 @@ function MyDashboard({ children }) {
             <div className="dashboard-layout">
                 <DashboardSideMenu />
                 <div className="dashboard-body">
-                    {children}
+                    <div>
+                        {children}
+                    </div>
                 </div>
             </div>
         </DashboardContainer>

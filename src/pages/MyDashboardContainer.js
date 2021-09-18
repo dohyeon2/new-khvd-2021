@@ -1,11 +1,11 @@
 import React from 'react';
 import MyDashboard from '../components/MyDashboard';
-import Editor from '../components/Editor';
+import EditWork from './dashboard/EditWork';
 
 function MyDashboardContainer({ match }) {
     return (
         <MyDashboard>
-            <Editor></Editor>
+            <EditWork></EditWork>
         </MyDashboard>
     );
 }

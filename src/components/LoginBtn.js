@@ -30,7 +30,6 @@ function LoginBtn() {
                 googleData: googleLoginResponse,
                 wordpressData: userData.data,
             });
-            console.log(googleLoginResponse.tokenObj);
             localStorage.setItem("google_access_token", googleLoginResponse.tokenObj.access_token);
         } else {
             window.alert("경희대학교 이메일로 로그인해주세요.");

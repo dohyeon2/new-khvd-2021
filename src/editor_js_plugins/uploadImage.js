@@ -11,6 +11,7 @@ export class SimpleImage {
     constructor({ data }) {
         this.data = data;
         this.wrapper = undefined;
+        this.state = undefined;
     }
 
     render() {
@@ -19,14 +20,54 @@ export class SimpleImage {
         const uploadBtn = document.createElement('input');
         uploadBtn.value = "파일 업로드 to Google Drive";
         uploadBtn.type = "file";
+
+        const beforeRequest = (file) => {
+            const img = document.createElement("img");
+            const src = URL.createObjectURL(file);
+            img.style.cssText = `
+                max-width:100%;
+                opacity:0.5;
+            `;
+            img.src = src;
+            this.wrapper.replaceChildren(img);
+        }
+
         uploadBtn.oninput = async (event) => {
             const file = event.currentTarget.files;
+            beforeRequest(file[0]);
             console.log("khvd grad 30폴더가 있는지 확인합니다.");
-            
-            console.log("세션을 연결합니다.");
+            const checkFolder = await axios.get("https://www.googleapis.com/drive/v3/files?q=name%3D%27khvd_grad_30%27%20and%20mimeType%3D%27application%2Fvnd.google-apps.folder%27",
+                {
+                    headers: {
+                        Authorization: "Bearer " + localStorage.getItem("google_access_token"),
+                        "Content-Type": "application/json",
+                    },
+                    data: {
+
+                    }
+                });
+            let folder_id = null;
+            if (checkFolder.data.files.length === 0) {
+                //폴더가 없으면 폴더를 만듭니다.
+                console.log("폴더가 없습니다. 폴더를 만듭니다.", checkFolder.data.files);
+                const createFolder = await axios.post("https://www.googleapis.com/drive/v3/files", JSON.stringify({
+                    name: "khvd_grad_30",
+                    mimeType: "application/vnd.google-apps.folder",
+                }), {
+                    headers: {
+                        Authorization: "Bearer " + localStorage.getItem("google_access_token"),
+                        "Content-Type": "application/json",
+                    }
+                });
+                console.log(createFolder.data.id);
+                folder_id = createFolder.data.id;
+            } else {
+                folder_id = checkFolder.data.files[0].id;
+            }
             const uploadSession = await axios.post("https://www.googleapis.com/upload/drive/v3/files?uploadType=resumable", JSON.stringify({
                 name: file[0].name,
                 mimeType: file[0].type,
+                parents: [folder_id],
             }), {
                 headers: {
                     Authorization: "Bearer " + localStorage.getItem("google_access_token"),
@@ -36,11 +77,16 @@ export class SimpleImage {
             const reader = new FileReader();
             console.log(uploadSession);
             reader.onload = function (evt) {
+                console.log(evt);
+                const dataLength = evt.total;
                 const data = evt.target.result;
                 axios({
                     method: "PUT",
                     url: uploadSession.headers.location,
                     data: data,
+                    headers: {
+                        'Content-Range': "bytes 0-" + (dataLength - 1) + "/" + dataLength,
+                    }
                 }).then(async ({ data }) => {
                     const permission = await axios.post(`https://www.googleapis.com/drive/v3/files/${data.id}/permissions`, {
                         role: "reader",
@@ -60,6 +106,7 @@ export class SimpleImage {
                     const src = getLink.data.webContentLink.replace(/\&?export\=.*/, "");
                     console.log(src);
                     const img = document.createElement("img");
+                    img.style.cssText = `max-width:100%;`;
                     img.src = src;
                     thisClass.wrapper.replaceChildren(img);
                 });

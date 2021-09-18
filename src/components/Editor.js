@@ -1,14 +1,6 @@
 import React, { useEffect } from 'react';
 import EditorJS from '@editorjs/editorjs';
-import styled from 'styled-components';
 import { SimpleImage } from '../editor_js_plugins/uploadImage';
-
-const EditorStyled = styled.div`
-    .ce-block__content, 
-    .ce-toolbar__content {
-    max-width: 1600px;  /* example value, adjust for your own use case */
-    }
-`;
 
 function Editor() {
     useEffect(() => {
@@ -16,12 +8,13 @@ function Editor() {
             autofocus: true,
             tools: {
                 image: SimpleImage
-            }
+            },
+            placeholder:"이곳을 클릭하여 입력하세요"
         });
     }, [])
     return (
-        <EditorStyled id="editorjs">
-        </EditorStyled>
+        <div id="editorjs">
+        </div>
     );
 }
 

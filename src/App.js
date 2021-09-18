@@ -1,23 +1,15 @@
 import React from 'react';
-import Editor from './components/Editor';
-import styled from 'styled-components';
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 import MyDashboard from './components/MyDashboard';
 import MyDashboardContainer from './pages/MyDashboardContainer';
-const EditorContainer = styled.div`
-    border:1px solid #000;
-`;
+import 'normalize.css';
+import './App.css'
 
 function App() {
   return (
     <Router>
       <Switch>
         <Route path="/" exact>
-          <div className="app">
-            <EditorContainer>
-              <Editor />
-            </EditorContainer>
-          </div>
         </Route>
         <Route path="/login" exact>
           <MyDashboard />
