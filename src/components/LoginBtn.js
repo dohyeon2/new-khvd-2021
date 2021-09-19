@@ -22,9 +22,8 @@ function LoginBtn() {
         if (IsKHUEmail(googleLoginResponse.profileObj.email)) {
             const userData = await axios.post(apiURI + 'khvd/v1/signon', {
                 id_token: googleLoginResponse.tokenObj.id_token,
-                tokenExist: localStorage.getItem("khvd_user_token") ? true : false,
             });
-            const token = userData?.data?.wordpressData?.data?.tokenObj?.data?.token;
+            const token = userData?.data.data.tokenObj.data.token;
             token && localStorage.setItem("khvd_user_token", token);
             dispatchUserToRedux({
                 googleData: googleLoginResponse,

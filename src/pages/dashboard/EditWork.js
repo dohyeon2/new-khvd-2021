@@ -6,6 +6,27 @@ import { apiURI } from '../../vars/api';
 import axios from 'axios';
 
 const StyledEditWork = styled.div`
+    ul{
+        list-style:none;
+        padding:.5rem;
+        margin:0;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: stretch;
+        li.in-search{
+            flex-shrink:0;
+            border:1px solid #ddd;
+            border-radius: 4px;
+            padding:.5rem;
+            margin-right:.5rem;
+            background-color: #fff;
+            cursor: pointer;
+            transition: filter .2s ease-in-out;
+            &:hover{
+                filter:brightness(90%);
+            }
+        }
+    }
     .desinger-section-title{
         font-family: 'SBAggroB';
         font-size: 30px;
@@ -109,6 +130,18 @@ const StyledEditWork = styled.div`
         }
     }
 `;
+const StyledDesignerSummary = styled.li`
+
+`;
+function DesignerSummary({ data, inSearch }) {
+    return (<StyledDesignerSummary className={["designer", (inSearch && "in-search")].join(" ")}>
+        <div className="name">
+            <div className="korean">{data.name}</div>
+            <div className="english"></div>
+        </div>
+        {inSearch && <div className="student-number">학번</div>}
+    </StyledDesignerSummary>);
+}
 
 function EditWorkContainer({ data, SearchUserEventHandler }) {
     const initialState = {
@@ -128,7 +161,6 @@ function EditWorkContainer({ data, SearchUserEventHandler }) {
             backgroundColor: state.backgorund_color
         }
     };
-
     return (<StyledEditWork {...commonAttr}>
         <div className="editor-wrap">
             <div className="work-meta">
@@ -148,9 +180,7 @@ function EditWorkContainer({ data, SearchUserEventHandler }) {
                                     <input type="text" className="search-designer-input" placeholder="이름으로 검색" onInput={SearchUserEventHandler} />
                                 </div>
                                 <ul className="searched-list">
-                                    <li className="designer">
-
-                                    </li>
+                                    {data?.designerSearch.data && data?.designerSearch.data.map((x, i) => <DesignerSummary inSearch={true} key={i} data={x}></DesignerSummary>)}
                                 </ul>
                             </div>
                             <ul className="designer-list">
@@ -204,7 +234,7 @@ function EditWork({ data }) {
     useEffect(() => {
         if (state.loading) {
             (async () => {
-                
+
                 //카테고리를 불러옵니다.
                 const categories = await axios.get(apiURI + "wp/v2/categories/?exclude=1&_fields=name,id");
 
@@ -224,7 +254,20 @@ function EditWork({ data }) {
 
     const SearchUserEventHandler = async (event) => {
         const query = encodeURI(event.target.value);
-        
+        if (query === "" || query === null) {
+            setState(s => ({
+                ...s,
+                data: {
+                    ...s.data,
+                    designerSearch: {
+                        ...s.data.designerSearch,
+                        loading: false,
+                        data: [],
+                    }
+                }
+            }));
+            return;
+        }
         setState(s => ({
             ...s,
             data: {
@@ -235,19 +278,14 @@ function EditWork({ data }) {
                 }
             }
         }));
-        const users = await axios.get(apiURI + `wp/v2/users/?search=${query}`,{
-            headers:{
-                Authorization: "Bearer " + localStorage.getItem("khvd_access_token")
-            }
-        });
-        console.log(users);
+        const users = await axios.get(apiURI + `wp/v2/users/?search=${query}&has_published_posts=false`);
         setState(s => ({
             ...s,
             data: {
                 ...s.data,
                 designerSearch: {
                     ...s.data.designerSearch,
-                    data: users,
+                    data: users.data,
                     loading: false,
                 }
             }

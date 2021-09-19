@@ -11,9 +11,6 @@ function App() {
       <Switch>
         <Route path="/" exact>
         </Route>
-        <Route path="/login" exact>
-          <MyDashboard />
-        </Route>
         <Route path="/my-dashboard" exact>
           <MyDashboardContainer />
         </Route>

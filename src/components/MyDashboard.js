@@ -1,10 +1,11 @@
 import React from 'react';
 import styled from 'styled-components';
 import { useSelector } from 'react-redux';
-import LoginBtn from '../components/LoginBtn';
-import Loading from '../components/Loading';
-import DashboardAppBar from '../components/DashboardAppBar';
-import DashboardSideMenu from '../components/DashboardSideMenu';
+import LoginBtn from './LoginBtn';
+import Loading from './Loading';
+import DashboardAppBar from './DashboardAppBar';
+import DashboardSideMenu from './DashboardSideMenu';
+import LoginPage from '../pages/LoginPage';
 
 const DashboardContainer = styled.div`
     position: absolute;
@@ -43,17 +44,6 @@ const DashboardContainer = styled.div`
 `;
 
 function MyDashboard({ children }) {
-    //global states
-    const { user } = useSelector(s => s);
-
-    if (user.loading) {
-        return (<Loading />);
-    }
-
-    if (!user.data) {
-        return (<LoginBtn />);
-    }
-
     return (
         <DashboardContainer>
             <DashboardAppBar />

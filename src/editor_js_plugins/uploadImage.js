@@ -41,9 +41,6 @@ export class SimpleImage {
                     headers: {
                         Authorization: "Bearer " + localStorage.getItem("google_access_token"),
                         "Content-Type": "application/json",
-                    },
-                    data: {
-
                     }
                 });
             let folder_id = null;
