@@ -4,6 +4,15 @@ import Editor from '../../components/Editor';
 import Loading from '../../components/Loading';
 import { apiURI } from '../../vars/api';
 import axios from 'axios';
+import produce from 'immer';
+import {
+    searchGoogleDriveFolder,
+    createGoogleDriveFolder,
+    connectUploadSession,
+    uploadFileToGoogleDrive,
+    changeGoogleDriveFilePermission,
+    getWebContentLinkFromGoogleDriveFile
+} from '../../utils/googleDriveProcessing';
 
 const StyledEditWork = styled.div`
     ul{
@@ -109,6 +118,23 @@ const StyledEditWork = styled.div`
                 width:${513 * 100 / 1920}vw;
                 border-radius:4px;
                 overflow:hidden;
+                border:1px solid #ddd;
+                label{
+                    cursor: pointer;
+                    &.loading{
+                        opacity: 0.6;
+                    }
+                    img{
+                        max-width: 100%;
+                        max-height: 100%;
+                        width: auto;
+                        height: auto;
+                    }
+                    .dummy{
+                        width: 100%;
+                        height:100%;
+                    }
+                }
                 .dummy{
                     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23666' class='bi bi-image' viewBox='0 0 16 16'%3E%3Cpath d='M6.002 5.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z'/%3E%3Cpath d='M2.002 1a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2h-12zm12 1a1 1 0 0 1 1 1v6.5l-3.777-1.947a.5.5 0 0 0-.577.093l-3.71 3.71-2.66-1.772a.5.5 0 0 0-.63.062L1.002 12V3a1 1 0 0 1 1-1h12z'/%3E%3C/svg%3E");
                     background-size: 30%;
@@ -133,46 +159,38 @@ const StyledEditWork = styled.div`
 const StyledDesignerSummary = styled.li`
 
 `;
-function DesignerSummary({ data, inSearch }) {
-    return (<StyledDesignerSummary className={["designer", (inSearch && "in-search")].join(" ")}>
+function DesignerSummary({ data, inSearch, onClick }) {
+    return (<StyledDesignerSummary className={["designer", (inSearch && "in-search")].join(" ")} onClick={(event) => {
+        onClick && onClick(event, data);
+    }}>
         <div className="name">
             <div className="korean">{data.name}</div>
             <div className="english"></div>
         </div>
-        {inSearch && <div className="student-number">학번</div>}
+        {inSearch && <div className="student-number">{data.meta.common && JSON.parse(data.meta.common).student_number.value}</div>}
     </StyledDesignerSummary>);
 }
 
-function EditWorkContainer({ data, SearchUserEventHandler }) {
-    const initialState = {
-        text_color: "#000000",
-        backgorund_color: "#ffffff",
-    };
-    const [state, setState] = useState(initialState);
-    const changeColorState = (event) => {
-        setState(s => ({
-            ...s,
-            [event.target.name]: event.target.value,
-        }));
-    }
+function EditWorkContainer({ data, loadingObj, SearchUserEventHandler, insertDesignerToList, deleteDesignerToList, uploadFileOnGoogleDrive, saveData, onInput }) {
     const commonAttr = {
         style: {
-            color: state.text_color,
-            backgroundColor: state.backgorund_color
+            color: data.inputs?.text_color,
+            backgroundColor: data.inputs?.backgorund_color
         }
     };
+
     return (<StyledEditWork {...commonAttr}>
         <div className="editor-wrap">
             <div className="work-meta">
                 <div className="flex">
                     <div className="left">
-                        <input className="project-title" type="text" placeholder="프로젝트 제목" {...commonAttr} />
+                        <input name="project_title" className="project-title" type="text" placeholder="프로젝트 제목" {...commonAttr} onInput={onInput} />
                         <div className="flex justify-between">
-                            <select name="proejct-category" id="project-category" {...commonAttr}>
+                            <select name="project_category" id="project-category" {...commonAttr} onInput={onInput}>
                                 {data?.categories?.map((x, i) => <option key={x.id} value={x.id}>{x.name}</option>)}
                             </select>
                         </div>
-                        <textarea className="description" placeholder="작품 설명" {...commonAttr}></textarea>
+                        <textarea className="description" name="project_description" placeholder="작품 설명" {...commonAttr} onInput={onInput}></textarea>
                         <div>
                             <h2 className="desinger-section-title">Designer</h2>
                             <div className="search-designer-container">
@@ -180,20 +198,31 @@ function EditWorkContainer({ data, SearchUserEventHandler }) {
                                     <input type="text" className="search-designer-input" placeholder="이름으로 검색" onInput={SearchUserEventHandler} />
                                 </div>
                                 <ul className="searched-list">
-                                    {data?.designerSearch.data && data?.designerSearch.data.map((x, i) => <DesignerSummary inSearch={true} key={i} data={x}></DesignerSummary>)}
+                                    {data?.designerSearch
+                                        && data?.designerSearch.filter(
+                                            (x, i) => -1 === data.designerList.findIndex((y, j) => y.id === x.id)
+                                        ).map((x, i) =>
+                                            <DesignerSummary inSearch={true} key={i} data={x} onClick={insertDesignerToList}></DesignerSummary>)}
                                 </ul>
                             </div>
                             <ul className="designer-list">
-                                <li className="designer"></li>
+                                {data?.designerList && data?.designerList.map((x, i) =>
+                                    <DesignerSummary inSearch={true} key={i} data={x} onClick={deleteDesignerToList}></DesignerSummary>)}
                             </ul>
                         </div>
                     </div>
                     <div className="right">
                         <div className="thumbnail">
-                            <div className="dummy" style={{
-                                width: 513,
-                                height: 725.67
-                            }}></div>
+                            <label htmlFor="thumbnail-input" className={[(loadingObj.thumbnail && "loading")].join(" ")}>
+                                {data.thumbnail ? <img src={data.thumbnail} /> : <div className="dummy" style={{
+                                    width: 513,
+                                    height: 725.67
+                                }}></div>}
+                            </label>
+                            <input id="thumbnail-input" type="file" style={{ display: 'none' }} onInput={(event) => {
+                                uploadFileOnGoogleDrive(event);
+                            }} />
+                            {loadingObj.thumbnail && <Loading />}
                         </div>
                     </div>
                 </div>
@@ -201,102 +230,190 @@ function EditWorkContainer({ data, SearchUserEventHandler }) {
             <div className="colors flex">
                 <div className="text-color-wrap color-selector-wrap flex">
                     <label htmlFor="text_color">텍스트 색상</label>
-                    <input type="color" name="text_color" id="text_color" value={state.text_color} onInput={changeColorState} />
-                    <input type="text" name="text_color" id="text_color_input" value={state.text_color} onInput={changeColorState} />
+                    <input type="color" name="text_color" id="text_color" value={data.inputs?.text_color} onInput={onInput} />
+                    <input type="text" name="text_color" id="text_color_input" value={data.inputs?.text_color} onInput={onInput} />
                 </div>
                 <div className="background-color-wrap color-selector-wrap flex">
                     <label htmlFor="backgorund_color">배경 색상</label>
-                    <input type="color" name="backgorund_color" id="backgorund_color" value={state.backgorund_color} onInput={changeColorState} />
-                    <input type="text" name="backgorund_color" id="text_color_input" value={state.backgorund_color} onInput={changeColorState} />
+                    <input type="color" name="backgorund_color" id="backgorund_color" value={data.inputs?.backgorund_color} onInput={onInput} />
+                    <input type="text" name="backgorund_color" id="text_color_input" value={data.inputs?.backgorund_color} onInput={onInput} />
                 </div>
             </div>
-            <Editor {...commonAttr}></Editor>
+            <Editor {...commonAttr} onSave={saveData}></Editor>
         </div>
     </StyledEditWork >)
 }
 
 function EditWork({ data }) {
     const initialState = {
-        loading: true,
+        loading: {
+            data: true,
+            designerSearch: false,
+            thumbnail: false,
+        },
         data: {
             categories: [],
-            designerSearch: {
-                loading: false,
-                data: [],
-                error: false,
-            },
+            designerSearch: [],
             designerList: [],
+            thumbnail: null,
+            inputs: {
+                text_color: "#000000",
+                backgorund_color: "#ffffff",
+            }
         },
         error: false,
     };
     const [state, setState] = useState(initialState);
 
     useEffect(() => {
-        if (state.loading) {
+        if (state.loading.data) {
             (async () => {
 
                 //카테고리를 불러옵니다.
                 const categories = await axios.get(apiURI + "wp/v2/categories/?exclude=1&_fields=name,id");
 
-                setState(s => ({
-                    ...s,
-                    loading: false,
-                    data: {
-                        ...s.data,
-                        categories: categories.data,
-                    }
+                setState(produce(state, draft => {
+                    draft.loading.data = false;
+                    draft.data.categories = categories.data;
                 }));
 
             })();
         }
-
-    }, [state.loading]);
+    }, []);
 
     const SearchUserEventHandler = async (event) => {
+
         const query = encodeURI(event.target.value);
+
         if (query === "" || query === null) {
-            setState(s => ({
-                ...s,
-                data: {
-                    ...s.data,
-                    designerSearch: {
-                        ...s.data.designerSearch,
-                        loading: false,
-                        data: [],
-                    }
-                }
+            setState(produce(state, draft => {
+                draft.loading.designerSearch = false;
+                draft.data.designerSearch = [];
             }));
             return;
         }
-        setState(s => ({
-            ...s,
-            data: {
-                ...s.data,
-                designerSearch: {
-                    ...s.data.designerSearch,
-                    loading: true,
-                }
-            }
-        }));
-        const users = await axios.get(apiURI + `wp/v2/users/?search=${query}&has_published_posts=false`);
-        setState(s => ({
-            ...s,
-            data: {
-                ...s.data,
-                designerSearch: {
-                    ...s.data.designerSearch,
-                    data: users.data,
-                    loading: false,
-                }
-            }
+
+        setState(produce(state, draft => {
+            draft.loading.designerSearch = true;
         }));
 
+        const users = await axios.get(apiURI + `wp/v2/users/?search=${query}&exclude=1`);
+
+        setState(produce(state, draft => {
+            draft.loading.designerSearch = false;
+            draft.data.designerSearch = users.data;
+        }));
+
+    };
+
+    const insertDesignerToList = (event, data) => {
+        const isExistDesigner = state.data.designerList.findIndex((element) => element.id === data.id);
+        if (isExistDesigner !== -1) return;
+        setState(s => ({
+            ...s,
+            data: {
+                ...s.data,
+                designerList: [
+                    ...s.data.designerList,
+                    data
+                ]
+            }
+        }));
+    };
+
+    const deleteDesignerToList = (event, data) => {
+        setState(s => ({
+            ...s,
+            data: {
+                ...s.data,
+                designerList: s.data.designerList.filter((x, i) => x !== data)
+            }
+        }));
+    };
+
+    const uploadFileOnGoogleDrive = async (event) => {
+        const target = event.target;
+        const file = target.files[0];
+        setState(produce(state, draft => {
+            draft.loading.thumbnail = true;
+            draft.data.thumbnail = URL.createObjectURL(file);
+        }));
+        const checkFolder = await searchGoogleDriveFolder("khvd_grad_30");
+        let folder_id = null;
+        if (checkFolder.data.files.length === 0) {
+            //폴더가 없으면 폴더를 만듭니다.
+            const createFolder = await createGoogleDriveFolder("khvd_grad_30");
+            folder_id = createFolder.data.id;
+        } else {
+            folder_id = checkFolder.data.files[0].id;
+        }
+        const uploadSession = await connectUploadSession({
+            name: file.name,
+            mimeType: file.type,
+            parents: [folder_id],
+        });
+        const reader = new FileReader();
+        reader.onload = async (evt) => {
+            const dataLength = evt.total;
+            const data = evt.target.result;
+            const res = await uploadFileToGoogleDrive(uploadSession.headers.location, data, dataLength);
+            const permission = await changeGoogleDriveFilePermission(res.data.id, {
+                role: "reader",
+                type: "anyone",
+            });
+            const getLink = await getWebContentLinkFromGoogleDriveFile(res.data.id);
+            const src = getLink.data.webContentLink.replace(/\&?export\=.*/, "");
+            setState(produce(state, draft => {
+                draft.loading.thumbnail = false;
+                draft.data.thumbnail = src;
+            }));
+        };
+        reader.readAsArrayBuffer(file);
     }
+
+    const saveData = (event, outputData) => {
+        console.log(outputData);
+        console.log(event);
+        console.log(state);
+        (async () => {
+            const res = await axios.post(apiURI + `wp/v2/posts`, {
+                title: state.data.inputs.project_title,
+                content: JSON.stringify({
+                    designerList: state.data.designerList,
+                    editorOutput: outputData,
+                    thumbnail: state.data.thumbnail,
+                    ...state.data.inputs,
+                }),
+                status: "publish",
+                categories: state.data.inputs.project_category
+            }, {
+                headers: {
+                    Authorization: "Bearer " + localStorage.getItem("khvd_user_token"),
+                }
+            });
+        })();
+    };
+
+    const onInput = (event) => {
+        const target = event.target;
+        setState(produce(state, draft => {
+            draft.data.inputs[target.name] = target.value;
+        }));
+    };
 
     return (
         <>
-            <EditWorkContainer data={!state.loading && state.data} SearchUserEventHandler={SearchUserEventHandler} />
-            {state.loading && <Loading />}
+            <EditWorkContainer
+                data={!state.loading.data && state.data}
+                loadingObj={state.loading}
+                SearchUserEventHandler={SearchUserEventHandler}
+                insertDesignerToList={insertDesignerToList}
+                deleteDesignerToList={deleteDesignerToList}
+                uploadFileOnGoogleDrive={uploadFileOnGoogleDrive}
+                saveData={saveData}
+                onInput={onInput}
+            />
+            {state.loading.data && <Loading />}
         </>
     );
 }

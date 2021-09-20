@@ -67,9 +67,11 @@ function UserConfigure() {
         event.preventDefault();
         (async () => {
             const updateUserMeta = await axios.post(apiURI + `wp/v2/users/me`, {
+                name: `${state.answers.koeran_name?.value} ${state.answers.english_name?.value}`,
                 meta: {
                     common: JSON.stringify(state.answers),
-                }
+                },
+                roles: ["author"],
             }, {
                 headers: {
                     Authorization: "Bearer " + localStorage.getItem("khvd_user_token"),
