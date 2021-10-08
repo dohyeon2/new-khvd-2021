@@ -24,3 +24,8 @@ export const PrimaryBtn = styled.button`
         filter:brightness(120%);
     }
 `;
+
+export const SecondaryBtn = styled(PrimaryBtn)`
+    background-color: #666;
+    color:#fff;
+`;

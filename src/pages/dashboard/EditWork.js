@@ -5,6 +5,7 @@ import Loading from '../../components/Loading';
 import { apiURI } from '../../vars/api';
 import axios from 'axios';
 import produce from 'immer';
+import { Prompt } from 'react-router'
 import {
     searchGoogleDriveFolder,
     createGoogleDriveFolder,
@@ -14,152 +15,7 @@ import {
     getWebContentLinkFromGoogleDriveFile
 } from '../../utils/googleDriveProcessing';
 
-const StyledEditWork = styled.div`
-    ul{
-        list-style:none;
-        padding:.5rem;
-        margin:0;
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: stretch;
-        li.in-search{
-            flex-shrink:0;
-            border:1px solid #ddd;
-            border-radius: 4px;
-            padding:.5rem;
-            margin-right:.5rem;
-            background-color: #fff;
-            cursor: pointer;
-            transition: filter .2s ease-in-out;
-            &:hover{
-                filter:brightness(90%);
-            }
-        }
-    }
-    .desinger-section-title{
-        font-family: 'SBAggroB';
-        font-size: 30px;
-    }
-    .editor-wrap{
-        box-sizing:border-box;
-        font-family: NanumSquare;
-        max-width: 1280px;
-        padding-top: 189px;
-        margin:0 auto;
-    }
-    .flex{
-        display: flex;
-        &.justify-between{
-            justify-content: space-between;
-        }
-    }
-    .color-selector-wrap{
-        justify-content: flex-end;
-        align-items: center;
-        &>*{
-            margin:.2rem;
-        }
-    }
-    .search-designer-container{
-        border:1px solid #ddd;
-        border-radius: 10px;
-        .designer-search-input-wrap{
-            padding:.5rem;
-            border-bottom:1px solid #ddd;
-            box-sizing:border-box;
-            input{
-                box-sizing:border-box;
-                width:100%;
-                padding:.3rem;
-            }
-        }
-    }
-    .work-meta{
-        margin-bottom:200px;
-        .left{
-            flex-grow:1;
-            padding-right: 20px;
-            box-sizing:border-box;
-            .project-title{
-                width:100%;
-                padding:1rem;
-                border:2px dashed #ddd;
-                border-radius: 4px;
-                font-size:60px;
-                font-weight: bold;
-                box-sizing:border-box;
-                margin-bottom: 22px;
-            }
-            #project-category{
-                font-size:25px;
-                margin-bottom:44px;
-                padding:.25rem;
-                border-width: 2px;
-                border-color:#ddd;
-                border-style: dashed;
-            }
-            .description{
-                box-sizing:border-box;
-                display: block;
-                width: 100%;
-                resize:none;
-                height:200px;
-                font-size: 20px;
-                font-weight: 700;
-                border-width: 2px;
-                border-color:#ddd;
-                border-style: dashed;
-            }
-        }
-        .right{
-            flex-grow:0;
-            flex-shrink:0;
-            .thumbnail{
-                width:${513 * 100 / 1920}vw;
-                border-radius:4px;
-                overflow:hidden;
-                border:1px solid #ddd;
-                label{
-                    cursor: pointer;
-                    &.loading{
-                        opacity: 0.6;
-                    }
-                    img{
-                        max-width: 100%;
-                        max-height: 100%;
-                        width: auto;
-                        height: auto;
-                    }
-                    .dummy{
-                        width: 100%;
-                        height:100%;
-                    }
-                }
-                .dummy{
-                    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23666' class='bi bi-image' viewBox='0 0 16 16'%3E%3Cpath d='M6.002 5.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z'/%3E%3Cpath d='M2.002 1a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2h-12zm12 1a1 1 0 0 1 1 1v6.5l-3.777-1.947a.5.5 0 0 0-.577.093l-3.71 3.71-2.66-1.772a.5.5 0 0 0-.63.062L1.002 12V3a1 1 0 0 1 1-1h12z'/%3E%3C/svg%3E");
-                    background-size: 30%;
-                    background-color: #ccc;
-                    background-position: center;
-                    background-repeat: no-repeat;
-                }
-            }
-        }
-    }
-    #editorjs{
-        border:2px dashed #ddd;
-    }
-    .ce-block__content, 
-    .ce-toolbar__content {
-        max-width: unset;  /* example value, adjust for your own use case */
-        .cdx-block:focus{
-            border:1px solid #2EA7E0;
-        }
-    }
-`;
-const StyledDesignerSummary = styled.li`
-
-`;
-function DesignerSummary({ data, inSearch, onClick }) {
+export function DesignerSummary({ data, inSearch, onClick }) {
     return (<StyledDesignerSummary className={["designer", (inSearch && "in-search")].join(" ")} onClick={(event) => {
         onClick && onClick(event, data);
     }}>
@@ -167,7 +23,7 @@ function DesignerSummary({ data, inSearch, onClick }) {
             <div className="korean">{data.name}</div>
             <div className="english"></div>
         </div>
-        {inSearch && <div className="student-number">{data.meta.common && JSON.parse(data.meta.common).student_number.value}</div>}
+        {inSearch && <div className="student-number">{data.meta.common && JSON.parse(data.meta.common)['1_student_number']?.value}</div>}
     </StyledDesignerSummary>);
 }
 
@@ -214,10 +70,7 @@ function EditWorkContainer({ data, loadingObj, SearchUserEventHandler, insertDes
                     <div className="right">
                         <div className="thumbnail">
                             <label htmlFor="thumbnail-input" className={[(loadingObj.thumbnail && "loading")].join(" ")}>
-                                {data.thumbnail ? <img src={data.thumbnail} /> : <div className="dummy" style={{
-                                    width: 513,
-                                    height: 725.67
-                                }}></div>}
+                                {data.thumbnail ? <img src={data.thumbnail} /> : <div className="dummy"></div>}
                             </label>
                             <input id="thumbnail-input" type="file" style={{ display: 'none' }} onInput={(event) => {
                                 uploadFileOnGoogleDrive(event);
@@ -262,6 +115,7 @@ function EditWork({ data }) {
             }
         },
         error: false,
+        saved: false,
     };
     const [state, setState] = useState(initialState);
 
@@ -278,6 +132,13 @@ function EditWork({ data }) {
                 }));
 
             })();
+        }
+        window.onbeforeunload = (e) => {
+            if (state.saved) e.preventDefault();
+            else e.returnValue = "You have unsaved changes on this page. Do you want to leave this page and discard your changes or stay on this page?";
+        }
+        return () => {
+            window.onbeforeunload = null;
         }
     }, []);
 
@@ -298,7 +159,7 @@ function EditWork({ data }) {
         }));
 
         const users = await axios.get(apiURI + `wp/v2/users/?search=${query}&exclude=1`);
-
+        console.log(users);
         setState(produce(state, draft => {
             draft.loading.designerSearch = false;
             draft.data.designerSearch = users.data;
@@ -372,10 +233,13 @@ function EditWork({ data }) {
     }
 
     const saveData = (event, outputData) => {
-        console.log(outputData);
-        console.log(event);
-        console.log(state);
         (async () => {
+            console.log({
+                designerList: state.data.designerList,
+                editorOutput: outputData,
+                thumbnail: state.data.thumbnail,
+                ...state.data.inputs,
+            });
             const res = await axios.post(apiURI + `wp/v2/posts`, {
                 title: state.data.inputs.project_title,
                 content: JSON.stringify({
@@ -384,6 +248,10 @@ function EditWork({ data }) {
                     thumbnail: state.data.thumbnail,
                     ...state.data.inputs,
                 }),
+                meta: {
+                    thumbnail: state.data.thumbnail,
+                    designerList: state.data.designerList,
+                },
                 status: "publish",
                 categories: state.data.inputs.project_category
             }, {
@@ -403,6 +271,10 @@ function EditWork({ data }) {
 
     return (
         <>
+            <Prompt
+                when={!state.saved}
+                message='저장되지 않은 데이터가 있습니다. 정말 나가시겠습니까?'
+            />
             <EditWorkContainer
                 data={!state.loading.data && state.data}
                 loadingObj={state.loading}
@@ -419,3 +291,168 @@ function EditWork({ data }) {
 }
 
 export default EditWork;
+
+export const StyledEditWork = styled.div`
+    ul{
+        list-style:none;
+        padding:.5rem;
+        margin:0;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: stretch;
+        li.in-search{
+            flex-shrink:0;
+            border:1px solid #ddd;
+            border-radius: 4px;
+            padding:.5rem;
+            margin-right:.5rem;
+            background-color: #fff;
+            cursor: pointer;
+            transition: filter .2s ease-in-out;
+            &:hover{
+                filter:brightness(90%);
+            }
+        }
+    }
+    .desinger-section-title{
+        font-family: 'SBAggroB';
+        font-size: 30px;
+    }
+    .editor-wrap{
+        padding: 189px 0px;
+        box-sizing:border-box;
+        font-family: NanumSquare;
+        max-width: 1280px;
+        margin:0 auto;
+    }
+    .flex{
+        display: flex;
+        &.justify-between{
+            justify-content: space-between;
+        }
+    }
+    .color-selector-wrap{
+        justify-content: flex-end;
+        align-items: center;
+        &>*{
+            margin:.2rem;
+        }
+    }
+    .search-designer-container{
+        border:1px solid #ddd;
+        border-radius: 10px;
+        .designer-search-input-wrap{
+            padding:.5rem;
+            border-bottom:1px solid #ddd;
+            box-sizing:border-box;
+            input{
+                box-sizing:border-box;
+                width:100%;
+                padding:.3rem;
+            }
+        }
+    }
+    .work-meta{
+        margin-bottom:200px;
+        .left{
+            flex-grow:1;
+            padding-right: 20px;
+            box-sizing:border-box;
+            .project-title{
+                width:100%;
+                padding:1rem;
+                border:2px dashed #ddd;
+                border-radius: 4px;
+                font-size:60px;
+                font-weight: bold;
+                box-sizing:border-box;
+                margin-bottom: 22px;
+            }
+            #project-category{
+                font-size:25px;
+                margin-bottom:44px;
+                padding:.25rem;
+                border-width: 2px;
+                border-color:#ddd;
+                border-style: dashed;
+            }
+            .description{
+                box-sizing:border-box;
+                display: block;
+                width: 100%;
+                resize:none;
+                height:200px;
+                font-size: 20px;
+                font-weight: 700;
+                border-width: 2px;
+                border-color:#ddd;
+                border-style: dashed;
+            }
+        }
+        .right{
+            flex-grow:0;
+            flex-shrink:0;
+            .thumbnail{
+                width:${513 * 100 / 1920}vw;
+                border-radius:4px;
+                overflow:hidden;
+                position: relative;
+                border:1px solid #ddd;
+                &::before{
+                    content: "";
+                    display: block;
+                    padding-top: 140%;
+                }
+                label{
+                    position: absolute;
+                    left:0;
+                    right: 0;
+                    top:0;
+                    bottom:0;
+                    cursor: pointer;
+                    &.loading{
+                        opacity: 0.6;
+                    }
+                    img{
+                        max-width: 100%;
+                        max-height: 100%;
+                        width: auto;
+                        height: auto;
+                    }
+                    .dummy{
+                        width: 100%;
+                        height:100%;
+                    }
+                }
+                .dummy{
+                    position: absolute;
+                    left:0;
+                    right: 0;
+                    top:0;
+                    bottom:0;
+                    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23666' class='bi bi-image' viewBox='0 0 16 16'%3E%3Cpath d='M6.002 5.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z'/%3E%3Cpath d='M2.002 1a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2h-12zm12 1a1 1 0 0 1 1 1v6.5l-3.777-1.947a.5.5 0 0 0-.577.093l-3.71 3.71-2.66-1.772a.5.5 0 0 0-.63.062L1.002 12V3a1 1 0 0 1 1-1h12z'/%3E%3C/svg%3E");
+                    background-size: 30%;
+                    background-color: #ccc;
+                    background-position: center;
+                    background-repeat: no-repeat;
+                }
+            }
+        }
+    }
+    #editorjs{
+        border:1px solid #ddd;
+    }
+    .ce-block__content, 
+    .ce-toolbar__content {
+        max-width: unset;  /* example value, adjust for your own use case */
+        .cdx-block:focus{
+            border:1px solid #2EA7E0;
+        }
+        .ce-paragraph{
+            padding:.4rem 2rem;
+        }
+    }
+`;
+const StyledDesignerSummary = styled.li`
+    color:#000;
+`;

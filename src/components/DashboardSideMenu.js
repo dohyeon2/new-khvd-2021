@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 import { DashboardSideMenuBtn } from './Btns';
+import { useHistory } from 'react-router';
 
 const DashboardSideMenuAnimationWrap = styled.div`
     position: relative;
@@ -19,6 +20,7 @@ const DashboardSideMenuAnimationWrap = styled.div`
         }
     }
 `;
+
 const DashboardSideMenuContainer = styled.div`
     width: 400px;
     background-color: #333;
@@ -74,6 +76,7 @@ const ProfileImage = styled.div`
 `;
 
 function DashboardSideMenu() {
+    const history = useHistory();
     const { user } = useSelector(s => s);
     const initialState = {
         drawerShow: true,
@@ -87,20 +90,31 @@ function DashboardSideMenu() {
     }
     const DashboardSideMenuBtns = [
         {
-            label: "내 작품",
+            label: "내 정보 변경하기",
+            onClick: (e) => {
+                history.push('/my-dashboard/user-config');
+            }
         },
+    ];
+    const DashboardAdminSideMenuBtns = [
         {
             label: "작품 올리기",
-        }
+            onClick: (e) => {
+                history.push('/my-dashboard/edit-work');
+            }
+        },
     ];
-
     return (
         <DashboardSideMenuAnimationWrap className={[(!state.drawerShow ? "hide" : null)].join(" ")}>
             <DashboardSideMenuContainer className="dashboard-sidemenu">
                 <DashBoardProfileSection>
                     <div className="left">
-                        <div className="profile-image"><ProfileImage src={user.data.googleData.profileObj.imageUrl} /></div>
-                        <div className="user-name">{user.data.wordpressData.data.display_name}</div>
+                        <div style={{ display: "flex" }} onClick={() => {
+                            history.push('/my-dashboard');
+                        }}>
+                            <div className="profile-image"><ProfileImage src={user.data?.googleData?.profileObj?.imageUrl} /></div>
+                            <div className="user-name">{user.data.wordpressData.name}</div>
+                        </div>
                     </div>
                     <button className="show-toggle-btn" onClick={toggleDrawer}>
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" className="bi bi-chevron-double-left" viewBox="0 0 16 16">
@@ -109,7 +123,7 @@ function DashboardSideMenu() {
                         </svg>
                     </button>
                 </DashBoardProfileSection>
-                {DashboardSideMenuBtns.map((x, i) => <DashboardSideMenuBtn key={i}>
+                {DashboardSideMenuBtns.concat(DashboardAdminSideMenuBtns).map((x, i) => <DashboardSideMenuBtn key={i} onClick={x.onClick}>
                     {x.label}
                 </DashboardSideMenuBtn>)}
             </DashboardSideMenuContainer>

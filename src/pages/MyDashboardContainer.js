@@ -4,7 +4,9 @@ import Loading from '../components/Loading';
 import MyDashboard from '../components/MyDashboard';
 import EditWork from './dashboard/EditWork';
 import LoginPage from './LoginPage';
-import UserConfigure from './UserConfigure';
+import { Switch, Route } from "react-router-dom";
+import UserConfigure from './dashboard/UserConfigure';
+import UserInfo from './dashboard/UserInfo';
 
 function MyDashboardContainer({ match }) {
     //global states
@@ -17,14 +19,29 @@ function MyDashboardContainer({ match }) {
     if (!user.data) {
         return (<LoginPage />);
     }
-
-    if (!user.data.wordpressData?.data?.meta?.common) {
-        return (<UserConfigure />);
-    }
-
     return (
         <MyDashboard>
-            <EditWork></EditWork>
+            <Switch>
+                {!user.data.wordpressData?.meta?.common
+                    && <Route path="/my-dashboard">
+                        <UserConfigure></UserConfigure>
+                    </Route>}
+                <Route path="/my-dashboard/user-config">
+                    <UserConfigure></UserConfigure>
+                </Route>
+                {user.data.isAdmin
+                    &&
+                    [<Route path="/my-dashboard/edit-work">
+                        <EditWork></EditWork>
+                    </Route>,
+                    <Route path="/my-dashboard/users-info">
+                        유저 정보
+                    </Route>]
+                }
+                <Route path="/my-dashboard">
+                    <UserInfo></UserInfo>
+                </Route>
+            </Switch>
         </MyDashboard>
     );
 }

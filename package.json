@@ -4,6 +4,7 @@
   "private": true,
   "dependencies": {
     "@editorjs/editorjs": "^2.22.2",
+    "@editorjs/header": "^2.6.1",
     "@testing-library/jest-dom": "^5.14.1",
     "@testing-library/react": "^11.2.7",
     "@testing-library/user-event": "^12.8.3",
@@ -24,7 +25,7 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "react-scripts build",
+    "build": "./build.sh",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
@@ -44,6 +45,15 @@
       "last 1 chrome version",
       "last 1 firefox version",
       "last 1 safari version"
+    ]
+  },
+  "output":{
+    "crossOriginLoading":"anonymous"
+  },
+  "compilerOptions": {
+    "typeRoots": [
+      "./@types",
+      "./node_modules/@types"
     ]
   }
 }
