@@ -1,26 +1,28 @@
+import axios from 'axios';
+import credential from '../vars/credential.json';
 import { useSelector, useDispatch } from 'react-redux';
 import { setUser, setUserSuccess } from '../modules/user';
-import { web } from '../vars/credential.json';
-import { useGoogleLogin } from 'react-google-login';
 import { apiURI } from '../vars/api';
-import axios from 'axios';
-import { useHistory } from 'react-router';
 
-export default function useUser(attr = {}) {
+const objectToQuery = (object) => {
+    const result = Object.keys(object).map((x) => {
+        return encodeURI(x + "=" + object[x]);
+    });
+    return result.join("&");
+};
+
+const getUserInfoByToken = async (token) => {
+    const userData = await axios.get('https://www.googleapis.com/oauth2/v1/userinfo?alt=json', {
+        headers: {
+            Authorization: "Bearer " + token,
+        }
+    });
+    return userData;
+}
+function useUser() {
     //global states
     const { user } = useSelector(s => s);
     const dispatch = useDispatch();
-    const history = useHistory();
-    const options = {
-        clientId: web.client_id,
-        buttonText: "Login",
-        onSuccess: responseGoogleOnSuccess,
-        onFailure: responseGoogleOnFail,
-        cookiePolicy: 'single_host_origin',
-        scope: "profile email https://www.googleapis.com/auth/drive",
-        isSignedIn: true,
-    };
-    const { signIn, loaded } = useGoogleLogin({ ...options, isSignedIn: attr.loggedIn || false });
 
     function dispatchUserToRedux(data) {
         //리덕스 스테이트에 유저 정보를 등록합니다.
@@ -28,72 +30,74 @@ export default function useUser(attr = {}) {
         dispatch(setUserSuccess(data));
     }
 
-    async function signonBackend(googleLoginResponse) {
+    const oauthSignIn = () => {
+        // Google's OAuth 2.0 endpoint for requesting an access token
+        var oauth2Endpoint = 'https://accounts.google.com/o/oauth2/v2/auth';
+        // Create <form> element to submit parameters to OAuth 2.0 endpoint.
+        var form = document.createElement('form');
+        form.setAttribute('method', 'GET'); // Send as a GET request.
+        form.setAttribute('action', oauth2Endpoint);
+    
+        // Parameters to pass to OAuth 2.0 endpoint.
+        var params = {
+            'client_id': credential.web.client_id,
+            'redirect_uri': 'https://2021.khvd.kr:3000/login',
+            'response_type': 'token',
+            'scope': 'profile email https://www.googleapis.com/auth/drive',
+            'include_granted_scopes': 'true',
+            'state': 'pass-through value'
+        };
+    
+        // Add form parameters as hidden input values.
+        for (var p in params) {
+            var input = document.createElement('input');
+            input.setAttribute('type', 'hidden');
+            input.setAttribute('name', p);
+            input.setAttribute('value', params[p]);
+            form.appendChild(input);
+        }
+    
+        // Add form to page and submit it to open the OAuth 2.0 endpoint.
+        document.body.appendChild(form);
+        form.submit();
+    }
+
+    async function signonBackend(attr) {
+        const { email, access_token, picture } = attr;
         //데이터 서버에 로그인합니다.
-        if (IsKHUEmail(googleLoginResponse.profileObj.email)) {
-            try{
-                const userSignon = await axios.post(apiURI + 'khvd/v1/signon', {
-                    id_token: googleLoginResponse.tokenObj.id_token,
-                });
+        if (IsKHUEmail(email)) {
+            try {
+                const userSignon = await axios.post(apiURI + 'khvd/v1/signon', attr);
                 const token = userSignon?.data.data.tokenObj.data.token;
                 token && localStorage.setItem("khvd_user_token", token);
-    
+                access_token && localStorage.setItem("google_access_token", access_token);
+
                 const userData = await axios.post(apiURI + `wp/v2/users/me`, {}, {
                     headers: {
                         Authorization: "Bearer " + token,
                     }
                 });
-    
-                //재로그인 요청
-                if (user.data?.reSignInTimeOut) {
-                    clearTimeout(user.data.reSignInTimeOut);
-                }
-                const timeOut = setTimeout(() => {
-                    signIn();
-                }, googleLoginResponse.tokenObj.expires_in * 1000);
-    
+
                 //어드민인지 확인
                 const isAdmin = userData.data.roles?.includes("administrator");
-    
+
                 dispatchUserToRedux({
-                    googleData: googleLoginResponse,
                     wordpressData: userData.data,
-                    reSignInTimeOut: timeOut,
                     isAdmin: isAdmin,
+                    googleData: {
+                        picture: picture
+                    }
                 });
-    
-                localStorage.setItem("google_access_token", googleLoginResponse.tokenObj.access_token);
-                if (attr.logoutRedirect) {
-                    history.push(attr.logoutRedirect);
-                }
-    
-            }catch(e){
+
+            } catch (e) {
+
                 e.response?.data?.message && window.alert(e.response.data.message);
+
             }
-           
+
         } else {
             window.alert("경희대학교 이메일로 로그인해주세요.");
             return;
-        }
-    }
-
-    function responseGoogleOnSuccess(response) {
-        //구글 로그인 성공 시 응답입니다.
-        signonBackend(response);
-    }
-
-    function responseGoogleOnFail(response) {
-        window.alert("구글에 로그인 하던 중 문제가 발생했습니다.");
-        // console.log(response);
-        //구글 로그인 실패 시 응답입니다.
-    }
-
-    const responseGoogleLogOutSuccess = async () => {
-        localStorage.removeItem("khvd_user_token");
-        dispatch(setUser());
-        dispatch(setUserSuccess(null));
-        if (attr.logoutRedirect) {
-            history.push(attr.logoutRedirect);
         }
     }
     function IsKHUEmail(email) {
@@ -103,5 +107,7 @@ export default function useUser(attr = {}) {
         else return false;
     }
 
-    return { signIn, responseGoogleLogOutSuccess, options, user, dispatchUserToRedux };
+    return { oauthSignIn, user, dispatchUserToRedux, signonBackend };
 }
+
+export default useUser;

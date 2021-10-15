@@ -4,6 +4,7 @@ import MyDashboardContainer from './pages/MyDashboardContainer';
 import 'normalize.css';
 import './App.css'
 import Project from './pages/Project';
+import LoginCallBack from './pages/LoginCallBack';
 
 function Image({ src }) {
   const wrap = useRef();
@@ -20,6 +21,10 @@ function App() {
     <Router>
       <Switch>
         <Route path="/" exact>
+          <img src='http://drive.google.com/uc?export=view&id=1hsGzO7uv-mKg06UkM9eUEPx83gX5uNJV' />
+        </Route>
+        <Route path="/login">
+          <LoginCallBack />
         </Route>
         <Route path="/projects">
         </Route>

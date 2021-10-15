@@ -124,7 +124,7 @@ function DashboardSideMenu() {
                         <div style={{ display: "flex" }} onClick={() => {
                             history.push('/my-dashboard');
                         }}>
-                            <div className="profile-image"><ProfileImage src={user.data?.googleData?.profileObj?.imageUrl} /></div>
+                            <div className="profile-image"><ProfileImage src={user.data?.googleData?.picture} /></div>
                             <div className="user-name">{user.data.wordpressData.name}</div>
                         </div>
                     </div>

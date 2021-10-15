@@ -8,7 +8,7 @@ import { apiURI } from '../vars/api';
 import { StyledEditWork, StyledProjectContent } from './dashboard/EditWork';
 
 function ProjectContainer({ data, post_data }) {
-    console.log(post_data);
+    
     const INITIAL_STATE = {
         open: false,
     }
@@ -16,7 +16,7 @@ function ProjectContainer({ data, post_data }) {
     return (
         <StyledProjectContainer className={[(state.open && "open")].join(" ")}>
             <StyledProjectCover className={[(state.open && "open")].join(" ")}>
-                <div className="thumbnail-background-image-wrapper" dangerouslySetInnerHTML={{ __html: `<div class="thumbnail-background-image" style="background-image:url('${post_data.thumbnail}')" />` }}></div>
+                <div className="thumbnail-background-image-wrapper" dangerouslySetInnerHTML={{ __html: `<div class="thumbnail-background-image" style="background-image:url('')" />` }}></div>
                 <div className="title-container">
                     <h1>{data.title.rendered}</h1>
                     <div className="designer-list">
@@ -114,10 +114,10 @@ const StyledProjectCover = styled.div`
     justify-content:center;
     align-items:center;
     top:0;
-right:0;
-left:0;
-bottom:0;
-    z-index:2;
+    right:0;
+    left:0;
+    bottom:0;
+    z-index:99;
     box-sizing:border-box;
     transition:transform 1s ease-in-out;
     .thumbnail-background-image-wrapper{

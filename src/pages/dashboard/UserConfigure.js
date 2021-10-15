@@ -6,7 +6,7 @@ import LoginBtn from '../../components/LoginBtn';
 import { apiURI } from '../../vars/api';
 import { useHistory } from 'react-router';
 import { useSelector } from 'react-redux';
-import useUser from '../../hook/useUser';
+import useUser from '../../hook/useUser.js.origin';
 import MyDashboard from '../../components/MyDashboard';
 
 export const StyledUserConfigure = styled.div`

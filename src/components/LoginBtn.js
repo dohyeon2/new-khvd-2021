@@ -1,21 +1,14 @@
 import React from 'react';
-import { GoogleLogin, GoogleLogout } from 'react-google-login';
-import useUser from '../hook/useUser';
+import useUser from '../hook/useUser.js';
 
 function LoginBtn({ logoutRedirect }) {
-    const { responseGoogleLogOutSuccess, options, user } = useUser({ logoutRedirect: logoutRedirect });
+    const { oauthSignIn } = useUser();
+    return (
+        <button onClick={() => {
+            oauthSignIn();
+        }}>로그인</button>
+    );
 
-    if (user.loading) {
-        return (<div>Loading...</div>);
-    }
-
-    if (!user.data) {
-        return (
-            <GoogleLogin {...{ ...options, loggedIn: false }} />
-        );
-    }
-
-    return (<GoogleLogout onLogoutSuccess={responseGoogleLogOutSuccess} />);
 
 }
 
