@@ -130,7 +130,7 @@ export class SimpleImage {
                     type: "anyone",
                 });
                 const getLink = await getWebContentLinkFromGoogleDriveFile(res.data.id);
-                const src = getLink.data.webContentLink.replace(/\&?export\=.*/, "");
+                const src = getLink.data.webContentLink;
                 const img = document.createElement("img");
                 img.style.cssText = `max-width:100%; opacity:0; position:absolute; left:0; top:0;`;
                 img.src = src;

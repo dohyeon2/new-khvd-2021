@@ -55,7 +55,7 @@ export const changeGoogleDriveFilePermission = (fileId, roleAndType) => new Prom
 });
 
 export const getWebContentLinkFromGoogleDriveFile = (fileId) => new Promise((resolve) => {
-    const res = axios.get(`https://www.googleapis.com/drive/v3/files/${fileId}?fields=webContentLink`, {
+    const res = axios.get(`https://www.googleapis.com/drive/v3/files/${fileId}?fields=webContentLink&includePermissionsForView=published`, {
         headers: {
             Authorization: "Bearer " + localStorage.getItem("google_access_token"),
             "Content-Type": "application/json",

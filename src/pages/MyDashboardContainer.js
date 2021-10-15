@@ -7,6 +7,8 @@ import LoginPage from './LoginPage';
 import { Switch, Route } from "react-router-dom";
 import UserConfigure from './dashboard/UserConfigure';
 import UserInfo from './dashboard/UserInfo';
+import UserList from './dashboard/UserList';
+import ProjectList from './dashboard/ProjectList';
 
 function MyDashboardContainer({ match }) {
     //global states
@@ -35,7 +37,10 @@ function MyDashboardContainer({ match }) {
                         <EditWork></EditWork>
                     </Route>,
                     <Route path="/my-dashboard/users-info">
-                        유저 정보
+                        <UserList></UserList>
+                    </Route>,
+                    <Route path="/my-dashboard/projects">
+                        <ProjectList></ProjectList>
                     </Route>]
                 }
                 <Route path="/my-dashboard">

@@ -30,7 +30,7 @@ class Book {
         const uploadInputId = "upload_btn_" + this.api.blocks.getCurrentBlockIndex();
 
         const uploadBtn = document.createElement("label");
-        uploadBtn.classList.add("img-upload-btn");
+        uploadBtn.classList.add("book-upload-btn");
         uploadBtn.contentEditable = false;
         uploadBtn.setAttribute("for", uploadInputId);
         uploadBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-cloud-arrow-up-fill" viewBox="0 0 16 16">
@@ -72,22 +72,8 @@ class Book {
             }
         });
 
-        const beforeRequest = (file) => {
-            const img = document.createElement("img");
-            const src = URL.createObjectURL(file);
-            img.style.cssText = `
-                max-width:100%;
-                opacity:0.5;
-            `;
-            img.src = src;
-            img.classList.add("placeholder");
-            this.wrapper.replaceChildren(img);
-            this.loading = true;
-        }
-
         uploadInput.addEventListener('input', async (event) => {
             const file = event.currentTarget.files;
-            beforeRequest(file[0]);
             const checkFolder = await searchGoogleDriveFolder("khvd_grad_30");
             let folder_id = null;
             if (checkFolder.data.files.length === 0) {
@@ -134,17 +120,6 @@ class Book {
         return this.wrapper;
     }
 
-    getYoutubeIframe(src) {
-        const iframe = document.createElement('iframe');
-        const SOURCE_ID_REGEX = new RegExp(/\?v=(.*)/, "g");
-        const SOURCE_URI = "https://www.youtube.com/embed/";
-        const sourceId = [...src.matchAll(SOURCE_ID_REGEX)][0][1];
-        iframe.src = SOURCE_URI + sourceId;
-        iframe.frameborder = 0;
-        iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
-        iframe.allowfullscreen = true;
-        return iframe;
-    }
 }
 
 export { Book };

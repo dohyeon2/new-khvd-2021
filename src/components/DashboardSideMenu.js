@@ -96,14 +96,26 @@ function DashboardSideMenu() {
             }
         },
     ];
-    const DashboardAdminSideMenuBtns = [
+    const DashboardAdminSideMenuBtns = user.data.isAdmin ? [
         {
             label: "작품 올리기",
             onClick: (e) => {
                 history.push('/my-dashboard/edit-work');
             }
         },
-    ];
+        {
+            label: "내 작품 리스트",
+            onClick: (e) => {
+                history.push('/my-dashboard/projects');
+            }
+        },
+        {
+            label: "유저 정보 확인",
+            onClick: (e) => {
+                history.push('/my-dashboard/users-info');
+            }
+        },
+    ] : [];
     return (
         <DashboardSideMenuAnimationWrap className={[(!state.drawerShow ? "hide" : null)].join(" ")}>
             <DashboardSideMenuContainer className="dashboard-sidemenu">

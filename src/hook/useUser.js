@@ -31,41 +31,46 @@ export default function useUser(attr = {}) {
     async function signonBackend(googleLoginResponse) {
         //데이터 서버에 로그인합니다.
         if (IsKHUEmail(googleLoginResponse.profileObj.email)) {
-            const userSignon = await axios.post(apiURI + 'khvd/v1/signon', {
-                id_token: googleLoginResponse.tokenObj.id_token,
-            });
-            const token = userSignon?.data.data.tokenObj.data.token;
-            token && localStorage.setItem("khvd_user_token", token);
-
-            const userData = await axios.post(apiURI + `wp/v2/users/me`, {}, {
-                headers: {
-                    Authorization: "Bearer " + token,
+            try{
+                const userSignon = await axios.post(apiURI + 'khvd/v1/signon', {
+                    id_token: googleLoginResponse.tokenObj.id_token,
+                });
+                const token = userSignon?.data.data.tokenObj.data.token;
+                token && localStorage.setItem("khvd_user_token", token);
+    
+                const userData = await axios.post(apiURI + `wp/v2/users/me`, {}, {
+                    headers: {
+                        Authorization: "Bearer " + token,
+                    }
+                });
+    
+                //재로그인 요청
+                if (user.data?.reSignInTimeOut) {
+                    clearTimeout(user.data.reSignInTimeOut);
                 }
-            });
-
-            //재로그인 요청
-            if (user.data?.reSignInTimeOut) {
-                clearTimeout(user.data.reSignInTimeOut);
+                const timeOut = setTimeout(() => {
+                    signIn();
+                }, googleLoginResponse.tokenObj.expires_in * 1000);
+    
+                //어드민인지 확인
+                const isAdmin = userData.data.roles?.includes("administrator");
+    
+                dispatchUserToRedux({
+                    googleData: googleLoginResponse,
+                    wordpressData: userData.data,
+                    reSignInTimeOut: timeOut,
+                    isAdmin: isAdmin,
+                });
+    
+                localStorage.setItem("google_access_token", googleLoginResponse.tokenObj.access_token);
+                if (attr.logoutRedirect) {
+                    history.push(attr.logoutRedirect);
+                }
+    
+            }catch(e){
+                e.response?.data?.message && window.alert(e.response.data.message);
             }
-            const timeOut = setTimeout(() => {
-                signIn();
-            }, googleLoginResponse.tokenObj.expires_in * 1000);
-
-            //어드민인지 확인
-            const isAdmin = userData.data.roles?.includes("administrator");
-
-            dispatchUserToRedux({
-                googleData: googleLoginResponse,
-                wordpressData: userData.data,
-                reSignInTimeOut: timeOut,
-                isAdmin: isAdmin,
-            });
-
-            localStorage.setItem("google_access_token", googleLoginResponse.tokenObj.access_token);
-            if (attr.logoutRedirect) {
-                history.push(attr.logoutRedirect);
-            }
-
+           
         } else {
             window.alert("경희대학교 이메일로 로그인해주세요.");
             return;
