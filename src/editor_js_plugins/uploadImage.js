@@ -3,6 +3,7 @@ import {
     createGoogleDriveFolder,
     connectUploadSession,
     uploadFileToGoogleDrive,
+    uploadFileToGoogleDriveAsChunk,
     changeGoogleDriveFilePermission,
     getWebContentLinkFromGoogleDriveFile
 } from '../utils/googleDriveProcessing';
@@ -20,6 +21,7 @@ export class SimpleImage {
             src: data.src || "",
             centered: data.centered !== undefined ? data.centered : true,
             stretched: data.stretched !== undefined ? data.stretched : true,
+            href: data.href !== undefined ? data.href : false,
         };
         this.wrapper = undefined;
         this.state = undefined;
@@ -35,6 +37,13 @@ export class SimpleImage {
                 name: 'stretched',
                 icon: `<svg width="17" height="10" viewBox="0 0 17 10" xmlns="http://www.w3.org/2000/svg"><path d="M13.568 5.925H4.056l1.703 1.703a1.125 1.125 0 0 1-1.59 1.591L.962 6.014A1.069 1.069 0 0 1 .588 4.26L4.38.469a1.069 1.069 0 0 1 1.512 1.511L4.084 3.787h9.606l-1.85-1.85a1.069 1.069 0 1 1 1.512-1.51l3.792 3.791a1.069 1.069 0 0 1-.475 1.788L13.514 9.16a1.125 1.125 0 0 1-1.59-1.591l1.644-1.644z"/></svg>`
             },
+            {
+                name: 'href',
+                icon: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-link" viewBox="0 0 16 16">
+                <path d="M6.354 5.5H4a3 3 0 0 0 0 6h3a3 3 0 0 0 2.83-4H9c-.086 0-.17.01-.25.031A2 2 0 0 1 7 10.5H4a2 2 0 1 1 0-4h1.535c.218-.376.495-.714.82-1z"/>
+                <path d="M9 5.5a3 3 0 0 0-2.83 4h1.098A2 2 0 0 1 9 6.5h3a2 2 0 1 1 0 4h-1.535a4.02 4.02 0 0 1-.82 1H12a3 3 0 1 0 0-6H9z"/>
+              </svg>`
+            },
         ];
     }
 
@@ -43,8 +52,50 @@ export class SimpleImage {
         this.api.blocks.delete(currentBlockIdx);
     }
 
+
+    getProtocolURL(URL) {
+        const reg = new RegExp(/^http/);
+        if (URL.match(reg) === null) {
+            return "http://" + URL;
+        } else {
+            return URL;
+        }
+    }
+
     render() {
         this.wrapper = document.createElement('div');
+        this.wrapper.style.cssText = "display:flex;";
+        this.wrapper.style.cssText += "padding:0;";
+        this.wrapper.style.cssText += "position:relative;";
+        this.wrapper.classList.add("cdx-block");
+        this.wrapper.classList.add("ce-paragraph");
+        this.wrapper.classList.add("cdx-image-wrapper");
+        this.wrapper.addEventListener('keydown', (event) => {
+            if (event.target.nodeName === "INPUT") {
+                if (event.key === "Enter") {
+                    event.preventDefault();
+                }
+                return;
+            }
+            event.preventDefault();
+            if (event.keyCode == 8) {
+                event.preventDefault();
+                this.deleteThisBlock();
+            }
+            if (event.keyCode == 46) {
+                event.preventDefault();
+                this.deleteThisBlock();
+            }
+        });
+        if (this.data.src) {
+            this._acceptTuneView();
+            const img = document.createElement("img");
+            img.src = this.data.src;
+            img.style.cssText = `max-width:100%; opacity:1; position:relative;`;
+            this.wrapper.replaceChildren(img);
+            return this.wrapper;
+        }
+
         const uploadInputId = "upload_btn_" + this.api.blocks.getCurrentBlockIndex();
 
         const uploadBtn = document.createElement("label");
@@ -62,6 +113,26 @@ export class SimpleImage {
         uploadInput.style.display = "none";
         uploadInput.id = uploadInputId;
 
+        const hrefInputContainer = document.createElement('div');
+        hrefInputContainer.contentEditable = false;
+        hrefInputContainer.classList.add("href-input-container");
+        const hrefInput = document.createElement('input');
+        hrefInput.classList.add("href-input");
+        hrefInput.type = "text";
+        hrefInput.placeholder = "링크 입력";
+        const textBtn = document.createElement("button");
+        textBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-box-arrow-up-right" viewBox="0 0 16 16">
+        <path fill-rule="evenodd" d="M8.636 3.5a.5.5 0 0 0-.5-.5H1.5A1.5 1.5 0 0 0 0 4.5v10A1.5 1.5 0 0 0 1.5 16h10a1.5 1.5 0 0 0 1.5-1.5V7.864a.5.5 0 0 0-1 0V14.5a.5.5 0 0 1-.5.5h-10a.5.5 0 0 1-.5-.5v-10a.5.5 0 0 1 .5-.5h6.636a.5.5 0 0 0 .5-.5z"/>
+        <path fill-rule="evenodd" d="M16 .5a.5.5 0 0 0-.5-.5h-5a.5.5 0 0 0 0 1h3.793L6.146 9.146a.5.5 0 1 0 .708.708L15 1.707V5.5a.5.5 0 0 0 1 0v-5z"/>
+      </svg>`;
+        textBtn.onclick = (e) => {
+            window.open(this.getProtocolURL(hrefInput.value));
+        }
+
+        hrefInputContainer.appendChild(hrefInput);
+        hrefInputContainer.appendChild(textBtn);
+        this.wrapper.appendChild(hrefInputContainer);
+
         const cancelBtn = document.createElement("button");
         cancelBtn.classList.add("cancel-btn");
         cancelBtn.contentEditable = false;
@@ -72,23 +143,18 @@ export class SimpleImage {
             this.deleteThisBlock();
         });
 
-        this.wrapper.style.cssText = "display:flex;";
-        this.wrapper.style.cssText += "padding:0;";
-        this.wrapper.contentEditable = true;
-        this.wrapper.classList.add("cdx-block");
-        this.wrapper.classList.add("ce-paragraph");
-        this.wrapper.classList.add("cdx-image-wrapper");
-        this.wrapper.addEventListener('keydown', (event) => {
-            event.preventDefault();
-            if (event.keyCode == 8) {
-                event.preventDefault();
-                this.deleteThisBlock();
-            }
-            if (event.keyCode == 46) {
-                event.preventDefault();
-                this.deleteThisBlock();
-            }
-        });
+        const loadingConatiner = document.createElement("div");
+        loadingConatiner.classList.add("loading-container");
+        loadingConatiner.style.cssText = "position:absolute; top:0; left:0; bottom:0; right:0; display:flex; align-items:center; justify-content:center; background-color:rgba(0,0,0,.5); flex-direction:column;";
+        const loadingSpinner = document.createElement('div');
+        loadingSpinner.classList.add("loader");
+        loadingSpinner.innerHTML = "Loading...";
+        const loadingProgress = document.createElement('div');
+        loadingProgress.classList.add("loadingProgress");
+        loadingProgress.style.cssText += "color:#fff";
+        loadingProgress.innerHTML = "Loading...";
+        loadingConatiner.appendChild(loadingSpinner);
+        loadingConatiner.appendChild(loadingProgress);
 
         const beforeRequest = (file) => {
             const img = document.createElement("img");
@@ -99,7 +165,10 @@ export class SimpleImage {
             `;
             img.src = src;
             img.classList.add("placeholder");
-            this.wrapper.replaceChildren(img);
+            uploadInput.remove();
+            uploadBtn.remove();
+            this.wrapper.appendChild(img);
+            this.wrapper.appendChild(loadingConatiner);
             this.loading = true;
         }
 
@@ -124,7 +193,29 @@ export class SimpleImage {
             reader.onload = async (evt) => {
                 const dataLength = evt.total;
                 const data = evt.target.result;
-                const res = await uploadFileToGoogleDrive(uploadSession.headers.location, data, dataLength);
+                let flag = true;
+                let res;
+                let offset = 0;
+                while (flag) {
+                    //                     access-control-allow-credentials: "true"
+                    // access-control-allow-origin: "https://2021.khvd.kr:3000"
+                    // access-control-expose-headers: "Access-Control-Allow-Credentials, Access-Control-Allow-Origin, Access-Control-Expose-Headers, Content-Length, Content-Type, Date, Range, Server, Transfer-Encoding, X-GUploader-UploadID, X-Google-Trace, X-Range-MD5"
+                    // content-length: "0"
+                    // content-type: "text/plain; charset=utf-8"
+                    // date: "Wed, 20 Oct 2021 10:55:18 GMT"
+                    // range: "bytes=0-262143"
+                    // server: "UploadServer"
+                    // x-guploader-uploadid: "ADPycdsTwpebpulKQFaNfiShuIkends5BacjpRuXV44gVyZbKE6SZlWO9S_C81ud5lvDc4aPplcSS324XW2lx6lSzII"
+                    // x-range-md5: "1dc80a4ab7b63f2a0d4c785181b14d08"
+                    try {
+                        res = await uploadFileToGoogleDriveAsChunk(uploadSession.headers.location, data, dataLength, offset);
+                        flag = false;
+                    } catch (e) {
+                        res = e.response;
+                        offset = res.headers.range.split("-")[1] * 1;
+                        loadingProgress.innerHTML = (offset * 100 / dataLength).toFixed(2) + "%";
+                    }
+                }
                 const permission = await changeGoogleDriveFilePermission(res.data.id, {
                     role: "reader",
                     type: "anyone",
@@ -138,8 +229,10 @@ export class SimpleImage {
                 img.onload = (event) => {
                     const parentElement = event.target.parentElement;
                     const placeholder = parentElement.querySelector('.placeholder');
+                    const loadingConatiner = parentElement.querySelector('.loading-container');
                     img.style.cssText = `max-width:100%; opacity:1; position:relative;`;
                     placeholder.remove();
+                    loadingConatiner.remove();
                 }
                 this.loading = false;
             };
@@ -158,8 +251,11 @@ export class SimpleImage {
             return;
         }
         const image = blockContent.querySelector('img');
+        const hrefInput = blockContent.querySelector('.href-input');
+        console.log(hrefInput);
         return Object.assign(this.data, {
             src: image.src,
+            href: hrefInput.value || false
         });
     }
 

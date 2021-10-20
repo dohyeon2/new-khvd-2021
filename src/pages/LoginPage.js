@@ -1,6 +1,7 @@
 import React from 'react';
 import LoginBtn from '../components/LoginBtn';
 import styled from 'styled-components';
+import axios from 'axios';
 
 const LoginPageContainer = styled.div`
     display: flex;
@@ -15,6 +16,14 @@ const LoginPageContainer = styled.div`
 `;
 
 function LoginPage() {
+    (    async () => {
+        const userData = await axios.get("https://www.googleapis.com/oauth2/v1/userinfo?alt=json", {
+            headers: {
+                Authorization: "Bearer " + localStorage.getItem("google_access_token"),
+            }
+        });
+        return userData.data.name;
+    })();
     return (
         <LoginPageContainer>
             <h1>KHVD GRAD. Dashboard</h1>

@@ -7,59 +7,94 @@ import Loading from '../components/Loading';
 import { apiURI } from '../vars/api';
 import { StyledEditWork, StyledProjectContent } from './dashboard/EditWork';
 
-function ProjectContainer({ data, post_data }) {
-    
+function getProtocolURL(URL) {
+    const reg = new RegExp(/^http/);
+    if (URL.match(reg) === null) {
+        return "http://" + URL;
+    } else {
+        return URL;
+    }
+}
+
+
+function ProjectContainer({ data }) {
+
     const INITIAL_STATE = {
         open: false,
+        popup: false,
     }
     const [state, setState] = useState(INITIAL_STATE);
+    console.log(data);
     return (
-        <StyledProjectContainer className={[(state.open && "open")].join(" ")}>
-            <StyledProjectCover className={[(state.open && "open")].join(" ")}>
-                <div className="thumbnail-background-image-wrapper" dangerouslySetInnerHTML={{ __html: `<div class="thumbnail-background-image" style="background-image:url('')" />` }}></div>
-                <div className="title-container">
-                    <h1>{data.title.rendered}</h1>
-                    <div className="designer-list">
-                        {post_data.designerList.map((x, i) => x.name).join(", ")}
-                    </div>
-                </div>
-                <button className="open-button" onClick={() => {
-                    setState(s => ({
-                        ...s,
-                        open: true,
-                    }));
-                }}>
-                    <img src="/img/open-btn.png" alt="" />
-                </button>
-            </StyledProjectCover>
-            {state.open && <div className="project-wrap">
+        <StyledProjectContainer className={[(state.open && "open")].join(" ")} style={{
+            backgroundColor: data.backgorund_color,
+            color: data.text_color,
+            overflowY: (state.popup !== false ? "hidden" : null)
+        }}>
+            <div className="project-wrap">
                 <div className="work-meta">
                     <div className="flex">
                         <div className="left">
-                            <h3 className="project-title">{data.title.rendered}</h3>
+                            <h3 className="project-title">{data.title}</h3>
+                            <h4 className="project-category" style={{
+                                color: data.feature_color,
+                            }}>{data.category_name}</h4>
                             <div className="description">
-                                {post_data.project_description}
+                                {data.description}
                             </div>
                             <div>
-                                <h2 className="desinger-section-title">Designer</h2>
+                                <h2 className="desinger-section-title" style={{
+                                    color: data.feature_color,
+                                }}>Designer</h2>
                                 <ul className="designer-list">
-                                    {post_data.designerList.map((x, i) => <li>{x.name}</li>)}
+                                    {data.designer_list.map((x, i) => <li>
+                                        <div className="name">{x.name}</div>
+                                        <div className="line">{x.common.question_4.value}</div>
+                                    </li>)}
                                 </ul>
                             </div>
                         </div>
                         <div className="right">
-                            <div className={["thumbnail"].join(" ")} dangerouslySetInnerHTML={{ __html: `<div class="thumbnail-image" style="background-image:url('${post_data.thumbnail}')" />` }}></div>
+                            <div
+                                className={["thumbnail"].join(" ")}
+                                style={{ backgroundImage: `url('${data.thumbnail}')` }}
+                                onClick={() => {
+                                    setState(s => ({
+                                        ...s,
+                                        popup: data.thumbnail,
+                                    }));
+                                }}
+                            ></div>
                         </div>
                     </div>
                 </div>
                 <StyledProjectContent>
-                    {post_data.editorOutput.blocks.map((x, i) => {
+                    {data.editor_output.blocks.map((x, i) => {
                         switch (x.type) {
                             case "paragraph":
                                 return <p>{x.data?.text}</p>;
                             case "image":
                                 const classList = ["cdx-image-wrapper", (x.data?.centered ? "centered" : null), (x.data?.stretched ? "stretched" : null)];
-                                return <div className={classList.join(" ")} dangerouslySetInnerHTML={{ __html: `<img src='${x.data?.src}' />` }}></div>;
+                                return <img className={classList.join(" ")} src={x.data?.src} onClick={() => {
+                                    if (!x.data?.href) {
+                                        window.open(getProtocolURL(x.data?.href));
+                                    } else {
+                                        setState(s => ({
+                                            ...s,
+                                            popup: x.data?.src,
+                                        }));
+                                    }
+                                }} />;
+                            case "book":
+                                return <div className={"cdx-embed-wrapper"}>
+                                    <div className={"iframe-wrapper"}>
+                                        <iframe src={x.data.src} height="800" style={{
+                                            width: "100%",
+                                            maxWidth: "100%",
+                                            border: 0
+                                        }}></iframe>
+                                    </div>
+                                </div>;
                             case "embed":
                                 return <div className={"cdx-embed-wrapper"}>
                                     <div className={"iframe-wrapper"}>
@@ -71,6 +106,37 @@ function ProjectContainer({ data, post_data }) {
                         }
                     })}
                 </StyledProjectContent>
+            </div>
+            <StyledProjectCover className={[(state.open && "open")].join(" ")} style={{ backgroundImage: `url(${data.thumbnail})` }}>
+                <div className="title-container">
+                    <h1>{data.title}</h1>
+                    <h2>{data.subtitle}</h2>
+                    <div className="designer-list">
+                        {data.designer_list.map((x, i) => x.name).join(", ")}
+                    </div>
+                </div>
+                <button className="open-button" onClick={() => {
+                    setState(s => ({
+                        ...s,
+                        open: true,
+                    }));
+                }}>
+                    <img src="/img/open-btn.png" alt="" />
+                </button>
+            </StyledProjectCover>
+            {state.popup && <div className="image-modal">
+                <button className="x-btn" onClick={() => {
+                    setState(s => ({
+                        ...s,
+                        popup: false,
+                    }));
+                }}>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16">
+                        <path fill-rule="evenodd" d="M13.854 2.146a.5.5 0 0 1 0 .708l-11 11a.5.5 0 0 1-.708-.708l11-11a.5.5 0 0 1 .708 0Z" />
+                        <path fill-rule="evenodd" d="M2.146 2.146a.5.5 0 0 0 0 .708l11 11a.5.5 0 0 0 .708-.708l-11-11a.5.5 0 0 0-.708 0Z" />
+                    </svg>
+                </button>
+                <img src={state.popup} alt="" />
             </div>}
         </StyledProjectContainer >
     )
@@ -88,11 +154,9 @@ function Project({ match }) {
     useEffect(() => {
         if (state.loading) {
             (async () => {
-                const res = await axios.get(apiURI + `wp/v2/posts/${params.id}`);
-                const postData = JSON.parse(res.data.post_content_no_rendered);
+                const res = await axios.get(apiURI + `khvd/v1/project/${params.id}`);
                 setState(s => produce(s, draft => {
                     draft.data = res.data;
-                    draft.post_data = postData;
                     draft.loading = false;
                 }));
             })();
@@ -100,7 +164,7 @@ function Project({ match }) {
     }, [state.loading]);
     if (state.loading) return <Loading></Loading>
     return (
-        <ProjectContainer data={state.data} post_data={state.post_data} />
+        <ProjectContainer data={state.data} />
     );
 }
 
@@ -109,6 +173,7 @@ export default Project;
 const StyledProjectCover = styled.div`
     background-size:cover;
     background-position:center;
+    background-color:#000;
     display:flex;
     position:absolute;
     justify-content:center;
@@ -119,26 +184,8 @@ const StyledProjectCover = styled.div`
     bottom:0;
     z-index:99;
     box-sizing:border-box;
+    transform:scale(1) rotateX(0deg);
     transition:transform 1s ease-in-out;
-    .thumbnail-background-image-wrapper{
-        position:absolute;
-        left:0;
-        top:0;
-        bottom:0;
-        right:0;
-        width:100%;
-        height:100%;
-        .thumbnail-background-image{
-            position:absolute;
-            left:0;
-            top:0;
-            bottom:0;
-            right:0;
-            width:100%;
-            height:100%;
-            background-size:cover;
-        }
-    }
     .title-container{
         position:relative;
         text-align:center;
@@ -148,6 +195,13 @@ const StyledProjectCover = styled.div`
         h1{
             color:#fff;
             font-size:80px;
+            margin-bottom:30px;
+            line-height: 1;
+        }
+        h2{
+            margin-bottom:28px;
+            font-size:30px;
+            color:#fff;
         }
         .designer-list{
             font-size:25px;
@@ -156,7 +210,7 @@ const StyledProjectCover = styled.div`
     }
     &.open{
         transform-origin:center top;
-        transform:rotateX(-90deg);
+        transform:scale(1) rotateX(-90deg);
     }
     &::before{
         content:"";
@@ -185,22 +239,56 @@ const StyledProjectCover = styled.div`
 
 const StyledProjectContainer = styled(StyledEditWork)`
     max-height:100%;
+    position:relative;
+    .cdx-image-wrapper{
+        cursor: pointer;
+    }
     &.open{
         overflow-y:auto;
-        .project-wrap{
-            transform:scale(1);
+    }
+    .image-modal{
+        position:fixed;
+        top:0;
+        left:0;
+        right:0;
+        bottom:0;
+        z-index:3;
+        background-color:rgba(0,0,0,.8);
+        overflow-y:auto;
+        text-align:center;
+        .x-btn{
+            background-color:transparent;
+            border:0;
+            position:fixed;
+            top:2rem;
+            right:2rem;
+            filter:drop-shadow(0px 0px 3px rgba(0,0,0.5));
+            cursor:pointer;
+            path{
+                fill:#fff;
+            }
+        }
+        img{
+            max-width:1800px;
+            width:calc(100% - 4rem);
+            margin:2rem;
         }
     }
     .project-wrap{
-        transition:transform 1s ease-in-out;
-        transform:scale(0.8);
+        position:relative;
+        z-index:1;
         box-sizing:border-box;
         font-family: NanumSquare;
         max-width: 1280px;
+        @media screen and (max-width:1440px){
+            max-width: 1080px;
+        }
         padding-top: 189px;
         margin:0 auto;
+        margin-bottom:200px;
         .work-meta{
             .left{
+                margin-right:50px;
                 .project-title{
                     border:0;
                     padding:0;
@@ -210,23 +298,41 @@ const StyledProjectContainer = styled(StyledEditWork)`
                     border:0;
                     margin-bottom:50px;
                     height:auto;
+                    white-space:pre-wrap;
+                    word-break:break-all;
+                }
+                .project-category{
+                    font-size:24px;
                 }
                 .desinger-section-title{
                     margin-bottom:50px;
                 }
+                .designer-list{
+                    margin:0;
+                    padding:0;
+                    display:flex;
+                    li{
+                        padding:0;
+                        margin:0;
+                        width:50%;
+                        font-size:20px;
+                        line-height:1.6;
+                        margin-bottom:36px;
+                        letter-spacing: -0.4px;
+                        .name{
+                            font-weight:800;
+                        }
+                        .line{
+
+                        }
+                    }
+                }
             }
             .right{
                 .thumbnail{
-                    border:0;
-                    .thumbnail-image{
-                        position:absolute;
-                        left:0;
-                        top:0;
-                        bottom:0;
-                        right:0;
-                        background-size: cover;
-                        background-position:center;
-                    }
+                    background-size: cover;
+                    background-position:center;
+                    cursor:pointer;
                     img{
                         position:absolute;
                         left:0;

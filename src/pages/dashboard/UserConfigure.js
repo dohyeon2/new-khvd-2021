@@ -1,13 +1,11 @@
 import axios from 'axios';
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
 import { PrimaryBtn, SecondaryBtn } from '../../components/Btns';
-import LoginBtn from '../../components/LoginBtn';
 import { apiURI } from '../../vars/api';
 import { useHistory } from 'react-router';
 import { useSelector } from 'react-redux';
-import useUser from '../../hook/useUser.js.origin';
-import MyDashboard from '../../components/MyDashboard';
+import useUser from '../../hook/useUser.js';
 
 export const StyledUserConfigure = styled.div`
     overflow-x: hidden;

@@ -47,7 +47,6 @@ function useUser() {
             'include_granted_scopes': 'true',
             'state': 'pass-through value'
         };
-    
         // Add form parameters as hidden input values.
         for (var p in params) {
             var input = document.createElement('input');
@@ -70,7 +69,6 @@ function useUser() {
                 const userSignon = await axios.post(apiURI + 'khvd/v1/signon', attr);
                 const token = userSignon?.data.data.tokenObj.data.token;
                 token && localStorage.setItem("khvd_user_token", token);
-                access_token && localStorage.setItem("google_access_token", access_token);
 
                 const userData = await axios.post(apiURI + `wp/v2/users/me`, {}, {
                     headers: {
@@ -90,8 +88,8 @@ function useUser() {
                 });
 
             } catch (e) {
-
-                e.response?.data?.message && window.alert(e.response.data.message);
+                console.log('문제발생');
+                e.response?.data?.message ? window.alert(e.response.data.message) : window.alert("문제 발생"); 
 
             }
 

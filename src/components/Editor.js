@@ -6,7 +6,7 @@ import { Book } from '../editor_js_plugins/book';
 import { PrimaryBtn } from './Btns';
 import Header from '@editorjs/header';
 
-function Editor({ onSave }) {
+function Editor({ onSave, data }) {
     const editor = useRef(null);
     useEffect(() => {
         editor.current = new EditorJS({
@@ -22,6 +22,7 @@ function Editor({ onSave }) {
                 image: SimpleImage,
                 book: Book
             },
+            data: data,
             placeholder: "이곳을 클릭하여 입력하세요"
         });
     }, []);

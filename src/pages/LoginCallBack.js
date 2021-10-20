@@ -11,6 +11,7 @@ function getGoogleTokenFromHash() {
     hashObject[hashKeyNValue[0]] = hashKeyNValue[1];
   });
   const access_token = hashObject.access_token;
+  access_token && localStorage.setItem("google_access_token", access_token);
   return access_token;
 }
 function LoginCallBack() {
@@ -21,11 +22,12 @@ function LoginCallBack() {
       const access_token = await getGoogleTokenFromHash();
       const userData = await axios.get("https://www.googleapis.com/oauth2/v1/userinfo?alt=json", {
         headers: {
-          Authorization: "Bearer " + access_token,
+          Authorization: "Bearer " + localStorage.getItem("google_access_token"),
         }
       });
       if (userData.error) return;
-      signonBackend({
+      await signonBackend({
+        access_token: access_token,
         email: userData.data.email,
         name: userData.data.name,
         userid: userData.data.id,

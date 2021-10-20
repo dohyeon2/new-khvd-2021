@@ -44,6 +44,25 @@ export const uploadFileToGoogleDrive = (sessionUrl, data, dataLength) => new Pro
     resolve(res);
 });
 
+export const uploadFileToGoogleDriveAsChunk = (sessionUrl, data, dataLength, offset = 0, chunkSize = 262145) => new Promise((resolve) => {
+    const chunkDestination = ((offset + chunkSize) >= dataLength) ? dataLength - 1 : (offset + chunkSize - 1);
+    data = data.slice(offset, offset + chunkSize);
+    const res = axios({
+        method: "PUT",
+        url: sessionUrl,
+        data: data,
+        headers: {
+            'Content-Range': "bytes " + offset + "-" + chunkDestination + "/" + dataLength,
+        }
+    }, {
+        validateStatus: function (status) {
+            // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+            return status < 500;
+        }
+    });
+    resolve(res);
+});
+
 export const changeGoogleDriveFilePermission = (fileId, roleAndType) => new Promise((resolve) => {
     const res = axios.post(`https://www.googleapis.com/drive/v3/files/${fileId}/permissions`, roleAndType, {
         headers: {
@@ -54,12 +73,13 @@ export const changeGoogleDriveFilePermission = (fileId, roleAndType) => new Prom
     resolve(res);
 });
 
-export const getWebContentLinkFromGoogleDriveFile = (fileId) => new Promise((resolve) => {
-    const res = axios.get(`https://www.googleapis.com/drive/v3/files/${fileId}?fields=webContentLink&includePermissionsForView=published`, {
+export const getWebContentLinkFromGoogleDriveFile = async (fileId) => {
+    const res = await axios.get(`https://www.googleapis.com/drive/v3/files/${fileId}?fields=webContentLink`, {
         headers: {
             Authorization: "Bearer " + localStorage.getItem("google_access_token"),
             "Content-Type": "application/json",
         }
     });
-    resolve(res);
-});
+    res.data.webContentLink = res.data.webContentLink.replace(/export=[^&]*/, "export=view");
+    return res;
+}

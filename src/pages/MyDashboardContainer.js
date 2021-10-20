@@ -33,7 +33,10 @@ function MyDashboardContainer({ match }) {
                 </Route>
                 {user.data.isAdmin
                     &&
-                    [<Route path="/my-dashboard/edit-work">
+                    [<Route path="/my-dashboard/edit-work/:id">
+                        <EditWork></EditWork>
+                    </Route>,
+                    <Route path="/my-dashboard/edit-work">
                         <EditWork></EditWork>
                     </Route>,
                     <Route path="/my-dashboard/users-info">

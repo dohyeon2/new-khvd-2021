@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import Editor from '../../components/Editor';
-import Loading from '../../components/Loading';
+import Loading, { PageLoading } from '../../components/Loading';
 import { apiURI } from '../../vars/api';
 import axios from 'axios';
 import produce from 'immer';
-import { Prompt } from 'react-router'
+import { Prompt, useParams } from 'react-router'
+import { useHistory } from "react-router-dom";
 import {
     searchGoogleDriveFolder,
     createGoogleDriveFolder,
@@ -34,21 +35,32 @@ function EditWorkContainer({ data, loadingObj, SearchUserEventHandler, insertDes
             backgroundColor: data.inputs?.backgorund_color
         }
     };
-
     return (<StyledEditWork {...commonAttr}>
         <div className="editor-wrap">
             <div className="work-meta">
                 <div className="flex">
                     <div className="left">
-                        <input name="project_title" className="project-title" type="text" placeholder="프로젝트 제목" {...commonAttr} onInput={onInput} />
-                        <div className="flex justify-between">
-                            <select name="project_category" id="project-category" {...commonAttr} onInput={onInput}>
-                                {data?.categories?.map((x, i) => <option key={x.id} value={x.id}>{x.name}</option>)}
+                        <input name="project_title" className="project-title" type="text" placeholder="프로젝트 제목" {...commonAttr} onInput={onInput} value={data.inputs.project_title} />
+                        <input type="text" name="subtitle" className="project-subtitle" placeholder="프로젝트 한줄 설명" {...commonAttr} onInput={onInput} value={data.inputs.subtitle} />
+                        <div className="flex justify-between" style={{
+                            color: data.inputs?.feature_color,
+                        }}>
+                            <select name="project_category" id="project-category" {...commonAttr} onInput={onInput} style={{
+                                color: data.inputs?.feature_color,
+                            }}>
+                                {!data.inputs.project_category && <option selected disabled hidden style={{
+                                    color: data.inputs?.feature_color,
+                                }}>카테고리 선택</option>}
+                                {data?.categories?.map((x, i) => <option key={x.id} style={{
+                                    color: data.inputs?.feature_color,
+                                }} value={x.id} selected={data.inputs.project_category === x.id}>{x.name}</option>)}
                             </select>
                         </div>
-                        <textarea className="description" name="project_description" placeholder="작품 설명" {...commonAttr} onInput={onInput}></textarea>
+                        <textarea className="description" name="project_description" placeholder="작품 설명" {...commonAttr} onInput={onInput} value={data.inputs.project_description}></textarea>
                         <div>
-                            <h2 className="desinger-section-title">Designer</h2>
+                            <h2 className="desinger-section-title" style={{
+                                color: data.inputs?.feature_color,
+                            }}>Designer</h2>
                             <div className="search-designer-container">
                                 <div className="designer-search-input-wrap">
                                     <input type="text" className="search-designer-input" placeholder="이름으로 검색" onInput={SearchUserEventHandler} />
@@ -69,8 +81,14 @@ function EditWorkContainer({ data, loadingObj, SearchUserEventHandler, insertDes
                     </div>
                     <div className="right">
                         <div className="thumbnail">
-                            <label htmlFor="thumbnail-input" className={[(loadingObj.thumbnail && "loading")].join(" ")}>
-                                {data.thumbnail ? <img src={data.thumbnail} /> : <div className="dummy"></div>}
+                            <label
+                                htmlFor="thumbnail-input"
+                                className={[(loadingObj.thumbnail && "loading")].join(" ")}
+                                style={{
+                                    backgroundImage: `url(${data.thumbnail})`,
+                                }}
+                            >
+                                {data.thumbnail === null && <div className="dummy"></div>}
                             </label>
                             <input id="thumbnail-input" type="file" style={{ display: 'none' }} onInput={(event) => {
                                 uploadFileOnGoogleDrive(event);
@@ -80,26 +98,35 @@ function EditWorkContainer({ data, loadingObj, SearchUserEventHandler, insertDes
                     </div>
                 </div>
             </div>
-            <div className="colors flex">
+            <div className="colors flex" style={{
+                flexWrap: "wrap"
+            }}>
                 <div className="text-color-wrap color-selector-wrap flex">
                     <label htmlFor="text_color">텍스트 색상</label>
-                    <input type="color" name="text_color" id="text_color" value={data.inputs?.text_color} onInput={onInput} />
-                    <input type="text" name="text_color" id="text_color_input" value={data.inputs?.text_color} onInput={onInput} />
+                    <input type="color" name="text_color" id="text_color" value={data.inputs?.text_color} onInput={onInput} value={data.inputs.text_color} />
+                    <input type="text" name="text_color" id="text_color_input" value={data.inputs?.text_color} onInput={onInput} value={data.inputs.text_color} />
                 </div>
                 <div className="background-color-wrap color-selector-wrap flex">
                     <label htmlFor="backgorund_color">배경 색상</label>
-                    <input type="color" name="backgorund_color" id="backgorund_color" value={data.inputs?.backgorund_color} onInput={onInput} />
-                    <input type="text" name="backgorund_color" id="text_color_input" value={data.inputs?.backgorund_color} onInput={onInput} />
+                    <input type="color" name="backgorund_color" id="backgorund_color" value={data.inputs?.backgorund_color} onInput={onInput} value={data.inputs.backgorund_color} />
+                    <input type="text" name="backgorund_color" id="backgorund_color_input" value={data.inputs?.backgorund_color} onInput={onInput} value={data.inputs.backgorund_color} />
+                </div>
+                <div className="feature-color-wrap color-selector-wrap flex">
+                    <label htmlFor="feature_color">포인트 색상</label>
+                    <input type="color" name="feature_color" id="feature_color" value={data.inputs?.feature_color} onInput={onInput} value={data.inputs.feature_color} />
+                    <input type="text" name="feature_color" id="feature_color_input" value={data.inputs?.feature_color} onInput={onInput} value={data.inputs.feature_color} />
                 </div>
             </div>
             <StyledProjectContent>
-                <Editor {...commonAttr} onSave={saveData}></Editor>
+                <Editor {...commonAttr} onSave={saveData} data={data.editor_outupt}></Editor>
             </StyledProjectContent>
         </div>
     </StyledEditWork >)
 }
 
 function EditWork({ data }) {
+    const params = useParams();
+    const history = useHistory();
     const initialState = {
         loading: {
             data: true,
@@ -111,26 +138,62 @@ function EditWork({ data }) {
             designerSearch: [],
             designerList: [],
             thumbnail: null,
+            editor_outupt: null,
             inputs: {
                 text_color: "#000000",
                 backgorund_color: "#ffffff",
+                feature_color: "#FF358E",
+                project_title: null,
+                subtitle: null,
+                project_category: null,
+                project_description: null,
             }
         },
         error: false,
         saved: false,
     };
     const [state, setState] = useState(initialState);
-
     useEffect(() => {
         if (state.loading.data) {
             (async () => {
-
+                let projectData = false;
                 //카테고리를 불러옵니다.
                 const categories = await axios.get(apiURI + "wp/v2/categories/?exclude=1&_fields=name,id");
+
+                //아이디가 있으면 불러온다
+                if (params.id) {
+                    projectData = await axios.get(apiURI + `khvd/v1/project/${params.id}`);
+                }
+
 
                 setState(produce(state, draft => {
                     draft.loading.data = false;
                     draft.data.categories = categories.data;
+                    if (projectData) {
+                        draft.data.inputs.project_category = projectData.data.category;
+                        draft.data.designerList = projectData.data.designer_list;
+                        draft.data.editor_outupt = projectData.data.editor_output;
+                        draft.data.thumbnail = projectData.data.thumbnail;
+                        draft.data.inputs.project_title = projectData.data.title;
+                        draft.data.inputs.project_description = projectData.data.description;
+                        draft.data.inputs.subtitle = projectData.data.subtitle;
+                        draft.data.inputs.backgorund_color = projectData.data.backgorund_color;
+                        draft.data.inputs.text_color = projectData.data.text_color;
+                        // data: {
+                        //     categories: [],
+                        //     designerSearch: [],
+                        //     designerList: [],
+                        //     thumbnail: null,
+                        //     inputs: {
+                        //         text_color: "#000000",
+                        //         backgorund_color: "#ffffff",
+                        //         project_title: null,
+                        //         subtitle: null,
+                        //         project_category: null,
+                        //         project_description: null,
+                        //     }
+                        // }
+                    }
                 }));
 
             })();
@@ -161,7 +224,6 @@ function EditWork({ data }) {
         }));
 
         const users = await axios.get(apiURI + `wp/v2/users/?search=${query}&exclude=1`);
-        console.log(users);
         setState(produce(state, draft => {
             draft.loading.designerSearch = false;
             draft.data.designerSearch = users.data;
@@ -170,7 +232,7 @@ function EditWork({ data }) {
     };
 
     const insertDesignerToList = (event, data) => {
-        const isExistDesigner = state.data.designerList.findIndex((element) => element.id === data.id);
+        const isExistDesigner = state.data.designerList.findIndex((element) => element.id === data);
         if (isExistDesigner !== -1) return;
         setState(s => ({
             ...s,
@@ -234,25 +296,41 @@ function EditWork({ data }) {
         reader.readAsArrayBuffer(file);
     }
 
+    const isUndefined = (value) => {
+        return (value === [] || value === undefined || value === null);
+    }
+
+    const validateInputs = () => {
+        const required = [...Object.values(state.data.inputs), state.data.thumbnail, state.data.designerList];
+        return !required.map(x => isUndefined(x)).includes(true);
+    }
+
     const saveData = (event, outputData) => {
+        const designerList = state.data.designerList.map(x => x.id);
+        const idx = Object.values(state.loading).findIndex((x, i) => x);
+
+        if (idx !== -1) {
+            window.alert(Object.keys(state.loading)[idx] + "가 로딩중입니다");
+            return;
+        }
+        if (!validateInputs()) {
+            window.alert("모든 항목을 입력해주세요.");
+            return;
+        }
+
         (async () => {
-            console.log({
-                designerList: state.data.designerList,
-                editorOutput: outputData,
-                thumbnail: state.data.thumbnail,
-                ...state.data.inputs,
-            });
-            const res = await axios.post(apiURI + `wp/v2/posts`, {
+            const res = await axios.post(apiURI + `khvd/v1/project`, {
+                post_id: params.id || 0,
                 title: state.data.inputs.project_title,
-                content: JSON.stringify({
-                    designerList: state.data.designerList,
-                    editorOutput: outputData,
-                    thumbnail: state.data.thumbnail,
-                    ...state.data.inputs,
-                }),
+                content: state.data.inputs.project_description,
                 meta: {
                     thumbnail: state.data.thumbnail,
-                    designerList: state.data.designerList,
+                    designerList: designerList,
+                    editorOutput: outputData,
+                    subtitle: state.data.inputs.subtitle,
+                    text_color: state.data.inputs.text_color,
+                    backgorund_color: state.data.inputs.backgorund_color,
+                    feature_color: state.data.inputs.feature_color,
                 },
                 status: "publish",
                 categories: state.data.inputs.project_category
@@ -261,6 +339,12 @@ function EditWork({ data }) {
                     Authorization: "Bearer " + localStorage.getItem("khvd_user_token"),
                 }
             });
+            setState(s => ({
+                ...s,
+                saved: true,
+            }));
+            window.alert("저장이 완료 되었습니다!");
+            history.push("/my-dashboard/projects");
         })();
     };
 
@@ -270,7 +354,7 @@ function EditWork({ data }) {
             draft.data.inputs[target.name] = target.value;
         }));
     };
-
+    if (state.loading.data) return <PageLoading></PageLoading>
     return (
         <>
             <Prompt
@@ -295,6 +379,21 @@ function EditWork({ data }) {
 export default EditWork;
 
 export const StyledEditWork = styled.div`
+    .href-input-container{
+        display:none;
+        position:absolute;
+        top:1rem;
+        left:4rem;
+        align-items:center;
+        z-index:3;
+    }
+    .cdx-image-wrapper{
+        &.href{
+            .href-input-container{
+                display: flex;
+            }
+        }
+    }
     ul{
         list-style:none;
         padding:.5rem;
@@ -325,7 +424,17 @@ export const StyledEditWork = styled.div`
         box-sizing:border-box;
         font-family: NanumSquare;
         max-width: 1280px;
+        @media screen and (max-width:1440px){
+            max-width: 1080px;
+        }
+        width:100%;
         margin:0 auto;
+        .ce-toolbar__plus{
+            left:0;
+        }
+        .ce-toolbar__actions{
+            right:5px;
+        }
     }
     .flex{
         display: flex;
@@ -366,6 +475,16 @@ export const StyledEditWork = styled.div`
                 border:2px dashed #ddd;
                 border-radius: 4px;
                 font-size:60px;
+                font-weight: bold;
+                box-sizing:border-box;
+                margin-bottom: 22px;
+            }
+            .project-subtitle{
+                width:100%;
+                padding:1rem;
+                border:2px dashed #ddd;
+                border-radius: 4px;
+                font-size:24px;
                 font-weight: bold;
                 box-sizing:border-box;
                 margin-bottom: 22px;
@@ -412,6 +531,8 @@ export const StyledEditWork = styled.div`
                     top:0;
                     bottom:0;
                     cursor: pointer;
+                    background-size:cover;
+                    background-position: center;
                     &.loading{
                         opacity: 0.6;
                     }
@@ -557,7 +678,7 @@ export const StyledProjectContent = styled.div`
             z-index:2;
             position: absolute;
             top:1rem;
-            right:1rem;
+            left:1rem;
             border:0;
             background-color: transparent;
             cursor: pointer;

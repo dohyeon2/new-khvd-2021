@@ -14,7 +14,7 @@ function CustomToolbar() {
     );
 }
 
-function ProjectListComponent({ data }) {
+function ProjectListComponent({ data, reload }) {
     const history = useHistory();
     const rowsAndColumns = {
         rows: [], columns: [
@@ -27,15 +27,16 @@ function ProjectListComponent({ data }) {
             { field: 'desginers', headerName: '디자이너 리스트', width: 200 },
         ]
     };
-    rowsAndColumns.rows = data.map((x, i) => {
-        const postData = JSON.parse(x.post_content_no_rendered);
+    rowsAndColumns.rows = data.posts.map((x, i) => {
         return {
             id: x.id,
             idx: i + 1,
-            category: x.categories_title[0],
-            title: x.title.rendered,
-            desginers: postData.designerList.map(x => x.name).join(", "),
+            category: x.category_name,
+            title: x.title,
+            desginers: x.designer_list.map(x=>x.name).join(", "),
             goto: "보러가기",
+            edit: "수정하기",
+            delete: "삭제하기",
         }
     });
     return (
@@ -45,6 +46,27 @@ function ProjectListComponent({ data }) {
                     switch (e.field) {
                         case "goto":
                             history.push(`/project/${e.id}`);
+                            break;
+                        case "edit":
+                            history.push(`/my-dashboard/edit-work/${e.id}`);
+                            break;
+                        case "delete":
+                            const deleteConfirm = window.confirm("정말 삭제합니까?");
+                            if(deleteConfirm){
+                                (async () => {
+                                    try {
+                                        const token = localStorage.getItem("khvd_user_token");
+                                        await axios.delete(apiURI + `wp/v2/posts/${e.id}`, {
+                                            headers: {
+                                                Authorization: "Bearer " + token,
+                                            }
+                                        });
+                                    } catch (e) {
+                                        e.response?.data?.message && window.alert(e.response.data.message);
+                                    }
+                                    reload && reload();
+                                })();
+                            }
                             break;
                     }
                 }}
@@ -71,7 +93,7 @@ function ProjectList() {
         if (data.loading) {
             (async () => {
                 try {
-                    const userListData = await axios.get(apiURI + `wp/v2/posts?author=${user.data.wordpressData.id}`, {
+                    const userListData = await axios.get(apiURI + `khvd/v1/project?author=${user.data.wordpressData.id}`, {
                         headers: {
                             Authorization: "Bearer " + localStorage.getItem("khvd_user_token"),
                         }
@@ -90,10 +112,16 @@ function ProjectList() {
                 }
             })();
         }
-    }, []);
+    }, [data.loading]);
     if (data.loading) return null;
     return (
-            <ProjectListComponent data={data.data} />
+        <ProjectListComponent data={data.data} reload={() => {
+            setData(s => ({
+                ...s,
+                loading: true,
+                data: null,
+            }));
+        }} />
     );
 }
 
