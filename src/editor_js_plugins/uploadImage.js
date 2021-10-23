@@ -7,6 +7,7 @@ import {
     changeGoogleDriveFilePermission,
     getWebContentLinkFromGoogleDriveFile
 } from '../utils/googleDriveProcessing';
+import { writeErrorLog } from '../api/error';
 
 export class SimpleImage {
     static get toolbox() {
@@ -17,6 +18,9 @@ export class SimpleImage {
     }
 
     constructor({ data, api }) {
+        if (data === false) {
+            this.deleteThisBlock();
+        }
         this.data = {
             src: data.src || "",
             centered: data.centered !== undefined ? data.centered : true,
@@ -87,14 +91,6 @@ export class SimpleImage {
                 this.deleteThisBlock();
             }
         });
-        if (this.data.src) {
-            this._acceptTuneView();
-            const img = document.createElement("img");
-            img.src = this.data.src;
-            img.style.cssText = `max-width:100%; opacity:1; position:relative;`;
-            this.wrapper.replaceChildren(img);
-            return this.wrapper;
-        }
 
         const uploadInputId = "upload_btn_" + this.api.blocks.getCurrentBlockIndex();
 
@@ -148,11 +144,11 @@ export class SimpleImage {
         loadingConatiner.style.cssText = "position:absolute; top:0; left:0; bottom:0; right:0; display:flex; align-items:center; justify-content:center; background-color:rgba(0,0,0,.5); flex-direction:column;";
         const loadingSpinner = document.createElement('div');
         loadingSpinner.classList.add("loader");
-        loadingSpinner.innerHTML = "Loading...";
+        loadingSpinner.innerHTML = "Uploading...";
         const loadingProgress = document.createElement('div');
         loadingProgress.classList.add("loadingProgress");
         loadingProgress.style.cssText += "color:#fff";
-        loadingProgress.innerHTML = "Loading...";
+        loadingProgress.innerHTML = "Uploading...";
         loadingConatiner.appendChild(loadingSpinner);
         loadingConatiner.appendChild(loadingProgress);
 
@@ -197,16 +193,6 @@ export class SimpleImage {
                 let res;
                 let offset = 0;
                 while (flag) {
-                    //                     access-control-allow-credentials: "true"
-                    // access-control-allow-origin: "https://2021.khvd.kr:3000"
-                    // access-control-expose-headers: "Access-Control-Allow-Credentials, Access-Control-Allow-Origin, Access-Control-Expose-Headers, Content-Length, Content-Type, Date, Range, Server, Transfer-Encoding, X-GUploader-UploadID, X-Google-Trace, X-Range-MD5"
-                    // content-length: "0"
-                    // content-type: "text/plain; charset=utf-8"
-                    // date: "Wed, 20 Oct 2021 10:55:18 GMT"
-                    // range: "bytes=0-262143"
-                    // server: "UploadServer"
-                    // x-guploader-uploadid: "ADPycdsTwpebpulKQFaNfiShuIkends5BacjpRuXV44gVyZbKE6SZlWO9S_C81ud5lvDc4aPplcSS324XW2lx6lSzII"
-                    // x-range-md5: "1dc80a4ab7b63f2a0d4c785181b14d08"
                     try {
                         res = await uploadFileToGoogleDriveAsChunk(uploadSession.headers.location, data, dataLength, offset);
                         flag = false;
@@ -214,6 +200,10 @@ export class SimpleImage {
                         res = e.response;
                         offset = res.headers.range.split("-")[1] * 1;
                         loadingProgress.innerHTML = (offset * 100 / dataLength).toFixed(2) + "%";
+                        if (e.response.status !== 308) {
+                            writeErrorLog({ content: e.response });
+                            window.alert('문제가 발생했습니다!');
+                        }
                     }
                 }
                 const permission = await changeGoogleDriveFilePermission(res.data.id, {
@@ -234,29 +224,42 @@ export class SimpleImage {
                     placeholder.remove();
                     loadingConatiner.remove();
                 }
+                img.onerror = (event) => {
+                    window.alert(`이미지 링크를 불러오는 중 문제가 발생했습니다.\n 이미지 용량 : ${(dataLength / 1048576).toFixed(2)}MB\n 해당 이미지는 정상적으로 출력되지 않습니다.`);
+                }
                 this.loading = false;
             };
             reader.readAsArrayBuffer(file[0]);
         });
         this.wrapper.appendChild(uploadInput);
         this.wrapper.appendChild(uploadBtn);
+        if (this.data.src) {
+            this._acceptTuneView();
+            const img = document.createElement("img");
+            img.src = this.data.src;
+            img.style.cssText = `max-width:100%; opacity:1; position:relative;`;
+            this.wrapper.replaceChildren(img);
+        }
         this.wrapper.appendChild(cancelBtn);
         this._acceptTuneView();
         return this.wrapper;
     }
 
     save(blockContent) {
-        if (this.loading) {
-            window.alert("이미지가 로딩중입니다.");
-            return;
-        }
         const image = blockContent.querySelector('img');
         const hrefInput = blockContent.querySelector('.href-input');
-        console.log(hrefInput);
-        return Object.assign(this.data, {
-            src: image.src,
-            href: hrefInput.value || false
-        });
+        if (this.loading) {
+            window.alert("업로드중인 이미지가 있습니다. 업로드가 완료 될 때까지 기다려주세요.");
+            return 'uploading';
+        }
+        if (image) {
+            return Object.assign(this.data, {
+                src: image?.src,
+                href: hrefInput?.value || false
+            });
+        } else {
+            return false;
+        }
     }
 
     renderSettings() {

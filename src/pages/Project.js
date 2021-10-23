@@ -18,13 +18,11 @@ function getProtocolURL(URL) {
 
 
 function ProjectContainer({ data }) {
-
     const INITIAL_STATE = {
         open: false,
         popup: false,
     }
     const [state, setState] = useState(INITIAL_STATE);
-    console.log(data);
     return (
         <StyledProjectContainer className={[(state.open && "open")].join(" ")} style={{
             backgroundColor: data.backgorund_color,
@@ -70,13 +68,14 @@ function ProjectContainer({ data }) {
                 </div>
                 <StyledProjectContent>
                     {data.editor_output.blocks.map((x, i) => {
+                        if (x.data === false) return null;
                         switch (x.type) {
                             case "paragraph":
-                                return <p>{x.data?.text}</p>;
+                                return <p dangerouslySetInnerHTML={{ __html: x.data?.text.replace(`">`, '" target="_blank">') }}></p>;
                             case "image":
                                 const classList = ["cdx-image-wrapper", (x.data?.centered ? "centered" : null), (x.data?.stretched ? "stretched" : null)];
-                                return <img className={classList.join(" ")} src={x.data?.src} onClick={() => {
-                                    if (!x.data?.href) {
+                                return <div className={classList.join(" ")}><img src={x.data?.src} onClick={() => {
+                                    if (x.data?.href) {
                                         window.open(getProtocolURL(x.data?.href));
                                     } else {
                                         setState(s => ({
@@ -84,7 +83,7 @@ function ProjectContainer({ data }) {
                                             popup: x.data?.src,
                                         }));
                                     }
-                                }} />;
+                                }} /></div>;
                             case "book":
                                 return <div className={"cdx-embed-wrapper"}>
                                     <div className={"iframe-wrapper"}>
@@ -186,6 +185,9 @@ const StyledProjectCover = styled.div`
     box-sizing:border-box;
     transform:scale(1) rotateX(0deg);
     transition:transform 1s ease-in-out;
+    a{
+        color:unset !important;
+    }
     .title-container{
         position:relative;
         text-align:center;
@@ -238,10 +240,15 @@ const StyledProjectCover = styled.div`
 `;
 
 const StyledProjectContainer = styled(StyledEditWork)`
+    a{
+        color:unset !important;
+    }
     max-height:100%;
     position:relative;
     .cdx-image-wrapper{
-        cursor: pointer;
+        img{
+            cursor: pointer;
+        }
     }
     &.open{
         overflow-y:auto;
@@ -278,7 +285,9 @@ const StyledProjectContainer = styled(StyledEditWork)`
         position:relative;
         z-index:1;
         box-sizing:border-box;
-        font-family: NanumSquare;
+        font-family: NanumSquare -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;;
         max-width: 1280px;
         @media screen and (max-width:1440px){
             max-width: 1080px;

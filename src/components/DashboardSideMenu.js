@@ -3,6 +3,8 @@ import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 import { DashboardSideMenuBtn } from './Btns';
 import { useHistory } from 'react-router';
+import { apiURI } from '../vars/api';
+import axios from 'axios';
 
 const DashboardSideMenuAnimationWrap = styled.div`
     position: relative;
@@ -95,11 +97,18 @@ function DashboardSideMenu() {
                 history.push('/my-dashboard/user-config');
             }
         },
-    ];
-    const DashboardAdminSideMenuBtns = user.data.isAdmin ? [
         {
             label: "작품 올리기",
-            onClick: (e) => {
+            onClick: async (e) => {
+                const projectListData = await axios.get(apiURI + `khvd/v1/project?author=${user.data.wordpressData.id}`, {
+                    headers: {
+                        Authorization: "Bearer " + localStorage.getItem("khvd_user_token"),
+                    }
+                });
+                if (projectListData.data.posts.length >= 5) {
+                    window.alert("현재 작품이 5개 이상이기 때문에 추가로 작품을 등록할 수 없습니다.\n작품을 지우고 새로 등록하거나 수정하세요.");
+                    return;
+                }
                 history.push('/my-dashboard/edit-work');
             }
         },
@@ -109,6 +118,8 @@ function DashboardSideMenu() {
                 history.push('/my-dashboard/projects');
             }
         },
+    ];
+    const DashboardAdminSideMenuBtns = user.data.isAdmin ? [
         {
             label: "유저 정보 확인",
             onClick: (e) => {

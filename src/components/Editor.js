@@ -10,7 +10,6 @@ function Editor({ onSave, data }) {
     const editor = useRef(null);
     useEffect(() => {
         editor.current = new EditorJS({
-            autofocus: true,
             tools: {
                 header: {
                     class: Header,
@@ -25,6 +24,9 @@ function Editor({ onSave, data }) {
             data: data,
             placeholder: "이곳을 클릭하여 입력하세요"
         });
+        return () => {
+            editor.current.destroy();
+        }
     }, []);
 
     return (
@@ -33,9 +35,12 @@ function Editor({ onSave, data }) {
             </div>
             <PrimaryBtn onClick={(event) => {
                 (async () => {
-                    const data = await editor.current.save();
-                    console.log(data);
-                    onSave && onSave(event, data);
+                    editor.current.save().then((outputData) => {
+                        onSave && onSave(event, outputData);
+                    }).catch((error) => {
+                        window.alert('Saving failed: ', error);
+                    });
+
                 })();
             }}>저장</PrimaryBtn>
         </>

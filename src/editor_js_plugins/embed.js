@@ -1,5 +1,8 @@
 class Embed {
     constructor({ data, api }) {
+        if (data === false) {
+            this.deleteThisBlock();
+        }
         this.data = {
             src: data.src || "",
         };
@@ -27,7 +30,6 @@ class Embed {
 
         //초기화
         this.wrapper = document.createElement('div');
-        this.wrapper.contenteditable = true;
         this.wrapper.classList.add("cdx-embed-wrapper");
         const form = document.createElement("form");
 
@@ -44,11 +46,6 @@ class Embed {
         //폼태그에 삽입
         form.appendChild(input);
         form.appendChild(submitButton);
-
-        if(this.data.src){
-            const src = this.data.src;
-            this.appendIframe(src);
-        }
 
         //폼태그 이벤트 정의
         form.addEventListener("submit", (event) => {
@@ -68,19 +65,30 @@ class Embed {
         });
 
         this.wrapper.appendChild(form);
+        if (this.data.src) {
+            this.wrapper.innerHTML = "";
+            const src = this.data.src;
+            this.appendIframe(src);
+        }
+
         return this.wrapper;
     }
 
     save(blockContent) {
         const iframe = blockContent.querySelector('iframe');
-        return Object.assign(this.data, {
-            src: iframe.src,
-        });
+        if (iframe) {
+            return {
+                src: iframe?.src,
+            };
+        } else {
+            return false;
+        }
+
     }
 
-    appendIframe(src){
+    appendIframe(src) {
         const result = this.getYoutubeIframe(src);
-        result.addEventListener("click",(e)=>{
+        result.addEventListener("click", (e) => {
             e.preventDefault();
         });
         const iframeWrapper = document.createElement('div');

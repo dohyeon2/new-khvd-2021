@@ -15,12 +15,14 @@ function CustomToolbar() {
 }
 
 function ProjectListComponent({ data, reload }) {
+
     const history = useHistory();
     const rowsAndColumns = {
         rows: [], columns: [
             { field: 'idx', headerName: 'idx' },
             { field: 'category', headerName: '카테고리', width: 150 },
             { field: 'title', headerName: '제목', flex: 1 },
+            { field: 'related_project', headerName: '연관 프로젝트' },
             { field: 'goto', headerName: '보러가기', width: 100 },
             { field: 'edit', headerName: '수정하기', width: 100 },
             { field: 'delete', headerName: '삭제하기', width: 100 },
@@ -33,7 +35,8 @@ function ProjectListComponent({ data, reload }) {
             idx: i + 1,
             category: x.category_name,
             title: x.title,
-            desginers: x.designer_list.map(x=>x.name).join(", "),
+            related_project: x.related_project || "-",
+            desginers: x.designer_list.map(x => x.name).join(", "),
             goto: "보러가기",
             edit: "수정하기",
             delete: "삭제하기",
@@ -52,11 +55,11 @@ function ProjectListComponent({ data, reload }) {
                             break;
                         case "delete":
                             const deleteConfirm = window.confirm("정말 삭제합니까?");
-                            if(deleteConfirm){
+                            if (deleteConfirm) {
                                 (async () => {
                                     try {
                                         const token = localStorage.getItem("khvd_user_token");
-                                        await axios.delete(apiURI + `wp/v2/posts/${e.id}`, {
+                                        await axios.delete(apiURI + `khvd/v1/project/${e.id}`, {
                                             headers: {
                                                 Authorization: "Bearer " + token,
                                             }
@@ -114,6 +117,7 @@ function ProjectList() {
         }
     }, [data.loading]);
     if (data.loading) return null;
+    if (!data.data) return null;
     return (
         <ProjectListComponent data={data.data} reload={() => {
             setData(s => ({

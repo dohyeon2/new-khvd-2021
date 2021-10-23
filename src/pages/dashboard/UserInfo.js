@@ -5,7 +5,6 @@ import { StyledUserConfigure } from './UserConfigure';
 import styled from 'styled-components';
 
 function UserInfo() {
-    console.log('test');
     const { user } = useSelector(s => s);
     const userMeta = JSON.parse(user.data?.wordpressData?.meta?.common || "{}");
     const userMetaKeys = Object.keys(userMeta);

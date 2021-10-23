@@ -16,7 +16,7 @@ const LoginPageContainer = styled.div`
 `;
 
 function LoginPage() {
-    (    async () => {
+    (async () => {
         const userData = await axios.get("https://www.googleapis.com/oauth2/v1/userinfo?alt=json", {
             headers: {
                 Authorization: "Bearer " + localStorage.getItem("google_access_token"),

@@ -31,21 +31,18 @@ function MyDashboardContainer({ match }) {
                 <Route path="/my-dashboard/user-config">
                     <UserConfigure></UserConfigure>
                 </Route>
-                {user.data.isAdmin
-                    &&
-                    [<Route path="/my-dashboard/edit-work/:id">
-                        <EditWork></EditWork>
-                    </Route>,
-                    <Route path="/my-dashboard/edit-work">
-                        <EditWork></EditWork>
-                    </Route>,
-                    <Route path="/my-dashboard/users-info">
-                        <UserList></UserList>
-                    </Route>,
-                    <Route path="/my-dashboard/projects">
-                        <ProjectList></ProjectList>
-                    </Route>]
-                }
+                <Route path="/my-dashboard/edit-work/:id">
+                    <EditWork></EditWork>
+                </Route>
+                <Route path="/my-dashboard/edit-work">
+                    <EditWork></EditWork>
+                </Route>
+                <Route path="/my-dashboard/projects">
+                    <ProjectList></ProjectList>
+                </Route>
+                {user.data.isAdmin && [<Route path="/my-dashboard/users-info">
+                    <UserList></UserList>
+                </Route>]}
                 <Route path="/my-dashboard">
                     <UserInfo></UserInfo>
                 </Route>

@@ -37,11 +37,11 @@ function useUser() {
         var form = document.createElement('form');
         form.setAttribute('method', 'GET'); // Send as a GET request.
         form.setAttribute('action', oauth2Endpoint);
-    
+
         // Parameters to pass to OAuth 2.0 endpoint.
         var params = {
             'client_id': credential.web.client_id,
-            'redirect_uri': 'https://2021.khvd.kr:3000/login',
+            'redirect_uri': window.location.origin + "/login",
             'response_type': 'token',
             'scope': 'profile email https://www.googleapis.com/auth/drive',
             'include_granted_scopes': 'true',
@@ -55,10 +55,22 @@ function useUser() {
             input.setAttribute('value', params[p]);
             form.appendChild(input);
         }
-    
+
         // Add form to page and submit it to open the OAuth 2.0 endpoint.
         document.body.appendChild(form);
         form.submit();
+    }
+
+    async function getUserInfo() {
+        const userData = await axios.post(apiURI + `wp/v2/users/me`, {}, {
+            headers: {
+                Authorization: "Bearer " + localStorage.getItem("khvd_user_token"),
+            }
+        });
+        dispatchUserToRedux({
+            ...user.data,
+            wordpressData: userData.data,
+        });
     }
 
     async function signonBackend(attr) {
@@ -88,8 +100,7 @@ function useUser() {
                 });
 
             } catch (e) {
-                console.log('문제발생');
-                e.response?.data?.message ? window.alert(e.response.data.message) : window.alert("문제 발생"); 
+                e.response?.data?.message ? window.alert(e.response.data.message) : window.alert("문제 발생");
 
             }
 
@@ -105,7 +116,7 @@ function useUser() {
         else return false;
     }
 
-    return { oauthSignIn, user, dispatchUserToRedux, signonBackend };
+    return { oauthSignIn, user, dispatchUserToRedux, getUserInfo, signonBackend };
 }
 
 export default useUser;

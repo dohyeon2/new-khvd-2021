@@ -5,28 +5,30 @@ import 'normalize.css';
 import './App.css'
 import Project from './pages/Project';
 import LoginCallBack from './pages/LoginCallBack';
+import ProjectList from './pages/ProjectList';
 
 function App() {
   return (
     <Router>
       <Switch>
         <Route path="/" exact>
-      </Route>
-      <Route path="/login">
-        <LoginCallBack />
-      </Route>
-      <Route path="/projects">
-      </Route>
-      <Route path="/project/:id">
-        <Project />
-      </Route>
-      <Route path="/my-dashboard/:page">
-        <MyDashboardContainer />
-      </Route>
-      <Route path="/my-dashboard">
-        <MyDashboardContainer />
-      </Route>
-    </Switch>
+        </Route>
+        <Route path="/login">
+          <LoginCallBack />
+        </Route>
+        <Route path="/project/:id">
+          <Project />
+        </Route>
+        <Route path="/project">
+          <ProjectList />
+        </Route>
+        <Route path="/my-dashboard/:page">
+          <MyDashboardContainer />
+        </Route>
+        <Route path="/my-dashboard">
+          <MyDashboardContainer />
+        </Route>
+      </Switch>
     </Router >
   );
 }
