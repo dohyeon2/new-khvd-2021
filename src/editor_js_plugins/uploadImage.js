@@ -27,6 +27,7 @@ export class SimpleImage {
             stretched: data.stretched !== undefined ? data.stretched : true,
             href: data.href !== undefined ? data.href : false,
         };
+        this.blockDeleted = false;
         this.wrapper = undefined;
         this.state = undefined;
         this.loading = false;
@@ -53,6 +54,7 @@ export class SimpleImage {
 
     deleteThisBlock() {
         const currentBlockIdx = this.api.blocks.getCurrentBlockIndex();
+        this.blockDeleted = true;
         this.api.blocks.delete(currentBlockIdx);
     }
 
@@ -121,6 +123,9 @@ export class SimpleImage {
         <path fill-rule="evenodd" d="M8.636 3.5a.5.5 0 0 0-.5-.5H1.5A1.5 1.5 0 0 0 0 4.5v10A1.5 1.5 0 0 0 1.5 16h10a1.5 1.5 0 0 0 1.5-1.5V7.864a.5.5 0 0 0-1 0V14.5a.5.5 0 0 1-.5.5h-10a.5.5 0 0 1-.5-.5v-10a.5.5 0 0 1 .5-.5h6.636a.5.5 0 0 0 .5-.5z"/>
         <path fill-rule="evenodd" d="M16 .5a.5.5 0 0 0-.5-.5h-5a.5.5 0 0 0 0 1h3.793L6.146 9.146a.5.5 0 1 0 .708.708L15 1.707V5.5a.5.5 0 0 0 1 0v-5z"/>
       </svg>`;
+        if (this.data.href) {
+            hrefInput.value = this.data.href;
+        }
         textBtn.onclick = (e) => {
             window.open(this.getProtocolURL(hrefInput.value));
         }
@@ -194,10 +199,11 @@ export class SimpleImage {
                 let offset = 0;
                 while (flag) {
                     try {
-                        res = await uploadFileToGoogleDriveAsChunk(uploadSession.headers.location, data, dataLength, offset);
+                        res = await uploadFileToGoogleDriveAsChunk(uploadSession.headers.location, data, dataLength, offset, 262145 * 4);
                         flag = false;
                     } catch (e) {
                         res = e.response;
+                        console.log(res);
                         offset = res.headers.range.split("-")[1] * 1;
                         loadingProgress.innerHTML = (offset * 100 / dataLength).toFixed(2) + "%";
                         if (e.response.status !== 308) {
@@ -239,6 +245,9 @@ export class SimpleImage {
             img.src = this.data.src;
             img.style.cssText = `max-width:100%; opacity:1; position:relative;`;
             this.wrapper.replaceChildren(img);
+        }
+        if (this.data.href) {
+            this.wrapper.appendChild(hrefInputContainer);
         }
         this.wrapper.appendChild(cancelBtn);
         this._acceptTuneView();

@@ -1,7 +1,7 @@
 import axios from 'axios';
 import credential from '../vars/credential.json';
 import { useSelector, useDispatch } from 'react-redux';
-import { setUser, setUserSuccess } from '../modules/user';
+import { setUser, setUserSuccess } from '../reducers/user';
 import { apiURI } from '../vars/api';
 
 const objectToQuery = (object) => {

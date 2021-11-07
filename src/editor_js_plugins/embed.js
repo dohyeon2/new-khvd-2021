@@ -5,11 +5,18 @@ class Embed {
         }
         this.data = {
             src: data.src || "",
+            width: data.width || 100,
         };
         this.wrapper = undefined;
         this.state = undefined;
         this.loading = false;
         this.api = api;
+        this.settings = [
+            {
+                name: 'width',
+                icon: `<svg width="17" height="10" viewBox="0 0 17 10" xmlns="http://www.w3.org/2000/svg"><path d="M13.568 5.925H4.056l1.703 1.703a1.125 1.125 0 0 1-1.59 1.591L.962 6.014A1.069 1.069 0 0 1 .588 4.26L4.38.469a1.069 1.069 0 0 1 1.512 1.511L4.084 3.787h9.606l-1.85-1.85a1.069 1.069 0 1 1 1.512-1.51l3.792 3.791a1.069 1.069 0 0 1-.475 1.788L13.514 9.16a1.125 1.125 0 0 1-1.59-1.591l1.644-1.644z"/></svg>`
+            },
+        ];
     }
 
     static get toolbox() {
@@ -70,15 +77,51 @@ class Embed {
             const src = this.data.src;
             this.appendIframe(src);
         }
+        if (this.data.width) {
+            const widthInputContainer = document.createElement('div');
+            widthInputContainer.style.cssText = `
+                display:flex;
+                algin-items:center;
+                justify-content:flex-start;
+                background-color:#333;
+                color:#fff;
+                padding:1rem;
+                width:100%;
+                box-sizing:border-box;
+            `;
+            widthInputContainer.contentEditable = false;
+            widthInputContainer.classList.add("width-input-container");
+            const label = document.createElement("label");
+            label.innerHTML = "영상 가로사이즈(%)";
+            label.style.cssText = `margin-right:0.5rem`;
+            const widthInput = document.createElement('input');
+            widthInput.value = this.data.width;
+            widthInput.min = 10;
+            widthInput.max = 100;
+            widthInput.classList.add("width-input");
+            widthInput.type = "number";
+            widthInput.placeholder = "%";
+            widthInputContainer.appendChild(label);
+            widthInputContainer.appendChild(widthInput);
+            widthInput.oninput = (e) => {
+                const widthValue = e.target.value;
+                const wrapper = this.wrapper.querySelector('.iframe-wrapper');
+                wrapper.style.width = `${widthValue}%`;
+            }
+            this.wrapper.appendChild(widthInputContainer);
+        }
+        this._acceptTuneView();
 
         return this.wrapper;
     }
 
     save(blockContent) {
         const iframe = blockContent.querySelector('iframe');
+        const width = blockContent.querySelector('.width-input');
         if (iframe) {
             return {
                 src: iframe?.src,
+                width: width.value * 1,
             };
         } else {
             return false;
@@ -127,6 +170,34 @@ class Embed {
 
     _toggleWrapperClass() {
         this.wrapper.classList.toggle("cdx-embed-embeded", this.data.src);
+    }
+
+    renderSettings() {
+        const wrapper = document.createElement('div');
+        this.settings.forEach(tune => {
+            let button = document.createElement('div');
+            button.classList.add('cdx-settings-button');
+            button.classList.toggle('cdx-settings-button--active', this.data[tune.name]);
+            button.innerHTML = tune.icon;
+            wrapper.appendChild(button);
+            button.addEventListener('click', () => {
+                this._toggleTune(tune.name);
+                button.classList.toggle('cdx-settings-button--active', this.data[tune.name]);
+            });
+        });
+
+        return wrapper;
+    }
+
+    _toggleTune(tune) {
+        this.data[tune] = !this.data[tune];
+        this._acceptTuneView();
+    }
+
+    _acceptTuneView() {
+        this.settings.forEach(tune => {
+            this.wrapper.classList.toggle(tune.name, !!this.data[tune.name]);
+        });
     }
 
 }

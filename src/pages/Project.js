@@ -47,7 +47,7 @@ function ProjectContainer({ data }) {
                                 <ul className="designer-list">
                                     {data.designer_list.map((x, i) => <li>
                                         <div className="name">{x.name}</div>
-                                        <div className="line">{x.common.question_4.value}</div>
+                                        {/* <div className="line">{x.common.question_4.value}</div> */}
                                     </li>)}
                                 </ul>
                             </div>
@@ -96,7 +96,11 @@ function ProjectContainer({ data }) {
                                 </div>;
                             case "embed":
                                 return <div className={"cdx-embed-wrapper"}>
-                                    <div className={"iframe-wrapper"}>
+                                    <div className={"iframe-wrapper"} style={
+                                        {
+                                            width:`${x.data.width}%`
+                                        }
+                                    }>
                                         <iframe src={x.data.src} title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
                                     </div>
                                 </div>;

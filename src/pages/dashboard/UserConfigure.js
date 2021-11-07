@@ -53,8 +53,8 @@ function UserConfigure() {
         {
             q: "Q. 나를 표현하는 색상 코드와 그 이유는?",
             preText: ({ value, onInput, idx, question }) => <div className="text-color-wrap color-selector-wrap">
-                <input type="color" name={`question_${idx}_add`} id="text_color" question={"색상코드"} onInput={onInput} value={value} required/>
-                <input type="text" name={`question_${idx}_add`} id="text_color_input" question={"색상코드"} value={value} onInput={onInput} maxLength="7" required/>
+                <input type="color" name={`question_${idx}_add`} id="text_color" question={"색상코드"} onInput={onInput} value={value} required />
+                <input type="text" name={`question_${idx}_add`} id="text_color_input" question={"색상코드"} value={value} onInput={onInput} maxLength="7" required />
             </div>
         },
         {
@@ -142,6 +142,10 @@ function UserConfigure() {
                     <small>외국인 학생인 경우 입력</small>
                     <input type="text" question="영문 이름" name="3_english_name" onInput={answerInput} value={getValue("3_english_name")} />
                 </div>
+                {[1, 2, 3, 4, 5].map((x) => <div key={x}>
+                    <label>컨택트 {x}</label>
+                    <input type="text" question={`컨택트 ${x}`} name={`contact_${x}`} onInput={answerInput} value={getValue(`contact_${x}`)} />
+                </div>)}
                 {state.questions.map((x, i) => <div key={i}>
                     <label >{x.q}</label>
                     {x.preText && x.preText({

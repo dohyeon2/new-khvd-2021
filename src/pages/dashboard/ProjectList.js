@@ -15,8 +15,9 @@ function CustomToolbar() {
 }
 
 function ProjectListComponent({ data, reload }) {
-
+    const QRCode = window.QRCode;
     const history = useHistory();
+
     const rowsAndColumns = {
         rows: [], columns: [
             { field: 'idx', headerName: 'idx' },
@@ -27,8 +28,10 @@ function ProjectListComponent({ data, reload }) {
             { field: 'edit', headerName: '수정하기', width: 100 },
             { field: 'delete', headerName: '삭제하기', width: 100 },
             { field: 'desginers', headerName: '디자이너 리스트', width: 200 },
+            { field: 'qrcode', headerName: 'QR코드', width: 100 },
         ]
     };
+
     rowsAndColumns.rows = data.posts.map((x, i) => {
         return {
             id: x.id,
@@ -40,11 +43,25 @@ function ProjectListComponent({ data, reload }) {
             goto: "보러가기",
             edit: "수정하기",
             delete: "삭제하기",
+            qrcode: "",
         }
     });
+    useEffect(() => {
+
+    }, []);
     return (
         <DashboardContentWrapper>
             <DataGrid
+                onStateChange={() => {
+                    const qrcodeCell = document.querySelectorAll(`[aria-rowindex]`);
+                    for (let i = 1, len = qrcodeCell.length; i < len; i++) {
+                        const cell = qrcodeCell[i].querySelector(`[data-field="qrcode"]`);
+                        if (!cell.querySelector("img")) {
+                            const qrcode = new QRCode(cell, `${window.location.origin}/project/${data.posts[i - 1].id}`);
+                            cell.querySelector('img').style.cssText = `width:100%`;
+                        }
+                    }
+                }}
                 onCellClick={(e) => {
                     switch (e.field) {
                         case "goto":

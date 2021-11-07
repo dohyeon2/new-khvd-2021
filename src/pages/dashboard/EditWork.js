@@ -26,7 +26,7 @@ export function DesignerSummary({ data, inSearch, onClick }) {
             <div className="korean">{data.name}</div>
             <div className="english"></div>
         </div>
-        {inSearch && <div className="student-number">{data.common ? data.common['1_student_number']?.value : JSON.parse(data.meta?.common)['1_student_number']?.value}</div>}
+        {inSearch && <div className="student-number">{data.common ? data.common['1_student_number']?.value : (data.meta?.common && JSON.parse(data.meta?.common)['1_student_number']?.value)}</div>}
     </StyledDesignerSummary>);
 }
 

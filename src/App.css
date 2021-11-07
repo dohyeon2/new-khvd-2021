@@ -10,4 +10,11 @@ body,#root{
 }
 html,body,#root{
   height:100%;
+  font-size:10px;
+}
+
+@media screen and (min-width:900px) {
+  html,body,#root{
+    font-size:14px;
+  }
 }

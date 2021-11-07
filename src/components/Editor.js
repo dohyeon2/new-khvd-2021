@@ -7,22 +7,27 @@ import { PrimaryBtn } from './Btns';
 import Header from '@editorjs/header';
 
 function Editor({ onSave, data }) {
+    const Paragraph = require('editorjs-paragraph-with-alignment');
     const editor = useRef(null);
     useEffect(() => {
         editor.current = new EditorJS({
             tools: {
+                paragraph: {
+                    class: Paragraph,
+                    inlineToolbar: true,
+                },
                 header: {
                     class: Header,
                     config: {
                         placeholder: 'Enter a header',
-                    }
+                    },
                 },
                 embed: Embed,
                 image: SimpleImage,
                 book: Book
             },
             data: data,
-            placeholder: "이곳을 클릭하여 입력하세요"
+            placeholder: "이곳을 클릭하여 입력하세요",
         });
         return () => {
             editor.current.destroy();
@@ -40,7 +45,6 @@ function Editor({ onSave, data }) {
                     }).catch((error) => {
                         window.alert('Saving failed: ', error);
                     });
-
                 })();
             }}>저장</PrimaryBtn>
         </>
