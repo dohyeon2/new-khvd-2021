@@ -10,7 +10,7 @@ import { useHistory } from 'react-router';
  */
 function Appbar() {
   const menuWrapperClass = [];
-  const { global } = useGlobal();
+  const { global, goTo } = useGlobal();
   const history = useHistory();
   const [hambergerMenu, setHambergerMenu] = useState(false);
 
@@ -18,9 +18,26 @@ function Appbar() {
     setHambergerMenu(s => !s);
   }
 
-  useEffect(() => {
+  const makeMenuObj = (link, label) => {
+    return {
+      link: link,
+      label: label,
+      current: (link === (history.location.pathname || "/")),
+    }
+  }
+
+  const menuList = [
+    makeMenuObj("/", "UNBOXSING"),
+    makeMenuObj("/project", "PROJECT"),
+    makeMenuObj("/participant", "PARTICIPANT"),
+    makeMenuObj("/guestbook", "GUEST BOOK"),
+    makeMenuObj("/popupstore", "POP-UP STORE"),
+    makeMenuObj("/banner", "BANNER"),
+  ];
+
+  history.listen(() => {
     setHambergerMenu(false);
-  }, [history.location.pathname]);
+  });
 
   if (hambergerMenu) {
     menuWrapperClass.push("on");
@@ -39,7 +56,14 @@ function Appbar() {
         </div>
       </StyledAppbar>
       <StyledMenuWrap className={menuWrapperClass.join(" ")} >
-        <StyledMenuButton>버튼</StyledMenuButton>
+        {menuList.map((x, i) => <StyledMenuButton
+          key={i} idx={i}
+          className={(x.current ? "current" : "") + " " + (hambergerMenu ? "on" : "")}
+          onClick={() => {
+            goTo(x.link);
+          }}
+        >{x.label}</StyledMenuButton>)}
+
       </StyledMenuWrap>
     </>
   );
@@ -48,7 +72,10 @@ function Appbar() {
 export default Appbar;
 
 const StyledAppbar = styled.div`
-  padding:36px 70px;
+  padding:2.5rem 5rem;
+  @media screen and (max-width:900px){
+    padding:2.5rem;
+  }
   display:flex;
   align-items: center;
   z-index:99;
@@ -82,11 +109,28 @@ const StyledMenuWrap = styled.div`
 `;
 
 const StyledMenuButton = styled.button`
+  padding:0;
+  border:0;
+  background-color:transparent;
+  color:${({ theme }) => theme.colors.foreground};
+  font-family: ${({ theme }) => theme.font.family.englishBold};
+  font-size:3.3rem;
+  line-height: 1.5;
+  cursor:pointer;
+  letter-spacing: ${({ theme }) => theme.font.translateLetterSpacing(60, -20)};
+  opacity: 0;
+  transform: translateY(20%);
+  &.on{
+    opacity: 1;
+    transform: translateY(0%);
+    transition:color .2s ease-in-out, opacity .4s ${p => 0.2 * p.idx}s ease-in-out, transform .4s ${p => 0.2 * p.idx}s ease-in-out;
+  }
   &:active{
     outline:none;
   }
   &:hover,
-  &.active{
-    color:#FF358E;
+  &.current{
+    color:${({ theme }) => theme.colors.primary};
   }
+
 `;

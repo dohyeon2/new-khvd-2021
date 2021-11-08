@@ -2,16 +2,17 @@ import React, { useEffect, useState, useRef } from 'react';
 import styled from 'styled-components';
 import useGlobal from '../hook/useGlobal';
 import images from '../images';
+import theme from '../themes';
 
 function Intro() {
-    const { setGlobal } = useGlobal();
+    const { setGlobal, global } = useGlobal();
     const maxFrame = 580;
     const WrapperRef = useRef();
     const frameRef = useRef(0);
     const followingLightInterval = useRef(null);
     const mousePos = useRef({
-        x: 0,
-        y: 0,
+        x: window.innerWidth / 2,
+        y: window.innerHeight / 2,
     });
     const openAnimationDuration = 40;
     const openingInterval = useRef(null);
@@ -38,11 +39,18 @@ function Intro() {
                     setFrameHanlder(frameRef.current + 1);
                     if (frameRef.current - maxFrame >= openAnimationDuration) {
                         clearInterval(openingInterval.current);
+                        setGlobal({ intro: false });
                     }
                 }, 1000 / 60);
             }, 500);
         }
     }
+
+    useEffect(() => {
+        return () => {
+            clearInterval(openingInterval.current);
+        }
+    }, []);
 
     useEffect(() => {
         setGlobal({
@@ -70,41 +78,45 @@ function Intro() {
             setFrameHanlder(frameIndex);
         });
         WrapperRef.current.addEventListener("mousemove", (event) => {
-            const cFrame = frameRef.current;
-            if (cFrame === 580) {
-                const light = WrapperRef.current.querySelector('#light');
-                const left = parseInt(light.style.left);
-                const top = parseInt(light.style.top);
-                if (!left) {
-                    light.style.left = WrapperRef.current.offsetWidth / 2 + "px";
-                }
-                if (!top) {
-                    light.style.top = WrapperRef.current.offsetHeight / 2 + "px";
-                }
-                mousePos.current = {
-                    x: event.x,
-                    y: event.y,
-                };
-                if (followingLightInterval.current === null) {
-                    followingLightInterval.current = setInterval(() => {
-                        const { x, y } = mousePos.current;
-                        const left = parseInt(light.style.left);
-                        const top = parseInt(light.style.top);
-                        const xGap = x - left;
-                        const yGap = y - top;
-                        const weight = 20;
-                        light.style.left = (left + (xGap / weight)) + "px";
-                        light.style.top = (top + (yGap / weight)) + "px";
-                    }, 1000 / 60);
-                }
-            } else {
-                if (followingLightInterval.current !== null) {
-                    clearInterval(followingLightInterval.current);
-                    followingLightInterval.current = null;
-                }
-            }
+            mousePos.current = {
+                x: event.x,
+                y: event.y,
+            };
         });
     }, []);
+
+    useEffect(() => {
+        const cFrame = frameRef.current;
+        if (cFrame === 580) {
+            const light = WrapperRef.current.querySelector('#light');
+            const left = parseInt(light.style.left);
+            const top = parseInt(light.style.top);
+            if (!left) {
+                light.style.left = WrapperRef.current.offsetWidth / 2 + "px";
+            }
+            if (!top) {
+                light.style.top = WrapperRef.current.offsetHeight / 2 + "px";
+            }
+            if (followingLightInterval.current === null) {
+                followingLightInterval.current = setInterval(() => {
+                    const { x, y } = mousePos.current;
+                    const left = parseInt(light.style.left);
+                    const top = parseInt(light.style.top);
+                    const xGap = x - left;
+                    const yGap = y - top;
+                    const weight = 20;
+                    light.style.left = (left + (xGap / weight)) + "px";
+                    light.style.top = (top + (yGap / weight)) + "px";
+                }, 1000 / 60);
+            }
+        } else {
+            if (followingLightInterval.current !== null) {
+                clearInterval(followingLightInterval.current);
+                followingLightInterval.current = null;
+            }
+        }
+    }, [frameRef.current]);
+
     return (
         <CustomWrapper
             ref={WrapperRef}
@@ -132,9 +144,10 @@ function Intro() {
                 end={40}
                 goal={1}
                 zIndex={20}
+                className={"message"}
                 currentFrame={frame}
                 style={{
-                    transformOrigin: 'left center',
+                    transformOrigin: 'right bottom',
                     width: 'auto',
                     height: 'auto',
                     right: '10%',
@@ -142,12 +155,11 @@ function Intro() {
                     color: '#fff',
                     fontSize: '1.6rem',
                     textAlign: 'right',
-                    lineHeight: 1.4
                 }}
                 frameStyleHandler={(currentProceed, getSubFramePercent) => {
                     const subFrame = getSubFramePercent(80, 120, 1);
                     return {
-                        transform: `translateY(${-100 * currentProceed + (-50 * subFrame)}%)`,
+                        bottom: `${(10 * currentProceed) + (10 * subFrame)}%`,
                         opacity: `${currentProceed - subFrame}`
                     }
                 }}
@@ -161,27 +173,27 @@ function Intro() {
                 end={120}
                 goal={1}
                 zIndex={20}
+                className={"message"}
                 currentFrame={frame}
                 style={{
-                    transformOrigin: 'left center',
+                    transformOrigin: 'left bottom',
                     width: 'auto',
                     height: 'auto',
                     left: '10%',
-                    bottom: '0',
                     color: '#fff',
                     fontSize: '1.6rem',
-                    lineHeight: 1.4
                 }}
                 frameStyleHandler={(currentProceed, getSubFramePercent) => {
                     const subFrame = getSubFramePercent(160, 200, 1);
                     return {
-                        transform: `translateY(${-100 * currentProceed + (-50 * subFrame)}%)`,
+                        bottom: `${(10 * currentProceed) + (10 * subFrame)}%`,
                         opacity: `${currentProceed - subFrame}`
                     }
                 }}
             >
                 'Unboxsing'의 사전적 정의는<br />
-                '상자에 들어간 물건을 꺼내다' 정도로 그칠 지 모릅니다.
+                '상자에 들어간 물건을 꺼내다'<br />
+                정도로 그칠 지 모릅니다.
             </AnimationObj>
 
             <AnimationObj
@@ -189,6 +201,7 @@ function Intro() {
                 end={200}
                 goal={1}
                 zIndex={20}
+                className={"message"}
                 currentFrame={frame}
                 style={{
                     transformOrigin: 'left center',
@@ -198,18 +211,18 @@ function Intro() {
                     top: '5%',
                     color: '#fff',
                     fontSize: '1.6rem',
-                    lineHeight: 1.4
                 }}
                 frameStyleHandler={(currentProceed, getSubFramePercent) => {
                     const subFrame = getSubFramePercent(240, 280, 1);
                     return {
-                        transform: `translateY(${100 * currentProceed + (50 * subFrame)}%)`,
+                        top: `${(10 * currentProceed) + (10 * subFrame)}%`,
                         opacity: `${currentProceed - subFrame}`
                     }
                 }}
             >
                 그러나 상자를 첫 개봉할 때의 설렘,<br />
-                그리고 상자 안에 든 '무언가'를 마주 할때의 행복감은 이루 말할 수 없죠.
+                그리고 상자 안에 든 '무언가'를 마주 할때의<br />
+                행복감은 이루 말할 수 없죠.
             </AnimationObj>
 
             <AnimationObj
@@ -220,20 +233,22 @@ function Intro() {
                 id={'light'}
                 currentFrame={frame}
                 style={{
-                    width: `15%`,
-                    height: `15%`,
-                    borderRadius: 999,
+                    width: `15vw`,
+                    height: `15vw`,
+                    maxWidth: 800,
+                    maxheight: 800,
+                    borderRadius: 999999,
                     backgroundSize: 'contain',
-                    opacity: 1,
                     transform: 'translate(-50%,50%)',
-                    background: 'radial-gradient(circle, rgba(245,255,179,1) 30%, rgba(245,255,179,0) 50%)',
+                    backgroundImage: `url(${images['light.png']})`,
+                    backgroundSize: '90%',
+                    backgroundPosition: 'center',
+                    backgroundRepeat: 'no-repeat'
                 }}
                 wrapperFrameStyleHandler={(currentProceed, getSubFramePercent) => {
-                    const subFrame = getSubFramePercent(160, 161, 1);
                     const subFrame2 = getSubFramePercent(580, 620, 1);
                     const subFrame3 = getSubFramePercent(619, 620, 1);
                     return {
-                        mixBlendMode: subFrame === 1 && "overlay",
                         opacity: 1 - subFrame2,
                         visibility: subFrame3 === 1 && "hidden",
                     }
@@ -245,8 +260,8 @@ function Intro() {
                     return {
                         left: `${10 + (10 * currentProceed ** 3) + (30 * (subFrame))}%`,
                         bottom: `calc(110% - ${20 * currentProceed}% - ${40 * (subFrame ** 2)}%)`,
-                        width: `${15 * (6 * subFrame2)}%`,
-                        height: `${15 * (6 * subFrame2)}%`,
+                        width: `${15 * (4 * subFrame2)}vw`,
+                        height: `${15 * (4 * subFrame2)}vw`,
                     }
                 }}
             />
@@ -318,6 +333,7 @@ function Intro() {
                 end={340}
                 goal={1}
                 zIndex={13}
+                className={"message"}
                 currentFrame={frame}
                 style={{
                     transformOrigin: 'left center',
@@ -326,7 +342,6 @@ function Intro() {
                     textAlign: "center",
                     color: '#fff',
                     fontSize: '1.6rem',
-                    lineHeight: 1.4
                 }}
                 wrapperStyle={{
                     display: 'flex',
@@ -350,6 +365,7 @@ function Intro() {
                 end={460}
                 goal={1}
                 zIndex={13}
+                className={"message"}
                 currentFrame={frame}
                 style={{
                     transformOrigin: 'left center',
@@ -358,7 +374,6 @@ function Intro() {
                     textAlign: "center",
                     color: '#fff',
                     fontSize: '1.6rem',
-                    lineHeight: 1.4
                 }}
                 wrapperStyle={{
                     display: 'flex',
@@ -395,7 +410,6 @@ function Intro() {
                     textAlign: "center",
                     color: '#fff',
                     fontSize: '1.6rem',
-                    lineHeight: 1.4
                 }}
                 wrapperStyle={{
                     display: 'flex',
@@ -416,7 +430,7 @@ function Intro() {
                     }
                 }}
             >
-                <div className="inner">
+                <div className="inner message">
                     <div className="title">다시 오지 않을 행복한 이 순간을 지금 바로 열어보세요!</div>
                     <div className="btns">
                         <button onClick={yesClickEventHandler}>
@@ -438,7 +452,8 @@ function Intro() {
                     opacity: 1,
                     backgroundSize: 'cover',
                     backgroundPosition: 'center',
-                    backgroundImage: `url(${images['intro-background.png']})`,
+                    backgroundImage: theme.backgorundImage,
+                    backgroundColor: theme.colors.background
                 }}
                 wrapperFrameStyleHandler={(currentProceed, getSubFramePercent) => {
                     return {
@@ -460,6 +475,7 @@ const AnimationObj = ({
     goal,
     style,
     id,
+    className,
     frameStyleHandler = () => { },
     wrapperFrameStyleHandler = () => { },
     zIndex = 1,
@@ -486,6 +502,7 @@ const AnimationObj = ({
     }
     return (<StyledBoxWrapper
         id={id}
+        className={className}
         style={{
             zIndex: zIndex,
             ...wrapperStyle,
@@ -556,6 +573,18 @@ const CustomWrapper = styled(Wrapper)`
         left:50%;
         top:50%;
         transform:translate(-50%,-50%);
+    }
+    .message{
+        font-weight:bold;
+        font-family:${({ theme }) => theme.font.family.notnSans};
+        &>div{
+            line-height:1.6;
+        }
+        button{
+            font-weight:bold;
+            font-family:${({ theme }) => theme.font.family.notnSans};
+            line-height:2;
+        }
     }
 `;
 

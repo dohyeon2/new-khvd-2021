@@ -1,4 +1,4 @@
-import { getCookie } from "../utils/functions";
+import { getCookie, setCookie } from "../utils/functions";
 
 const INITIAL_STATE = {
     intro: getCookie("intro_skip") === "1" ? false : true,

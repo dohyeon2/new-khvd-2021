@@ -1,13 +1,20 @@
-import React from "react";
+import React, { useState } from "react";
 import styled from 'styled-components';
+import { Layout } from "./Main";
+import ProjectCategory from "./ProjectCategory";
 
 function ProjectList() {
+    const INITIAL_STATE = {
+        category: null,
+    };
+    const [state, setState] = useState(INITIAL_STATE);
+
     return (
-        <StyledProjectList>
+        (state.category ? <ProjectListLayout>
             <ProjectThumb
                 thumbnailImage={null}
             />
-        </StyledProjectList>
+        </ProjectListLayout> : <ProjectCategory />)
     );
 }
 
@@ -18,14 +25,13 @@ function ProjectThumb({ thumbnailImage }) {
                 backgroundImage: thumbnailImage,
             }}
         >
-            
         </StyledProjectThumb>
     );
 }
 
 export default ProjectList;
 
-const StyledProjectList = styled.div`
+const ProjectListLayout = styled(Layout)`
 
 `;
 

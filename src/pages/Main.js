@@ -1,21 +1,21 @@
 import React from 'react';
 import styled from 'styled-components';
-import images from '../images';
+
+export const Layout = styled.div`
+  position:relative;
+  width:100%;
+  min-height:100%;
+  background-image:${({ theme }) => theme.backgorundImage};
+  background-size:cover;
+  background-position:center;
+  background-color:${({ theme }) => theme.colors.background};
+`;
 
 function Main() {
   return (
-    <StyledMain>
-      Hello React!
-    </StyledMain>
+    <Layout>
+    </Layout>
   );
 }
 
 export default Main;
-
-const StyledMain = styled.div`
-  position:fixed;
-  inset:0;
-  background-image:url(${images['intro-background.png']});
-  background-size:cover;
-  background-position:center;
-`;

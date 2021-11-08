@@ -17,9 +17,9 @@ export default HambergerMenu;
 
 const StyledHambergerMenu = styled.div`
     position:relative;
-    height:28px;
+    height:1.56rem;
     cursor:pointer;
-    width:40px;
+    width:2.23rem;
     &::after,
     &::before,
     .bar{
@@ -27,7 +27,7 @@ const StyledHambergerMenu = styled.div`
         content:"";
         display:block;
         width:100%;
-        height:4px;
+        height:0.23rem;
         background-color:#fff;
     }
     .bar{
@@ -53,11 +53,11 @@ const StyledHambergerMenu = styled.div`
             opacity:0;
         }
         &::after{
-            bottom:12px;
+            bottom:0.67rem;
             transform:rotate(45deg);
         }
         &::before{
-            top:12px;
+            top:0.67rem;
             transform:rotate(-45deg);
         }
     }
