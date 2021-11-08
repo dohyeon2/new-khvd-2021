@@ -3,9 +3,11 @@ import {
     createGoogleDriveFolder,
     connectUploadSession,
     uploadFileToGoogleDrive,
+    uploadFileToGoogleDriveAsChunk,
     changeGoogleDriveFilePermission,
     getWebContentLinkFromGoogleDriveFile
 } from '../utils/googleDriveProcessing';
+import { writeErrorLog } from '../api/error';
 
 export class Book {
     static get toolbox() {
@@ -16,6 +18,9 @@ export class Book {
     }
 
     constructor({ data, api }) {
+        if (data === false) {
+            this.deleteThisBlock();
+        }
         this.data = {
             src: data.src || "",
             centered: data.centered !== undefined ? data.centered : true,
@@ -38,7 +43,6 @@ export class Book {
         this.wrapper = document.createElement('div');
         this.wrapper.style.cssText = "display:flex;";
         this.wrapper.style.cssText += "padding:0;";
-        this.wrapper.contentEditable = false;
         this.wrapper.classList.add("cdx-block");
         this.wrapper.classList.add("ce-paragraph");
         this.wrapper.classList.add("cdx-image-wrapper");
@@ -56,12 +60,6 @@ export class Book {
         //         this.deleteThisBlock();
         //     }
         // });
-        if (this.data.src) {
-            this._acceptTuneView();
-            this.iframe.src = this.data.src;
-            this.wrapper.replaceChildren(this.iframe);
-            return this.wrapper;
-        }
 
         const uploadInputId = "upload_btn_" + this.api.blocks.getCurrentBlockIndex();
 
@@ -120,7 +118,22 @@ export class Book {
             reader.onload = async (evt) => {
                 const dataLength = evt.total;
                 const data = evt.target.result;
-                const res = await uploadFileToGoogleDrive(uploadSession.headers.location, data, dataLength);
+                let flag = true;
+                let res;
+                let offset = 0;
+                while (flag) {
+                    try {
+                        res = await uploadFileToGoogleDriveAsChunk(uploadSession.headers.location, data, dataLength, offset);
+                        flag = false;
+                    } catch (e) {
+                        res = e.response;
+                        offset = res.headers.range.split("-")[1] * 1;
+                        if (e.response.status !== 308) {
+                            writeErrorLog({ content: e.response });
+                            window.alert('문제가 발생했습니다!');
+                        }
+                    }
+                }
                 const permission = await changeGoogleDriveFilePermission(res.data.id, {
                     role: "reader",
                     type: "anyone",
@@ -133,20 +146,30 @@ export class Book {
         });
         this.wrapper.appendChild(uploadInput);
         this.wrapper.appendChild(uploadBtn);
-        this.wrapper.appendChild(cancelBtn);
+        if (this.data.src) {
+            this._acceptTuneView();
+            this.iframe.src = this.data.src;
+            this.wrapper.replaceChildren(this.iframe);
+            this.wrapper.appendChild(cancelBtn);
+            return this.wrapper;
+        }
         this._acceptTuneView();
         return this.wrapper;
     }
 
     save(blockContent) {
-        if (this.loading) {
-            window.alert("pdf가 로딩중입니다.");
-            return;
-        }
         const iframe = blockContent.querySelector('iframe');
-        return Object.assign(this.data, {
-            src: iframe.src,
-        });
+        if(this.loading){
+            window.alert("업로드중인 pdf가 있습니다. 업로드가 완료 될 때까지 기다려주세요.");
+            return 'uploading';
+        }
+        if (iframe) {
+            return {
+                src: iframe?.src,
+            };
+        } else {
+            return false;
+        }
     }
 
     renderSettings() {

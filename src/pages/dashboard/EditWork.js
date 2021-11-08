@@ -6,6 +6,7 @@ import { apiURI } from '../../vars/api';
 import axios from 'axios';
 import produce from 'immer';
 import { Prompt, useParams } from 'react-router'
+import { useSelector } from 'react-redux';
 import { useHistory } from "react-router-dom";
 import {
     searchGoogleDriveFolder,
@@ -15,6 +16,7 @@ import {
     changeGoogleDriveFilePermission,
     getWebContentLinkFromGoogleDriveFile
 } from '../../utils/googleDriveProcessing';
+import useUser from '../../hook/useUser';
 
 export function DesignerSummary({ data, inSearch, onClick }) {
     return (<StyledDesignerSummary className={["designer", (inSearch && "in-search")].join(" ")} onClick={(event) => {
@@ -24,7 +26,7 @@ export function DesignerSummary({ data, inSearch, onClick }) {
             <div className="korean">{data.name}</div>
             <div className="english"></div>
         </div>
-        {inSearch && <div className="student-number">{data.meta.common && JSON.parse(data.meta.common)['1_student_number']?.value}</div>}
+        {inSearch && <div className="student-number">{data.common ? data.common['1_student_number']?.value : (data.meta?.common && JSON.parse(data.meta?.common)['1_student_number']?.value)}</div>}
     </StyledDesignerSummary>);
 }
 
@@ -35,6 +37,29 @@ function EditWorkContainer({ data, loadingObj, SearchUserEventHandler, insertDes
             backgroundColor: data.inputs?.backgorund_color
         }
     };
+    const INITIAL_STATE = {
+        loading: false,
+        data: null,
+        error: false,
+    }
+    const [projects, setProjects] = useState(INITIAL_STATE);
+    const { user } = useSelector(s => s);
+    useEffect(() => {
+        if (data.inputs.project_category * 1 === 5) {
+            (async () => {
+                const projectListData = await axios.get(apiURI + `khvd/v1/project?author=${user.data.wordpressData.id}`, {
+                    headers: {
+                        Authorization: "Bearer " + localStorage.getItem("khvd_user_token"),
+                    }
+                });
+                setProjects(s => ({
+                    ...s,
+                    loading: false,
+                    data: projectListData.data,
+                }));
+            })();
+        }
+    }, [data.inputs.project_category]);
     return (<StyledEditWork {...commonAttr}>
         <div className="editor-wrap">
             <div className="work-meta">
@@ -55,6 +80,19 @@ function EditWorkContainer({ data, loadingObj, SearchUserEventHandler, insertDes
                                     color: data.inputs?.feature_color,
                                 }} value={x.id} selected={data.inputs.project_category === x.id}>{x.name}</option>)}
                             </select>
+                            {data.inputs.project_category * 1 === 5 && <select name="related_project" id="related-project" {...commonAttr} onInput={onInput} style={{
+                                color: data.inputs?.feature_color,
+                            }}>
+                                {!data.inputs.related_project && <option selected disabled hidden style={{
+                                    color: data.inputs?.feature_color,
+                                }}>연관 작품 선택</option>}
+                                <option vlaue="-" style={{
+                                    color: data.inputs?.feature_color,
+                                }}>없음</option>
+                                {projects?.data?.posts.map((x, i) => <option key={x.id} style={{
+                                    color: data.inputs?.feature_color,
+                                }} value={x.id} selected={data.inputs.related_project === x.title}>{x.title}</option>)}
+                            </select>}
                         </div>
                         <textarea className="description" name="project_description" placeholder="작품 설명" {...commonAttr} onInput={onInput} value={data.inputs.project_description}></textarea>
                         <div>
@@ -90,7 +128,7 @@ function EditWorkContainer({ data, loadingObj, SearchUserEventHandler, insertDes
                             >
                                 {data.thumbnail === null && <div className="dummy"></div>}
                             </label>
-                            <input id="thumbnail-input" type="file" style={{ display: 'none' }} onInput={(event) => {
+                            <input id="thumbnail-input" type="file" style={{ display: 'none' }} accept="image/*" onInput={(event) => {
                                 uploadFileOnGoogleDrive(event);
                             }} />
                             {loadingObj.thumbnail && <Loading />}
@@ -158,7 +196,7 @@ function EditWork({ data }) {
             (async () => {
                 let projectData = false;
                 //카테고리를 불러옵니다.
-                const categories = await axios.get(apiURI + "wp/v2/categories/?exclude=1&_fields=name,id");
+                const categories = await axios.get(apiURI + "wp/v2/categories/?exclude=1,6&_fields=name,id");
 
                 //아이디가 있으면 불러온다
                 if (params.id) {
@@ -179,20 +217,8 @@ function EditWork({ data }) {
                         draft.data.inputs.subtitle = projectData.data.subtitle;
                         draft.data.inputs.backgorund_color = projectData.data.backgorund_color;
                         draft.data.inputs.text_color = projectData.data.text_color;
-                        // data: {
-                        //     categories: [],
-                        //     designerSearch: [],
-                        //     designerList: [],
-                        //     thumbnail: null,
-                        //     inputs: {
-                        //         text_color: "#000000",
-                        //         backgorund_color: "#ffffff",
-                        //         project_title: null,
-                        //         subtitle: null,
-                        //         project_category: null,
-                        //         project_description: null,
-                        //     }
-                        // }
+                        draft.data.inputs.feature_color = projectData.data.feature_color;
+                        draft.data.inputs.related_project = projectData.data.related_project;
                     }
                 }));
 
@@ -301,12 +327,25 @@ function EditWork({ data }) {
     }
 
     const validateInputs = () => {
-        const required = [...Object.values(state.data.inputs), state.data.thumbnail, state.data.designerList];
+        const except = ["related_project"];
+        const inputs = Object.keys(state.data.inputs).filter(x => !except.includes(x)).map(x => state.data.inputs[x]);
+        const required = [...inputs, state.data.thumbnail, state.data.designerList];
         return !required.map(x => isUndefined(x)).includes(true);
     }
 
     const saveData = (event, outputData) => {
+        let loading = false;
+        outputData.blocks.map(x =>
+            {
+                if (x.data === "uploading") loading = true;
+            }
+        );
+        if(loading) return;
         const designerList = state.data.designerList.map(x => x.id);
+        if(designerList.length < 1){
+            window.alert("디자이너를 입력해주세요.");
+            return;
+        }
         const idx = Object.values(state.loading).findIndex((x, i) => x);
 
         if (idx !== -1) {
@@ -319,32 +358,37 @@ function EditWork({ data }) {
         }
 
         (async () => {
-            const res = await axios.post(apiURI + `khvd/v1/project`, {
-                post_id: params.id || 0,
-                title: state.data.inputs.project_title,
-                content: state.data.inputs.project_description,
-                meta: {
-                    thumbnail: state.data.thumbnail,
-                    designerList: designerList,
-                    editorOutput: outputData,
-                    subtitle: state.data.inputs.subtitle,
-                    text_color: state.data.inputs.text_color,
-                    backgorund_color: state.data.inputs.backgorund_color,
-                    feature_color: state.data.inputs.feature_color,
-                },
-                status: "publish",
-                categories: state.data.inputs.project_category
-            }, {
-                headers: {
-                    Authorization: "Bearer " + localStorage.getItem("khvd_user_token"),
-                }
-            });
-            setState(s => ({
-                ...s,
-                saved: true,
-            }));
-            window.alert("저장이 완료 되었습니다!");
-            history.push("/my-dashboard/projects");
+            try {
+                const res = await axios.post(apiURI + `khvd/v1/project`, {
+                    post_id: params.id || 0,
+                    title: state.data.inputs.project_title,
+                    content: state.data.inputs.project_description,
+                    meta: {
+                        thumbnail: state.data.thumbnail,
+                        designerList: designerList,
+                        editorOutput: outputData,
+                        subtitle: state.data.inputs.subtitle,
+                        text_color: state.data.inputs.text_color,
+                        backgorund_color: state.data.inputs.backgorund_color,
+                        feature_color: state.data.inputs.feature_color,
+                        related_project: (state.data.inputs.project_category * 1 === 5 ? state.data.inputs.related_project : null)
+                    },
+                    status: "publish",
+                    categories: state.data.inputs.project_category
+                }, {
+                    headers: {
+                        Authorization: "Bearer " + localStorage.getItem("khvd_user_token"),
+                    }
+                });
+                setState(s => ({
+                    ...s,
+                    saved: true,
+                }));
+                window.alert("저장이 완료 되었습니다!");
+                history.push("/my-dashboard/projects");
+            } catch (e) {
+                e?.response?.data?.message && window.alert(e.response.data.message);
+            }
         })();
     };
 
@@ -379,6 +423,20 @@ function EditWork({ data }) {
 export default EditWork;
 
 export const StyledEditWork = styled.div`
+    .codex-editor--narrow .codex-editor__redactor{
+        margin-right: 0;
+    }
+    .iframe-preventer{
+        position: absolute;
+        right:1rem;
+        bottom:1rem;
+        z-index:2;
+        padding:1rem;
+        font-size:18px;
+        background-color: #2EA7E0;
+        color:#fff;
+        border-radius:8px;
+    }
     .href-input-container{
         display:none;
         position:absolute;
@@ -422,7 +480,9 @@ export const StyledEditWork = styled.div`
     .editor-wrap{
         padding: 189px 0px;
         box-sizing:border-box;
-        font-family: NanumSquare;
+        font-family: NanumSquare -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
         max-width: 1280px;
         @media screen and (max-width:1440px){
             max-width: 1080px;
@@ -489,6 +549,14 @@ export const StyledEditWork = styled.div`
                 box-sizing:border-box;
                 margin-bottom: 22px;
             }
+            #related-project{
+                display: block;
+                flex-shrink: 1;
+                max-width: 200px;
+                min-width: unset;
+                white-space: wrap;
+            }
+            #related-project,
             #project-category{
                 font-size:25px;
                 margin-bottom:44px;
@@ -610,17 +678,6 @@ export const StyledProjectContent = styled.div`
             form{
                 display: none;
             }
-            .iframe-preventer{
-                position: absolute;
-                right:1rem;
-                bottom:1rem;
-                z-index:2;
-                padding:1rem;
-                font-size:18px;
-                background-color: #2EA7E0;
-                color:#fff;
-                border-radius:8px;
-            }
         }
         .iframe-wrapper{
             position: relative;
@@ -662,6 +719,7 @@ export const StyledProjectContent = styled.div`
             width: 100%;
             padding:2rem;
             border:5px solid #ccc;
+            color:#000;
             background-color: #efefef;
             cursor: pointer;
             border-radius: 10px;
