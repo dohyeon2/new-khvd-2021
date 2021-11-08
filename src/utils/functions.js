@@ -32,4 +32,18 @@ export function getCookie(cname) {
     return "";
 }
 
-export default { setCookie, getCookie };
+/**
+ * key:value 오브젝트를 입력받아 querystring으로 바꿔주는 함수
+ * @param {object} object 
+ * @returns {string} query
+ */
+export const parseObjectToQuery = (object) => {
+    let result = [];
+    for (let i in object) {
+        const curr = object[i];
+        result.push(i + "=" + curr);
+    }
+    return result.join("&");
+}
+
+export default { setCookie, getCookie, parseObjectToQuery };

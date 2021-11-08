@@ -2,8 +2,9 @@ import React, { useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 import ArtAndDesignHall from '../components/ArtAndDesignHall';
 import axios from 'axios';
-import apiURL from '../vars/api';
+import { apiURI } from '../vars/api';
 import { Layout } from './Main';
+import { parseObjectToQuery } from '../utils/functions';
 
 function ProjectCategory() {
     const INITIAL_STATE = {
@@ -15,14 +16,52 @@ function ProjectCategory() {
         mouseStokerPosition: {
             x: 0,
             y: 0,
-        }
+        },
+        categories: [
+            {
+                id: 2,
+                label: "GRAPHIC DESIGN",
+                featurePost: null,
+            },
+            {
+                id: 3,
+                label: "DESIGN BUSINESS",
+                featurePost: null,
+            },
+            {
+                id: 4,
+                label: "UXUI / NEW MEDIA",
+                featurePost: null,
+            }
+        ],
+        currentThumbnail: null,
     };
     const mouseStokerRef = useRef();
     const wrapperRef = useRef();
     const [state, setState] = useState(INITIAL_STATE);
 
     const getFeaturePostByCategory = async (categoryId) => {
-        const categoryFeaturePost = await axios.get(apiURL);
+        const queries = {
+            cat: categoryId,
+            posts_per_page: 1,
+            orderby: "rand",
+            nopaging: 0,
+        };
+        const categoryFeaturePost = await axios.get(apiURI + "khvd/v1/project" + "?" + parseObjectToQuery(queries));
+        setState(s => ({
+            ...s,
+            categories: s.categories.map(x => {
+                if (x.id === categoryId) {
+                    return {
+                        ...x,
+                        thumbnail: categoryFeaturePost.data.posts[0].thumbnail_small
+                    };
+                } else {
+                    return x;
+                }
+            }),
+        }));
+        return categoryFeaturePost.data.posts[0];
     }
 
     useEffect(() => {
@@ -40,27 +79,46 @@ function ProjectCategory() {
 
     useEffect(() => {
         // 그래픽 디자인 2, 디자인 비즈니스 3, 뉴미디어 4
-        const categoryList = [2, 3, 4];
-        categoryList.forEach((x) => {
-            getFeaturePostByCategory(x);
+        state.categories.forEach((x, i, arr) => {
+            const curr = getFeaturePostByCategory(x.id).then((post) => {
+                if (i === 0) {
+                    const image = new Image();
+                    image.src = post.thumbnail_small;
+                    image.onload = () => {
+                        setState(s => ({
+                            ...s,
+                            currentThumbnail: post.thumbnail_small,
+                        }));
+                    }
+                }
+            });
         });
     }, []);
+
     return (
         <ProjectCategoryLayout ref={wrapperRef}>
-            <ArtAndDesignHall />
+            <ArtAndDesignHall image={state.currentThumbnail} />
             <div className="categories">
-                {["GRAPHIC DESIGN", "DESIGN BUSINESS", "UXUI / NEW MEDIA"]
-                    .map((x, i) => <CategoriesBtn
+                {state.categories
+                    .map((x) => <CategoriesBtn
                         onMouseEnter={() => {
                             mouseStokerRef.current.style.width = '22.3rem';
                             mouseStokerRef.current.style.height = '22.3rem';
+                            const image = new Image();
+                            image.src = x.thumbnail;
+                            image.onload = () => {
+                                setState(s => ({
+                                    ...s,
+                                    currentThumbnail: x.thumbnail,
+                                }));
+                            }
                         }}
                         onMouseLeave={() => {
                             mouseStokerRef.current.style.width = '0';
                             mouseStokerRef.current.style.height = '0';
                         }}
-                        key={i}>
-                        {x}
+                        key={x.id}>
+                        {x.label}
                     </CategoriesBtn>)}
             </div>
             <div id="mouse-stoker" ref={mouseStokerRef} style={{

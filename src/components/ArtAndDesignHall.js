@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import images from '../images';
 
 function ArtAndDesignHall({ image }) {
+    console.log(image);
     return (
         <ANDHallWrap>
             <svg className="svg">
@@ -10,7 +11,7 @@ function ArtAndDesignHall({ image }) {
             </svg>
 
             <div className="clipped">
-                <div className="projected-thumbnail" style={{ backgroundImage: `url(${image})` }} />
+                <div className="projected-thumbnail" style={{ backgroundImage: `url(${image || images['andhall.png']})` }} />
                 <img className="background" src={images['andhall.png']} />
             </div>
         </ANDHallWrap>
@@ -39,13 +40,16 @@ const ANDHallWrap = styled.div`
         img{
             position:relative;
             width:100%;
+            z-index:1;
         }
         .projected-thumbnail{
             position:absolute;
+            transition: background-image .2s ease-in-out;
             inset:0;
-            z-index:2;
+            z-index:3;
             background-size:cover;
             background-position: center;
+            background-repeat: no-repeat;
             opacity:0.7;
         }
     }
