@@ -21,6 +21,11 @@ const theme = {
         }
     },
     backgorundImage: `url(${images['intro-background.png']})`,
+    breakPoints: {
+        s: 600,
+        m: 900,
+        l: 1200,
+    }
 };
 
 export default theme;

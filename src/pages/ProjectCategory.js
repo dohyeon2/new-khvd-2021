@@ -5,6 +5,9 @@ import axios from 'axios';
 import { apiURI } from '../vars/api';
 import { Layout } from './Main';
 import { parseObjectToQuery } from '../utils/functions';
+import Swiper from 'swiper';
+import theme from '../themes';
+import 'swiper/swiper.min.css';
 
 function ProjectCategory() {
     const INITIAL_STATE = {
@@ -35,8 +38,14 @@ function ProjectCategory() {
             }
         ],
         currentThumbnail: null,
+        allFeatureLoaded: false,
     };
+    const idxRef = useRef(0);
+    const overRef = useRef(false);
+    const intervalRef = useRef(null);
     const mouseStokerRef = useRef();
+    const swiperRef = useRef();
+    const currentThumbnailExist = useRef(false);
     const wrapperRef = useRef();
     const [state, setState] = useState(INITIAL_STATE);
 
@@ -46,6 +55,7 @@ function ProjectCategory() {
             posts_per_page: 1,
             orderby: "rand",
             nopaging: 0,
+            thumbSize: 788
         };
         const categoryFeaturePost = await axios.get(apiURI + "khvd/v1/project" + "?" + parseObjectToQuery(queries));
         setState(s => ({
@@ -64,6 +74,27 @@ function ProjectCategory() {
         return categoryFeaturePost.data.posts[0];
     }
 
+    const handleResizeEvent = (event) => {
+        // if (window.innerWidth < theme.breakPoints.m) {
+        //     const option = {
+        //         direction: 'horizontal',
+        //         slidesPerView: 1,
+        //         spaceBetween: 30,
+        //         loop: true,
+        //     };
+        //     swiperRef.current = new Swiper(".categories", option);
+        // } else {
+        //     if(swiperRef.current){
+        //         swiperRef.current.destroy(true,true);
+        //     }
+        // }
+    }
+
+    useEffect(() => {
+        handleResizeEvent();
+        window.addEventListener("resize", handleResizeEvent);
+    }, []);
+
     useEffect(() => {
         if (state.eventBinded === false) {
             wrapperRef.current.addEventListener('mousemove', (e) => {
@@ -81,10 +112,10 @@ function ProjectCategory() {
         // 그래픽 디자인 2, 디자인 비즈니스 3, 뉴미디어 4
         state.categories.forEach((x, i, arr) => {
             const curr = getFeaturePostByCategory(x.id).then((post) => {
-                if (i === 0) {
-                    const image = new Image();
-                    image.src = post.thumbnail_small;
-                    image.onload = () => {
+                const image = new Image();
+                image.src = post.thumbnail_small;
+                image.onload = () => {
+                    if (!currentThumbnailExist.current) {
                         setState(s => ({
                             ...s,
                             currentThumbnail: post.thumbnail_small,
@@ -95,31 +126,61 @@ function ProjectCategory() {
         });
     }, []);
 
+    useEffect(() => {
+        const filter = state.categories.filter(x => !x.thumbnail);
+        if (filter.length === 0) {
+            setState(s => ({
+                ...s,
+                allFeatureLoaded: true,
+            }));
+        }
+    }, [state.categories]);
+
+    useEffect(() => {
+        if (intervalRef.current === null && state.allFeatureLoaded) {
+            intervalRef.current = setInterval(() => {
+                idxRef.current++;
+                const thumb = state.categories[idxRef.current % state.categories.length].thumbnail;
+                if (!overRef.current) {
+                    setState(s => ({
+                        ...s,
+                        currentThumbnail: thumb,
+                    }));
+                }
+            }, 8000);
+        }
+    }, [state.allFeatureLoaded]);
+
     return (
         <ProjectCategoryLayout ref={wrapperRef}>
             <ArtAndDesignHall image={state.currentThumbnail} />
             <div className="categories">
-                {state.categories
-                    .map((x) => <CategoriesBtn
-                        onMouseEnter={() => {
-                            mouseStokerRef.current.style.width = '22.3rem';
-                            mouseStokerRef.current.style.height = '22.3rem';
-                            const image = new Image();
-                            image.src = x.thumbnail;
-                            image.onload = () => {
-                                setState(s => ({
-                                    ...s,
-                                    currentThumbnail: x.thumbnail,
-                                }));
-                            }
-                        }}
-                        onMouseLeave={() => {
-                            mouseStokerRef.current.style.width = '0';
-                            mouseStokerRef.current.style.height = '0';
-                        }}
-                        key={x.id}>
-                        {x.label}
-                    </CategoriesBtn>)}
+                <div className="swiper-wrapper category-btn-wrap">
+                    {state.categories
+                        .map((x) => <CategoriesBtn
+                            className="swiper-slide"
+                            onMouseEnter={() => {
+                                overRef.current = true;
+                                mouseStokerRef.current.style.width = '22.3rem';
+                                mouseStokerRef.current.style.height = '22.3rem';
+                                const image = new Image();
+                                image.src = x.thumbnail;
+                                image.onload = () => {
+                                    setState(s => ({
+                                        ...s,
+                                        currentThumbnail: x.thumbnail,
+                                    }));
+                                }
+                            }}
+                            onMouseLeave={() => {
+                                overRef.current = false;
+                                mouseStokerRef.current.style.width = '0';
+                                mouseStokerRef.current.style.height = '0';
+                            }}
+                            key={x.id}>
+                            {x.label}
+                        </CategoriesBtn>)}
+                </div>
             </div>
             <div id="mouse-stoker" ref={mouseStokerRef} style={{
                 width: state.mouseStokerSize.width,
@@ -139,14 +200,6 @@ const ProjectCategoryLayout = styled(Layout)`
     padding:4rem;
     box-sizing:border-box;
     justify-content:center;
-    .categories{
-        position:relative;
-        z-index:2;
-        display:flex;
-        flex-direction:column;
-        margin:-3.5rem 0;
-        margin-left:3.9rem;
-    }
     #mouse-stoker{
         position:absolute;
         transition:width 0.2s ease-in-out, height 0.2s ease-in-out;
@@ -154,6 +207,26 @@ const ProjectCategoryLayout = styled(Layout)`
         border-radius:999rem;
         transform:translate(-50%,-50%);
         pointer-events:none;
+    }
+    .swiper-wrapper{
+        position:relative;
+        z-index:2;
+        display:flex;
+        flex-direction:column;
+        margin:-3.5rem 0;
+        margin-left:3.9rem;
+    }
+    @media screen and (max-width:${({ theme }) => theme.breakPoints.m}px){
+        flex-wrap:wrap;
+        .categories{
+            width:100%;
+        }
+        .andhall-wrap{
+            width:100%;
+        }
+        .swiper-wrapper{
+            flex-direction:row;
+        }
     }
 `;
 
