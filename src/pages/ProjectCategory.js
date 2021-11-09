@@ -9,7 +9,7 @@ import Swiper from 'swiper';
 import theme from '../themes';
 import 'swiper/swiper.min.css';
 
-function ProjectCategory() {
+function ProjectCategory({ selectCategory }) {
     const INITIAL_STATE = {
         eventBinded: false,
         mouseStokerSize: {
@@ -40,14 +40,17 @@ function ProjectCategory() {
         currentThumbnail: null,
         allFeatureLoaded: false,
     };
+    const backEffectRef = useRef(null);
     const idxRef = useRef(0);
     const overRef = useRef(false);
     const intervalRef = useRef(null);
     const mouseStokerRef = useRef();
-    const swiperRef = useRef();
+    const swiperRef = useRef(null);
     const currentThumbnailExist = useRef(false);
     const wrapperRef = useRef();
+    const thumbnailRef = useRef({});
     const [state, setState] = useState(INITIAL_STATE);
+    const stokerExpandingSize = '22.3rem';
 
     const getFeaturePostByCategory = async (categoryId) => {
         const queries = {
@@ -75,29 +78,69 @@ function ProjectCategory() {
     }
 
     const handleResizeEvent = (event) => {
-        // if (window.innerWidth < theme.breakPoints.m) {
-        //     const option = {
-        //         direction: 'horizontal',
-        //         slidesPerView: 1,
-        //         spaceBetween: 30,
-        //         loop: true,
-        //     };
-        //     swiperRef.current = new Swiper(".categories", option);
-        // } else {
-        //     if(swiperRef.current){
-        //         swiperRef.current.destroy(true,true);
-        //     }
-        // }
+        if (window.innerWidth < theme.breakPoints.m) {
+            backEffectRef.current.style.display = "block";
+            handleSwiper();
+        } else {
+            backEffectRef.current.style.display = "none";
+            if (swiperRef.current) {
+                swiperRef.current.destroy();
+                swiperRef.current = null;
+            }
+        }
+    }
+
+    const slideChangeTransitionStart = () => {
+        backEffectRef.current.style.width = '0px';
+        backEffectRef.current.style.height = '0px';
+    }
+    const slideChangeTransitionEnd = (swiper) => {
+        backEffectRef.current.style.width = stokerExpandingSize;
+        backEffectRef.current.style.height = stokerExpandingSize;
+        const currSlide = swiper.slides[swiper.activeIndex];
+        const currCategory = state.categories.find(x => x.id === currSlide.dataset?.catidx * 1);
+        setThumbnailImage(currCategory?.thumbnail);
+    }
+    const handleSwiper = () => {
+        if (!state.allFeatureLoaded) return;
+        if (swiperRef.current === null) {
+            const option = {
+                direction: 'horizontal',
+                loop: true,
+                slidesPerView: "auto",
+                centeredSlides: true,
+                on: {
+                    slideChangeTransitionStart,
+                    slideChangeTransitionEnd
+                }
+            };
+            swiperRef.current = new Swiper(".categories", option);
+        }
+    }
+
+    const setThumbnailImage = (src) => {
+        const image = new Image();
+        image.src = src;
+        image.onload = () => {
+            setState(s => ({
+                ...s,
+                currentThumbnail: src,
+            }));
+        }
     }
 
     useEffect(() => {
         handleResizeEvent();
         window.addEventListener("resize", handleResizeEvent);
-    }, []);
+        return () => {
+            window.removeEventListener('resize', handleResizeEvent);
+        }
+    }, [state.allFeatureLoaded]);
 
     useEffect(() => {
         if (state.eventBinded === false) {
             wrapperRef.current.addEventListener('mousemove', (e) => {
+                if (swiperRef.current !== null) return;
                 mouseStokerRef.current.style.left = e.x + "px";
                 mouseStokerRef.current.style.top = e.y + "px";
             });
@@ -153,41 +196,42 @@ function ProjectCategory() {
 
     return (
         <ProjectCategoryLayout ref={wrapperRef}>
-            <ArtAndDesignHall image={state.currentThumbnail} />
-            <div className="categories">
-                <div className="swiper-wrapper category-btn-wrap">
-                    {state.categories
-                        .map((x) => <CategoriesBtn
-                            className="swiper-slide"
-                            onMouseEnter={() => {
-                                overRef.current = true;
-                                mouseStokerRef.current.style.width = '22.3rem';
-                                mouseStokerRef.current.style.height = '22.3rem';
-                                const image = new Image();
-                                image.src = x.thumbnail;
-                                image.onload = () => {
-                                    setState(s => ({
-                                        ...s,
-                                        currentThumbnail: x.thumbnail,
-                                    }));
-                                }
-                            }}
-                            onMouseLeave={() => {
-                                overRef.current = false;
-                                mouseStokerRef.current.style.width = '0';
-                                mouseStokerRef.current.style.height = '0';
-                            }}
-                            key={x.id}>
-                            {x.label}
-                        </CategoriesBtn>)}
-                </div>
+            <div className="page-title">
+                <div className="bold">PROJECTS</div>
+                <div>전시작품</div>
             </div>
-            <div id="mouse-stoker" ref={mouseStokerRef} style={{
-                width: state.mouseStokerSize.width,
-                height: state.mouseStokerSize.height,
-                left: state.mouseStokerPosition.x,
-                top: state.mouseStokerPosition.y,
-            }} />
+            <ArtAndDesignHall image={state.currentThumbnail} />
+            <div className="categories-container">
+                <div className="categories">
+                    <div className="swiper-wrapper category-btn-wrap">
+                        {state.categories
+                            .map((x) => <CategoriesBtn
+                                className="swiper-slide"
+                                data-catidx={x.id}
+                                onClick={() => {
+                                    selectCategory(x.id);
+                                }}
+                                onMouseEnter={() => {
+                                    if (swiperRef.current !== null) return;
+                                    overRef.current = true;
+                                    mouseStokerRef.current.style.width = stokerExpandingSize;
+                                    mouseStokerRef.current.style.height = stokerExpandingSize;
+                                    setThumbnailImage(x.thumbnail);
+                                }}
+                                onMouseLeave={() => {
+                                    if (swiperRef.current !== null) return;
+                                    overRef.current = false;
+                                    mouseStokerRef.current.style.width = '0';
+                                    mouseStokerRef.current.style.height = '0';
+                                }}
+                                key={x.id}>
+                                {x.label}
+                            </CategoriesBtn>)}
+                    </div>
+                </div>
+                <div id="back-effect" ref={backEffectRef}></div>
+            </div>
+            <div id="mouse-stoker" ref={mouseStokerRef} />
         </ProjectCategoryLayout>
     );
 }
@@ -200,6 +244,12 @@ const ProjectCategoryLayout = styled(Layout)`
     padding:4rem;
     box-sizing:border-box;
     justify-content:center;
+    .categories-container{
+        position:relative;
+        flex-shrink:0;
+        flex-grow:0;
+    }
+    #back-effect,
     #mouse-stoker{
         position:absolute;
         transition:width 0.2s ease-in-out, height 0.2s ease-in-out;
@@ -207,6 +257,11 @@ const ProjectCategoryLayout = styled(Layout)`
         border-radius:999rem;
         transform:translate(-50%,-50%);
         pointer-events:none;
+    }
+    #back-effect{
+        z-index:1;
+        left:50%;
+        top:50%;
     }
     .swiper-wrapper{
         position:relative;
@@ -216,16 +271,44 @@ const ProjectCategoryLayout = styled(Layout)`
         margin:-3.5rem 0;
         margin-left:3.9rem;
     }
+    .page-title{
+        display:none;
+    }
     @media screen and (max-width:${({ theme }) => theme.breakPoints.m}px){
         flex-wrap:wrap;
-        .categories{
+        flex-direction:column;
+        .page-title{
+            display:block;
+            position:absolute;
+            top:9.7rem;
+            right:2.5rem;
+            text-align: right;
+            color:#fff;
+            font-size:1.8rem;
+            z-index:3;
+            .bold{
+                font-family: ${({ theme }) => theme.font.family.englishBold};
+            }
+        }
+        .categories-container{
             width:100%;
         }
         .andhall-wrap{
             width:100%;
+            z-index:2;
+            margin-bottom:4rem;
         }
         .swiper-wrapper{
             flex-direction:row;
+            margin:0;
+        }
+        .swiper-slide{
+            text-align:center;
+            width:65vw;
+            &.swiper-slide-active{
+                color: #fff;
+                -webkit-text-stroke:unset;
+            }
         }
     }
 `;

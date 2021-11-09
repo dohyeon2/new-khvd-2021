@@ -575,14 +575,14 @@ const CustomWrapper = styled(Wrapper)`
         transform:translate(-50%,-50%);
     }
     .message{
-        font-weight:bold;
-        font-family:${({ theme }) => theme.font.family.notnSans};
+        font-weight:400;
+        font-family:${({ theme }) => theme.font.family.notoSans};
         &>div{
             line-height:1.6;
         }
         button{
             font-weight:bold;
-            font-family:${({ theme }) => theme.font.family.notnSans};
+            font-family:${({ theme }) => theme.font.family.notoSans};
             line-height:2;
         }
     }

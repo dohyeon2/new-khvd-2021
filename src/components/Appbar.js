@@ -28,7 +28,7 @@ function Appbar() {
 
   const menuList = [
     makeMenuObj("/", "UNBOXSING"),
-    makeMenuObj("/project", "PROJECT"),
+    makeMenuObj("/project", "PROJECTS"),
     makeMenuObj("/participant", "PARTICIPANT"),
     makeMenuObj("/guestbook", "GUEST BOOK"),
     makeMenuObj("/popupstore", "POP-UP STORE"),

@@ -20,6 +20,9 @@ function useGlobal() {
   }
 
   const goTo = (to) => {
+    if (history.location.pathname === to) {
+      history.go(0);
+    }
     history.push(to);
   }
   return { global, setGlobal, goTo };
