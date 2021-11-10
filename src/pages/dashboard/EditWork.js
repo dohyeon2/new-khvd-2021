@@ -335,14 +335,13 @@ function EditWork({ data }) {
 
     const saveData = (event, outputData) => {
         let loading = false;
-        outputData.blocks.map(x =>
-            {
-                if (x.data === "uploading") loading = true;
-            }
+        outputData.blocks.map(x => {
+            if (x.data === "uploading") loading = true;
+        }
         );
-        if(loading) return;
+        if (loading) return;
         const designerList = state.data.designerList.map(x => x.id);
-        if(designerList.length < 1){
+        if (designerList.length < 1) {
             window.alert("디자이너를 입력해주세요.");
             return;
         }
@@ -432,7 +431,7 @@ export const StyledEditWork = styled.div`
         bottom:1rem;
         z-index:2;
         padding:1rem;
-        font-size:18px;
+        font-size:1rem;
         background-color: #2EA7E0;
         color:#fff;
         border-radius:8px;
@@ -475,14 +474,11 @@ export const StyledEditWork = styled.div`
     }
     .desinger-section-title{
         font-family: 'SBAggroB';
-        font-size: 30px;
+        font-size: 1.67rem;
     }
     .editor-wrap{
-        padding: 189px 0px;
+        padding: 10.5rem 0rem;
         box-sizing:border-box;
-        font-family: NanumSquare -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
         max-width: 1280px;
         @media screen and (max-width:1440px){
             max-width: 1080px;
@@ -524,10 +520,13 @@ export const StyledEditWork = styled.div`
         }
     }
     .work-meta{
-        margin-bottom:200px;
+        margin-bottom:11.12rem;
+        @media screen and (max-width:${({ theme }) => theme.breakPoints.m}px){
+            margin-bottom:5rem;
+        }
         .left{
             flex-grow:1;
-            padding-right: 20px;
+            padding-right: 1.12rem;
             box-sizing:border-box;
             .project-title{
                 width:100%;
@@ -544,7 +543,7 @@ export const StyledEditWork = styled.div`
                 padding:1rem;
                 border:2px dashed #ddd;
                 border-radius: 4px;
-                font-size:24px;
+                font-size:1.34rem;
                 font-weight: bold;
                 box-sizing:border-box;
                 margin-bottom: 22px;
@@ -571,11 +570,13 @@ export const StyledEditWork = styled.div`
                 width: 100%;
                 resize:none;
                 height:200px;
-                font-size: 20px;
-                font-weight: 700;
+                font-size: 1.2rem;
+                font-weight: 400;
                 border-width: 2px;
                 border-color:#ddd;
                 border-style: dashed;
+                line-height: 1.8;
+                word-break:keep-all;
             }
         }
         .right{
@@ -626,6 +627,41 @@ export const StyledEditWork = styled.div`
                     background-color: #ccc;
                     background-position: center;
                     background-repeat: no-repeat;
+                }
+            }
+        }
+        @media screen and (max-width:${({ theme }) => theme.breakPoints.m}px){
+            .flex{
+                flex-wrap: wrap;
+            }
+            .right{
+                order:1;
+                width:100%;
+                padding:4rem;
+                box-sizing:border-box;
+                .thumbnail{
+                    width:100%;
+                    filter:drop-shadow(0px 0px 5px rgba(0,0,0,.2));
+                }
+            }
+            .left{
+                width:100%;
+                order: 2;
+                padding:3rem;
+                .project-title{
+                    font-size: 3.334rem;
+                }
+                .project-subtitle{
+                    font-size: 1.34rem;
+                }
+                #related-project,
+                #project-category{
+                    font-size: 1.389rem;
+                }
+                .description{
+                    font-size: 1.2rem;
+                    line-height: 1.6;
+                    letter-spacing:${({ theme }) => theme.font.translateLetterSpacing(-20)}
                 }
             }
         }

@@ -1,11 +1,15 @@
 import axios from 'axios';
 import produce from 'immer';
-import React, { useEffect, useState } from 'react';
+import React, { useDebugValue, useEffect, useState } from 'react';
 import { useParams } from 'react-router';
+import useGlobal from '../hook/useGlobal';
 import styled from 'styled-components';
 import Loading from '../components/Loading';
 import { apiURI } from '../vars/api';
+import Footer from '../components/Footer';
 import { StyledEditWork, StyledProjectContent } from './dashboard/EditWork';
+import theme from '../themes';
+import { getColorBrightness } from '../utils/functions';
 
 function getProtocolURL(URL) {
     const reg = new RegExp(/^http/);
@@ -18,16 +22,34 @@ function getProtocolURL(URL) {
 
 
 function ProjectContainer({ data }) {
+    const { setGlobal } = useGlobal();
     const INITIAL_STATE = {
         open: false,
         popup: false,
     }
     const [state, setState] = useState(INITIAL_STATE);
+    useEffect(() => {
+        setGlobal({ footer: false });
+        setGlobal({ appbarStyle: 'project' });
+        return () => {
+            setGlobal({ footer: true });
+            setGlobal({ appbarStyle: null });
+        }
+    }, []);
+
+    useEffect(() => {
+        console.log(getColorBrightness(data.backgorund_color));
+        setGlobal({ appbarBrightness: getColorBrightness(data.backgorund_color) });
+        return () => {
+            setGlobal({ appbarBrightness: null });
+        }
+    }, [data]);
+
     return (
         <StyledProjectContainer className={[(state.open && "open")].join(" ")} style={{
             backgroundColor: data.backgorund_color,
             color: data.text_color,
-            overflowY: (state.popup !== false ? "hidden" : null)
+            overflowY: ((state.popup !== false || !state.open) ? "hidden" : null)
         }}>
             <div className="project-wrap">
                 <div className="work-meta">
@@ -98,7 +120,7 @@ function ProjectContainer({ data }) {
                                 return <div className={"cdx-embed-wrapper"}>
                                     <div className={"iframe-wrapper"} style={
                                         {
-                                            width:`${x.data.width}%`
+                                            width: `${x.data.width}%`
                                         }
                                     }>
                                         <iframe src={x.data.src} title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
@@ -141,6 +163,7 @@ function ProjectContainer({ data }) {
                 </button>
                 <img src={state.popup} alt="" />
             </div>}
+            <Footer />
         </StyledProjectContainer >
     )
 }
@@ -185,7 +208,7 @@ const StyledProjectCover = styled.div`
     right:0;
     left:0;
     bottom:0;
-    z-index:99;
+    z-index:9;
     box-sizing:border-box;
     transform:scale(1) rotateX(0deg);
     transition:transform 1s ease-in-out;
@@ -200,17 +223,17 @@ const StyledProjectCover = styled.div`
         z-index:3;
         h1{
             color:#fff;
-            font-size:80px;
-            margin-bottom:30px;
+            font-size:4.5rem;
+            margin-bottom:1.67rem;
             line-height: 1;
         }
         h2{
-            margin-bottom:28px;
-            font-size:30px;
+            margin-bottom:1.56rem;
+            font-size:1.67rem;
             color:#fff;
         }
         .designer-list{
-            font-size:25px;
+            font-size:1.38rem;
             color:#fff;
         }
     }
@@ -263,7 +286,7 @@ const StyledProjectContainer = styled(StyledEditWork)`
         left:0;
         right:0;
         bottom:0;
-        z-index:3;
+        z-index:99;
         background-color:rgba(0,0,0,.8);
         overflow-y:auto;
         text-align:center;
@@ -289,19 +312,24 @@ const StyledProjectContainer = styled(StyledEditWork)`
         position:relative;
         z-index:1;
         box-sizing:border-box;
-        font-family: NanumSquare -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;;
         max-width: 1280px;
         @media screen and (max-width:1440px){
             max-width: 1080px;
         }
-        padding-top: 189px;
+        @media screen and (min-width:${({ theme }) => theme.breakPoints.m + 1}px){
+            padding-right:4rem;
+            padding-left:4rem;
+        }
+        padding-top: 10.5rem;
         margin:0 auto;
-        margin-bottom:200px;
+        margin-bottom:11.12rem;
         .work-meta{
             .left{
-                margin-right:50px;
+                margin-right:2.78rem;
+                @media screen and (max-width:${({ theme }) => theme.breakPoints.m}px){
+                    margin-right:0;
+                    padding:4rem;
+                }
                 .project-title{
                     border:0;
                     padding:0;
@@ -309,16 +337,15 @@ const StyledProjectContainer = styled(StyledEditWork)`
                 }
                 .description{
                     border:0;
-                    margin-bottom:50px;
+                    margin-bottom:2.78rem;
                     height:auto;
                     white-space:pre-wrap;
-                    word-break:break-all;
                 }
                 .project-category{
-                    font-size:24px;
+                    font-size:1.34rem;
                 }
                 .desinger-section-title{
-                    margin-bottom:50px;
+                    margin-bottom:2.78rem;
                 }
                 .designer-list{
                     margin:0;
@@ -328,10 +355,10 @@ const StyledProjectContainer = styled(StyledEditWork)`
                         padding:0;
                         margin:0;
                         width:50%;
-                        font-size:20px;
+                        font-size:1.12rem;
                         line-height:1.6;
-                        margin-bottom:36px;
-                        letter-spacing: -0.4px;
+                        margin-bottom:2rem;
+                        letter-spacing: ${({ theme }) => theme.font.translateLetterSpacing(20, -20)};
                         .name{
                             font-weight:800;
                         }

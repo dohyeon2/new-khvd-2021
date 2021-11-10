@@ -25,6 +25,7 @@ function useGlobal() {
     }
     history.push(to);
   }
+  
   return { global, setGlobal, goTo };
 }
 

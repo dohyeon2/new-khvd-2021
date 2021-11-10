@@ -8,8 +8,12 @@ import { parseObjectToQuery } from '../utils/functions';
 import Swiper from 'swiper';
 import theme from '../themes';
 import 'swiper/swiper.min.css';
+import useGlobal from '../hook/useGlobal';
+import { useHistory } from 'react-router';
 
-function ProjectCategory({ selectCategory }) {
+function ProjectCategory() {
+    const history = useHistory();
+    const { goTo } = useGlobal();
     const INITIAL_STATE = {
         eventBinded: false,
         mouseStokerSize: {
@@ -25,16 +29,20 @@ function ProjectCategory({ selectCategory }) {
                 id: 2,
                 label: "GRAPHIC DESIGN",
                 featurePost: null,
+                slug: "graphic-design",
             },
             {
                 id: 3,
                 label: "DESIGN BUSINESS",
                 featurePost: null,
+                slug: "design-business"
+
             },
             {
                 id: 4,
                 label: "UXUI / NEW MEDIA",
                 featurePost: null,
+                slug: "uxui-newmedia"
             }
         ],
         currentThumbnail: null,
@@ -48,9 +56,12 @@ function ProjectCategory({ selectCategory }) {
     const swiperRef = useRef(null);
     const currentThumbnailExist = useRef(false);
     const wrapperRef = useRef();
-    const thumbnailRef = useRef({});
     const [state, setState] = useState(INITIAL_STATE);
     const stokerExpandingSize = '22.3rem';
+
+    const selectCategory = (slug) => {
+        goTo(history.location.pathname + "/" + slug);
+    }
 
     const getFeaturePostByCategory = async (categoryId) => {
         const queries = {
@@ -115,6 +126,13 @@ function ProjectCategory({ selectCategory }) {
                 }
             };
             swiperRef.current = new Swiper(".categories", option);
+            const buttons = document.getElementsByClassName('swiper-slide-duplicate');
+            for (let i = 0, len = buttons.length; i < len; i++) {
+                buttons[i].addEventListener("click", (event) => {
+                    console.log(event.currentTarget);
+                    goTo("/project/" + event.currentTarget.dataset.catslug);
+                });
+            }
         }
     }
 
@@ -208,8 +226,9 @@ function ProjectCategory({ selectCategory }) {
                             .map((x) => <CategoriesBtn
                                 className="swiper-slide"
                                 data-catidx={x.id}
+                                data-catslug={x.slug}
                                 onClick={() => {
-                                    selectCategory(x.id);
+                                    selectCategory(x.slug);
                                 }}
                                 onMouseEnter={() => {
                                     if (swiperRef.current !== null) return;
@@ -231,8 +250,8 @@ function ProjectCategory({ selectCategory }) {
                 </div>
                 <div id="back-effect" ref={backEffectRef}></div>
             </div>
-            <div id="mouse-stoker" ref={mouseStokerRef} />
-        </ProjectCategoryLayout>
+            <div id="mouse-stoker" ref={mouseStokerRef} style={{ width: 0, height: 0 }} />
+        </ProjectCategoryLayout >
     );
 }
 

@@ -5,7 +5,7 @@ import images from '../images';
 import theme from '../themes';
 
 function Intro() {
-    const { setGlobal, global } = useGlobal();
+    const { setGlobal } = useGlobal();
     const maxFrame = 580;
     const WrapperRef = useRef();
     const frameRef = useRef(0);
@@ -17,7 +17,7 @@ function Intro() {
     const openAnimationDuration = 40;
     const openingInterval = useRef(null);
     const [frame, setFrame] = useState(0);
-    const [test, setTest] = useState(true);
+    const [test] = useState(true);
 
     const setFrameHanlder = (velocity) => {
         if (frameRef.current + velocity < 0) {
@@ -31,7 +31,7 @@ function Intro() {
         WrapperRef.current.style.overflow = 'hidden';
     }
 
-    const yesClickEventHandler = (event) => {
+    const yesClickEventHandler = () => {
         if (openingInterval.current === null) {
             clearAnimation();
             setTimeout(() => {

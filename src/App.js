@@ -12,10 +12,10 @@ import useGlobal from './hook/useGlobal';
 import Main from './pages/Main';
 import Appbar from './components/Appbar';
 import Footer from './components/Footer';
+import ProjectCategory from './pages/ProjectCategory';
 
 function App() {
   const { global } = useGlobal();
-  const location = useLocation();
   return (
     <>
       <Appbar />
@@ -26,14 +26,17 @@ function App() {
         <Route path="/login">
           <LoginCallBack />
         </Route>
-        <Route path="/project/:id">
-          <Project />
-        </Route>
         <Route path="/project_admin">
           <ProjectListTest />
         </Route>
-        <Route path="/project">
+        <Route path="/project/:categorySlug/:id">
+          <Project />
+        </Route>
+        <Route path="/project/:categorySlug">
           <ProjectList />
+        </Route>
+        <Route path="/project">
+          <ProjectCategory />
         </Route>
         <Route path="/my-dashboard/:page">
           <MyDashboardContainer />
@@ -42,7 +45,7 @@ function App() {
           <MyDashboardContainer />
         </Route>
       </Switch>
-      <Footer />
+      {global.footer && <Footer />}
     </>
   );
 }

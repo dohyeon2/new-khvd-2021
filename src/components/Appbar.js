@@ -47,9 +47,12 @@ function Appbar() {
 
   return (
     <>
-      <StyledAppbar>
+      <StyledAppbar className={(global.appbarStyle || "")} luma={global.appbarBrightness}>
         <div className="left">
           <Logo to={"/"} />
+        </div>
+        <div className="center">
+          {global.pageTitle}
         </div>
         <div className="right">
           <HambergerMenu on={hambergerMenu} onClick={handleClickHambergerMenu} />
@@ -72,7 +75,7 @@ function Appbar() {
 export default Appbar;
 
 const StyledAppbar = styled.div`
-  padding:2.5rem 5rem;
+  padding:1.5rem 5rem;
   @media screen and (max-width:900px){
     padding:2.5rem;
   }
@@ -87,6 +90,14 @@ const StyledAppbar = styled.div`
   pointer-events:none;
   &>div{
     pointer-events: auto;
+    filter:${p => p.luma > 50 && `brightness(0%)`};
+  }
+  .center{
+    font-size:2.23rem;
+    color:${p => p.luma > 50 ? "#000" : "#fff"};
+  }
+  &.project{
+    background-color: rgba(255,255,255,.3);
   }
 `;
 
@@ -132,5 +143,4 @@ const StyledMenuButton = styled.button`
   &.current{
     color:${({ theme }) => theme.colors.primary};
   }
-
 `;
