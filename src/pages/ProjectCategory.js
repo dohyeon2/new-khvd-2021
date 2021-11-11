@@ -48,7 +48,6 @@ function ProjectCategory() {
         seed: 0,
     };
     const INITIAL_THUMBNAIL_COUNT = 1;
-    const GET_POSTS_PER_REQUEST = 1;
     const STOKER_EXPAND_SIZE = '22.3rem';
     const THUMBNAIL_LOOPING_TERM = 4000;
     const backEffectRef = useRef(null);
@@ -56,7 +55,6 @@ function ProjectCategory() {
     const overRef = useRef(false);
     const mouseStokerRef = useRef();
     const wrapperRef = useRef();
-    const thumbnailLoopIntervalRef = useRef();
     const [state, setState] = useState(INITIAL_STATE);
 
     const selectCategory = (slug) => {
