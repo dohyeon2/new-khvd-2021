@@ -10,7 +10,9 @@ function ArtAndDesignHall({ image }) {
             </svg>
 
             <div className="clipped">
-                <div className={"projected-thumbnail" + (!image ? " loading" : "")} style={{ backgroundImage: `url(${image})` }} />
+                <div className={"projected-thumbnail" + (!image ? " loading" : "")} style={{
+                    backgroundImage: `url(${image || images['loading.gif']})`
+                }} />
                 <img className="background" src={images['andhall.png']} />
             </div>
         </ANDHallWrap>
@@ -51,9 +53,6 @@ const ANDHallWrap = styled.div`
             background-repeat: no-repeat;
             mix-blend-mode: multiply;
             opacity:1;
-            &.loading{
-                opacity:0;
-            }
         }
     }
 `;
