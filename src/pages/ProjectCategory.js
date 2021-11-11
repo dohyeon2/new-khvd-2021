@@ -46,8 +46,8 @@ function ProjectCategory() {
         thumbnailList: [],
         currentThumbnailIndex: 0,
     };
-    const INITIAL_THUMBNAIL_COUNT = 3;
-    const GET_POSTS_PER_REQUEST = 3;
+    const INITIAL_THUMBNAIL_COUNT = 1;
+    const GET_POSTS_PER_REQUEST = 1;
     const STOKER_EXPAND_SIZE = '22.3rem';
     const THUMBNAIL_LOOPING_TERM = 4000;
     const backEffectRef = useRef(null);
@@ -75,13 +75,13 @@ function ProjectCategory() {
             thumbSize: 788,
             fields: "thumbnail"
         };
-        const categoryFeaturePost = await axios.get(apiURI + "khvd/v1/project" + "?" + parseObjectToQuery(queries));
-        if (categoryFeaturePost.data.posts.length === 0)
+        const posts = await axios.get(apiURI + "khvd/v1/project" + "?" + parseObjectToQuery(queries));
+        if (posts.data.posts.length === 0)
             setState(s => ({
                 ...s,
                 projectEndOfList: true,
             }));
-        return categoryFeaturePost;
+        return posts;
     }, [state.thumbnailList]);
 
     //윈도우 리사이즈 이벤트 핸들러
@@ -138,16 +138,13 @@ function ProjectCategory() {
      * 섬네일 이미지를 loading하고, 완료되면 상태에 적용하는 함수
      * @param {string} src : 섬네일 이미지 주소;
      */
-    const setThumbnailImage = (src) => {
+    const setThumbnailImage = (src) => new Promise((resolve) => {
         const image = new Image();
         image.src = src;
         image.onload = () => {
-            setState(s => ({
-                ...s,
-                currentThumbnail: src,
-            }));
+            resolve(src, image);
         }
-    }
+    });
 
     //윈도우 리사이즈 이벤트 핸들러
     useEffect(() => {
@@ -187,40 +184,29 @@ function ProjectCategory() {
 
     //섬네일 루핑 핸들러
     useEffect(() => {
-        if (!thumbnailLoopIntervalRef.current) {
-            thumbnailLoopIntervalRef.current = setInterval(() => {
+        if (state.thumbnailList.length === 0) return;
+        const thumbnailList = [...state.thumbnailList];
+        const thumbnail = thumbnailList.pop();
+        const src = thumbnail.thumbnail;
+        setThumbnailImage(src).then((src, image) => {
+            setState(s => {
+                return {
+                    ...s,
+                    currentThumbnail: src,
+                }
+            });
+            setTimeout(() => {
+                const posts = getProjectsWithThumbnail(1);
                 setState(s => {
-                    const thumbnailList = [...s.thumbnailList];
-                    const thumbnail = thumbnailList.shift();
-                    thumbnailList.push(thumbnail);
                     return {
                         ...s,
-                        thumbnailList: thumbnailList,
-                        currentThumbnail: thumbnail.thumbnail,
-                        currentThumbnailIndex: s.currentThumbnailIndex + 1
+                        thumbnailList: [...s.thumbnailList, ...posts.data.posts]
                     }
                 });
-
             }, THUMBNAIL_LOOPING_TERM);
-        }
-    }, []);
+        });
+    }, [state.thumbnailList]);
 
-    useEffect(() => {
-        if (state.projectEndOfList) {
-            return;
-        }
-        if (state.thumbnailList.length <= state.currentThumbnailIndex) {
-
-            getProjectsWithThumbnail(GET_POSTS_PER_REQUEST).then((res) => {
-                const { posts } = res.data;
-                setState((s) => ({
-                    ...s,
-                    thumbnailList: [...s.thumbnailList, ...posts]
-                }));
-            });
-
-        }
-    }, [state.currentThumbnail, state.projectEndOfList]);
     const { currentThumbnail, categories } = state;
     return (
         <ProjectCategoryLayout ref={wrapperRef}>
