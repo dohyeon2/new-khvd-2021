@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 import ArtAndDesignHall from '../components/ArtAndDesignHall';
 import axios from 'axios';
@@ -28,67 +28,64 @@ function ProjectCategory() {
             {
                 id: 2,
                 label: "GRAPHIC DESIGN",
-                featurePost: null,
                 slug: "graphic-design",
             },
             {
                 id: 3,
                 label: "DESIGN BUSINESS",
-                featurePost: null,
                 slug: "design-business"
-
             },
             {
                 id: 4,
                 label: "UXUI / NEW MEDIA",
-                featurePost: null,
                 slug: "uxui-newmedia"
             }
         ],
+        projectEndOfList: false,
         currentThumbnail: null,
-        allFeatureLoaded: false,
+        thumbnailList: [],
+        currentThumbnailIndex: 0,
     };
+    const INITIAL_THUMBNAIL_COUNT = 3;
+    const GET_POSTS_PER_REQUEST = 3;
+    const STOKER_EXPAND_SIZE = '22.3rem';
+    const THUMBNAIL_LOOPING_TERM = 4000;
     const backEffectRef = useRef(null);
-    const idxRef = useRef(0);
-    const overRef = useRef(false);
-    const intervalRef = useRef(null);
-    const mouseStokerRef = useRef();
     const swiperRef = useRef(null);
-    const currentThumbnailExist = useRef(false);
+    const overRef = useRef(false);
+    const mouseStokerRef = useRef();
     const wrapperRef = useRef();
+    const thumbnailLoopIntervalRef = useRef();
     const [state, setState] = useState(INITIAL_STATE);
-    const stokerExpandingSize = '22.3rem';
 
     const selectCategory = (slug) => {
         goTo(history.location.pathname + "/" + slug);
     }
 
-    const getFeaturePostByCategory = async (categoryId) => {
+    /**
+     * 섬네일과 함께 프로젝트를 가져오는 함수
+     * @param {int} count : 가져올 개수
+     */
+    const getProjectsWithThumbnail = useCallback(async (count = 1) => {
         const queries = {
-            cat: categoryId,
-            posts_per_page: 1,
+            posts_per_page: count,
             orderby: "rand",
             nopaging: 0,
-            thumbSize: 788
+            post__not_in: state.thumbnailList.map(x => x.ID).join(","),
+            thumbSize: 788,
+            fields: "thumbnail"
         };
         const categoryFeaturePost = await axios.get(apiURI + "khvd/v1/project" + "?" + parseObjectToQuery(queries));
-        setState(s => ({
-            ...s,
-            categories: s.categories.map(x => {
-                if (x.id === categoryId) {
-                    return {
-                        ...x,
-                        thumbnail: categoryFeaturePost.data.posts[0].thumbnail_small
-                    };
-                } else {
-                    return x;
-                }
-            }),
-        }));
-        return categoryFeaturePost.data.posts[0];
-    }
+        if (categoryFeaturePost.data.posts.length === 0)
+            setState(s => ({
+                ...s,
+                projectEndOfList: true,
+            }));
+        return categoryFeaturePost;
+    }, [state.thumbnailList]);
 
-    const handleResizeEvent = (event) => {
+    //윈도우 리사이즈 이벤트 핸들러
+    const handleResizeEvent = () => {
         if (window.innerWidth < theme.breakPoints.m) {
             backEffectRef.current.style.display = "block";
             handleSwiper();
@@ -106,36 +103,41 @@ function ProjectCategory() {
         backEffectRef.current.style.height = '0px';
     }
     const slideChangeTransitionEnd = (swiper) => {
-        backEffectRef.current.style.width = stokerExpandingSize;
-        backEffectRef.current.style.height = stokerExpandingSize;
-        const currSlide = swiper.slides[swiper.activeIndex];
-        const currCategory = state.categories.find(x => x.id === currSlide.dataset?.catidx * 1);
-        setThumbnailImage(currCategory?.thumbnail);
+        backEffectRef.current.style.width = STOKER_EXPAND_SIZE;
+        backEffectRef.current.style.height = STOKER_EXPAND_SIZE;
     }
+
+    const swiperEvents = {
+        slideChangeTransitionStart,
+        slideChangeTransitionEnd,
+    }
+
+    /**
+     * 스와이퍼 init하고 조정하는 함수
+     */
     const handleSwiper = () => {
-        if (!state.allFeatureLoaded) return;
         if (swiperRef.current === null) {
             const option = {
                 direction: 'horizontal',
                 loop: true,
                 slidesPerView: "auto",
                 centeredSlides: true,
-                on: {
-                    slideChangeTransitionStart,
-                    slideChangeTransitionEnd
-                }
+                on: swiperEvents,
             };
             swiperRef.current = new Swiper(".categories", option);
             const buttons = document.getElementsByClassName('swiper-slide-duplicate');
             for (let i = 0, len = buttons.length; i < len; i++) {
                 buttons[i].addEventListener("click", (event) => {
-                    console.log(event.currentTarget);
                     goTo("/project/" + event.currentTarget.dataset.catslug);
                 });
             }
         }
     }
 
+    /**
+     * 섬네일 이미지를 loading하고, 완료되면 상태에 적용하는 함수
+     * @param {string} src : 섬네일 이미지 주소;
+     */
     const setThumbnailImage = (src) => {
         const image = new Image();
         image.src = src;
@@ -147,14 +149,16 @@ function ProjectCategory() {
         }
     }
 
+    //윈도우 리사이즈 이벤트 핸들러
     useEffect(() => {
         handleResizeEvent();
         window.addEventListener("resize", handleResizeEvent);
         return () => {
             window.removeEventListener('resize', handleResizeEvent);
         }
-    }, [state.allFeatureLoaded]);
+    }, []);
 
+    //마우스 스토커 위치 조정 이벤트 핸들러
     useEffect(() => {
         if (state.eventBinded === false) {
             wrapperRef.current.addEventListener('mousemove', (e) => {
@@ -167,62 +171,68 @@ function ProjectCategory() {
                 eventBinded: true
             }));
         }
-    }, []);
+    }, [state.eventBinded]);
 
+    //최초 로딩 시 thumbnail 불러오기
     useEffect(() => {
-        // 그래픽 디자인 2, 디자인 비즈니스 3, 뉴미디어 4
-        state.categories.forEach((x, i, arr) => {
-            const curr = getFeaturePostByCategory(x.id).then((post) => {
-                const image = new Image();
-                image.src = post.thumbnail_small;
-                image.onload = () => {
-                    if (!currentThumbnailExist.current) {
-                        setState(s => ({
-                            ...s,
-                            currentThumbnail: post.thumbnail_small,
-                        }));
-                    }
-                }
-            });
+        if (state.thumbnailList.length !== 0) return;
+        getProjectsWithThumbnail(INITIAL_THUMBNAIL_COUNT).then((res) => {
+            const { posts } = res.data;
+            setState((s) => ({
+                ...s,
+                thumbnailList: [...s.thumbnailList, ...posts]
+            }));
         });
     }, []);
 
+    //섬네일 루핑 핸들러
     useEffect(() => {
-        const filter = state.categories.filter(x => !x.thumbnail);
-        if (filter.length === 0) {
-            setState(s => ({
-                ...s,
-                allFeatureLoaded: true,
-            }));
-        }
-    }, [state.categories]);
-
-    useEffect(() => {
-        if (intervalRef.current === null && state.allFeatureLoaded) {
-            intervalRef.current = setInterval(() => {
-                idxRef.current++;
-                const thumb = state.categories[idxRef.current % state.categories.length].thumbnail;
-                if (!overRef.current) {
-                    setState(s => ({
+        if (!thumbnailLoopIntervalRef.current) {
+            thumbnailLoopIntervalRef.current = setInterval(() => {
+                setState(s => {
+                    const thumbnailList = [...s.thumbnailList];
+                    const thumbnail = thumbnailList.shift();
+                    thumbnailList.push(thumbnail);
+                    return {
                         ...s,
-                        currentThumbnail: thumb,
-                    }));
-                }
-            }, 8000);
-        }
-    }, [state.allFeatureLoaded]);
+                        thumbnailList: thumbnailList,
+                        currentThumbnail: thumbnail.thumbnail,
+                        currentThumbnailIndex: s.currentThumbnailIndex + 1
+                    }
+                });
 
+            }, THUMBNAIL_LOOPING_TERM);
+        }
+    }, []);
+
+    useEffect(() => {
+        if (state.projectEndOfList) {
+            return;
+        }
+        if (state.thumbnailList.length <= state.currentThumbnailIndex) {
+
+            getProjectsWithThumbnail(GET_POSTS_PER_REQUEST).then((res) => {
+                const { posts } = res.data;
+                setState((s) => ({
+                    ...s,
+                    thumbnailList: [...s.thumbnailList, ...posts]
+                }));
+            });
+
+        }
+    }, [state.currentThumbnail, state.projectEndOfList]);
+    const { currentThumbnail, categories } = state;
     return (
         <ProjectCategoryLayout ref={wrapperRef}>
             <div className="page-title">
                 <div className="bold">PROJECTS</div>
                 <div>전시작품</div>
             </div>
-            <ArtAndDesignHall image={state.currentThumbnail} />
+            <ArtAndDesignHall image={currentThumbnail} />
             <div className="categories-container">
                 <div className="categories">
                     <div className="swiper-wrapper category-btn-wrap">
-                        {state.categories
+                        {categories
                             .map((x) => <CategoriesBtn
                                 className="swiper-slide"
                                 data-catidx={x.id}
@@ -233,9 +243,8 @@ function ProjectCategory() {
                                 onMouseEnter={() => {
                                     if (swiperRef.current !== null) return;
                                     overRef.current = true;
-                                    mouseStokerRef.current.style.width = stokerExpandingSize;
-                                    mouseStokerRef.current.style.height = stokerExpandingSize;
-                                    setThumbnailImage(x.thumbnail);
+                                    mouseStokerRef.current.style.width = STOKER_EXPAND_SIZE;
+                                    mouseStokerRef.current.style.height = STOKER_EXPAND_SIZE;
                                 }}
                                 onMouseLeave={() => {
                                     if (swiperRef.current !== null) return;
