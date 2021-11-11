@@ -45,6 +45,7 @@ function ProjectCategory() {
         currentThumbnail: null,
         thumbnailList: [],
         currentThumbnailIndex: 0,
+        seed: 0,
     };
     const INITIAL_THUMBNAIL_COUNT = 1;
     const GET_POSTS_PER_REQUEST = 1;
@@ -196,16 +197,24 @@ function ProjectCategory() {
                 }
             });
             setTimeout(() => {
-                const posts = getProjectsWithThumbnail(1);
-                setState(s => {
-                    return {
+                if(state.projectEndOfList){
+                    setState(s=>({
                         ...s,
-                        thumbnailList: [...s.thumbnailList, ...posts.data.posts]
-                    }
-                });
+                        seed:s.seed + 1
+                    }));
+                }else{
+                    const posts = getProjectsWithThumbnail(1).then((posts) => {
+                        setState(s => {
+                            return {
+                                ...s,
+                                thumbnailList: [...s.thumbnailList, ...posts.data.posts]
+                            }
+                        });
+                    });
+                }
             }, THUMBNAIL_LOOPING_TERM);
         });
-    }, [state.thumbnailList]);
+    }, [state.thumbnailList, state.seed, state.projectEndOfList]);
 
     const { currentThumbnail, categories } = state;
     return (
