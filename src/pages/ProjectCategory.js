@@ -72,6 +72,7 @@ function ProjectCategory() {
             posts_per_page: count,
             orderby: "rand",
             nopaging: 0,
+            category__not_in:5,
             post__not_in: state.thumbnailList.map(x => x.ID).join(","),
             thumbSize: 788,
             fields: "thumbnail"
