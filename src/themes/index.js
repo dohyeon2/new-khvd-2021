@@ -3,6 +3,7 @@ import images from "../images";
 const theme = {
     colors: {
         primary: "#FF358E",
+        secondary: "#0039FF",
         foreground: "#fff",
         background: "#1E095B",
     },

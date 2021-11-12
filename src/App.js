@@ -1,5 +1,5 @@
 import React, { useRef, useEffect } from 'react';
-import { Switch, Route, useLocation } from "react-router-dom";
+import { Switch, Route, useHistory } from "react-router-dom";
 import MyDashboardContainer from './pages/MyDashboardContainer';
 import 'normalize.css';
 import './App.css'

@@ -5,6 +5,7 @@ import Logo from './Logo';
 import HambergerMenu from './HambergerMenu';
 import { useHistory } from 'react-router';
 import { setGlobal } from '../reducers/global';
+import images from '../images';
 
 /**
  * 앱바
@@ -13,10 +14,12 @@ function Appbar() {
   const menuWrapperClass = [];
   const { global, goTo } = useGlobal();
   const history = useHistory();
+  const searchRef = useRef();
   const [hambergerMenu, setHambergerMenu] = useState(false);
-  const scrollEventRef = useRef(false);
   const [state, setState] = useState({
-    invert:false,
+    invert: false,
+    minimize: false,
+    searchInput: false,
   });
   const classList = [];
 
@@ -47,29 +50,48 @@ function Appbar() {
 
   function handleScorllEvent() {
     if (this.scrollTop > 100) {
-      setGlobal({ appbarStyle: "invert" });
-      setState(s=>({
-        invert:true,
-      }));
+      if (!state.minimize) {
+        setState(s => ({
+          ...s,
+          minimize: true,
+        }))
+      }
+      if (global.appbarScrollInvert) {
+        setGlobal({ appbarStyle: "invert" });
+        setState(s => ({
+          ...s,
+          invert: true,
+        }));
+      }
     } else {
-      setState(s=>({
-        invert:false,
+      setState(s => ({
+        ...s,
+        invert: false,
+        minimize: false,
       }));
       setGlobal({ appbarStyle: null });
     }
   }
 
   useEffect(() => {
+    searchRef.current?.focus();
+  }, [state.searchInput]);
+
+  useEffect(() => {
     const root = document.getElementById("root");
-    if (!scrollEventRef.current) {
-      root.addEventListener("scroll", handleScorllEvent);
-    }
+    root.removeEventListener("scroll", handleScorllEvent);
+    root.addEventListener("scroll", handleScorllEvent);
     return () => {
-      setGlobal({ appbarStyle: null });
       root.removeEventListener("scroll", handleScorllEvent);
     }
-  }, [global.appbarScrollInvert]);
+  }, [global, state]);
 
+  useEffect(() => {
+    setState(s => ({
+      ...s,
+      searchInput: (Boolean(global.appbarSearch) && s.searchInput),
+    }));
+  }, [global]);
   if (hambergerMenu) {
     menuWrapperClass.push("on");
   }
@@ -82,6 +104,12 @@ function Appbar() {
   if (state.invert) {
     classList.push("invert");
   }
+  if (state.searchInput) {
+    classList.push("searchInput");
+  }
+  if (state.minimize) {
+    classList.push("minimize");
+  }
 
   return (
     <>
@@ -93,6 +121,23 @@ function Appbar() {
           {global.pageTitle}
         </div>
         <div className="right">
+          {state.searchInput && <SearchInput
+            onChange={(e) => {
+              const target = e.target;
+              const value = target.value;
+              global.searchChange(value);
+            }}
+            ref={searchRef}
+          />}
+          {global.appbarSearch && <SearchBtn on={state.searchInput}
+            onClick={() => {
+              setState(s => ({
+                ...s,
+                searchInput: !s.searchInput,
+              }));
+              global.searchChange(false);
+            }}
+          />}
           <HambergerMenu on={hambergerMenu} onClick={handleClickHambergerMenu} />
         </div>
       </StyledAppbar>
@@ -112,6 +157,40 @@ function Appbar() {
 
 export default Appbar;
 
+const SearchInput = styled.input`
+  margin-right:0.8rem; 
+  max-width:22rem;
+  width:100%;
+  color:#fff;
+  background-color: transparent;
+  border:0;
+  border-bottom:0.24rem solid #fff;
+  padding:0.4rem;
+  &:focus{
+    outline: 1px solid ${({ theme }) => theme.colors.primary};
+    border-bottom:0.24rem solid ${({ theme }) => theme.colors.primary};
+  }
+`;
+
+const SearchBtn = styled.button`
+  display:flex;
+  width:auto;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  background-color: transparent;
+  border:0;
+  background-image: url("${p => p.on ? images['icon_ex.png'] : images['icon_search.png']}");
+  background-repeat:no-repeat;
+  background-size: contain;
+  width:2rem;
+  height:2rem;
+  margin-right:1.2rem;
+  margin-top:0.1rem;
+  cursor: pointer;
+`;
+
+
 const StyledAppbar = styled.div`
   padding:1.5rem 5rem;
   @media screen and (max-width:900px){
@@ -127,15 +206,37 @@ const StyledAppbar = styled.div`
   right:0;
   pointer-events:none;
   transition:background-color .2s ease-in-out;
-  &>div{
+  &>div,
+  &>input{
     pointer-events: auto;
     filter:${p => p.luma > 50 && `brightness(0%)`};
     transition: filter .2s ease-in-out;
   }
+  .left{
+    position: relative;
+    margin:1rem;
+  }
+  &.searchInput{
+    .center{
+      display:none;
+    }
+  }
   .center{
+    z-index:1;
+    position: absolute;
+    transform:translate(-50%,-50%);
+    top:50%;
+    left:50%;
     font-size:2.23rem;
     color:${p => p.luma > 50 ? "#000" : "#fff"};
     font-family: ${({ theme }) => theme.font.family.nanumSquare};
+  }
+  .right{
+    display:flex;
+    align-items: center;
+    justify-content: flex-end;
+    z-index:2;
+    position: relative;
   }
   &.project{
     background-color: rgba(255,255,255,.3);
@@ -169,6 +270,7 @@ const StyledMenuWrap = styled.div`
 const StyledMenuButton = styled.button`
   padding:0;
   border:0;
+  flex-shrink: 0;
   background-color:transparent;
   color:${({ theme }) => theme.colors.foreground};
   font-family: ${({ theme }) => theme.font.family.englishBold};

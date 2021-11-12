@@ -5,14 +5,15 @@ import { useParams } from 'react-router';
 import { apiURI } from '../vars/api';
 import axios from 'axios';
 import useGlobal from '../hook/useGlobal';
-import { parseObjectToQuery } from '../utils/functions';
 import images from '../images';
 import theme from '../themes';
+import ProjectSearch from './subpage/ProjectSearch';
+import { getPostApi } from '../api/project';
 
 function ProjectList({
   slug: slugAttr,
 }) {
-  const { setGlobal, goTo } = useGlobal();
+  const { setGlobal, goTo, global } = useGlobal();
   const INITIAL_STATE = {
     category: null,
     authors: null,
@@ -29,6 +30,7 @@ function ProjectList({
     currentProjectIdx: -1,
     wholeCount: null,
     row: null,
+    searched: "",
     queries: {
       paged: 1,
       nopaging: 0,
@@ -37,11 +39,13 @@ function ProjectList({
       post__not_in: [],
       orderby: "rand",
     },
+    placeholder: [],
   };
   const params = useParams();
   const slug = slugAttr || params.categorySlug;
   const [state, setState] = useState(INITIAL_STATE);
   const windowResizeEventRef = useRef(false);
+  const searchPending = useRef(null);
 
   const handleWindowResizeEvent = () => {
     const { innerWidth } = window;
@@ -91,48 +95,83 @@ function ProjectList({
     });
   }, [slug]);
 
+  const appbarSearch = (value) => {
+    clearTimeout(searchPending.current);
+    searchPending.current = setTimeout(() => {
+      setState(s => ({
+        ...s,
+        searched: value,
+      }));
+    }, 500);
+  }
+
   useEffect(() => {
     setGlobal({ pageTitle: state.category?.meta.english_label });
-    setGlobal({ appbarScrollInvertl: true });
+    setGlobal({ appbarScrollInvert: true });
+    setGlobal({ appbarSearch: true });
+    setGlobal({ searchChange: appbarSearch });
+  }, [state.category]);
+  useEffect(() => {
     return () => {
       setGlobal({ pageTitle: null });
-      setGlobal({ appbarScrollInvertl: null });
+      setGlobal({ appbarSearch: false });
+      setGlobal({ searchChange: null });
+      setGlobal({ appbarScrollInvert: null });
     }
-  }, [state.category]);
+  }, []);
 
+  //플레이스홀더 이미지 세팅
   useEffect(() => {
-    if (state.loading && !state.endOfPost) {
-      const queries = state.queries;
-      axios.get(`${apiURI}khvd/v1/project?${parseObjectToQuery({
-        ...queries,
-      })}`).then(res => {
-        setState(s => {
-          const project = [...s.projects, ...res.data.posts];
-          return {
-            ...s,
-            projects: project,
-            endOfPost: (project.length >= s.wholeCount),
-            queries: {
-              ...s.queries,
-              post__not_in: [...s.queries.post__not_in, ...res.data.posts.map(x => x.id)]
-            },
-            loading: false,
-          }
-        });
-        if (isScrollEnd()) {
-          setState(s => ({
-            ...s,
-            loading: true,
-          }));
+    const placeholder = [];
+    for (let i = 0, len = 5; i < len; i++) {
+      placeholder.push(images['icon_' + (i + 1) + ".png"]);
+    }
+    placeholder.sort(() => Math.random() - Math.random());
+    setState(s => ({
+      ...s,
+      placeholder: placeholder,
+    }));
+  }, []);
+
+  const getPost = (queries) => {
+    getPostApi(queries).then(res => {
+      console.log(res);
+      setState(s => {
+        const project = [...s.projects, ...res.data?.posts];
+        return {
+          ...s,
+          projects: project,
+          endOfPost: (project.length >= s.wholeCount),
+          queries: {
+            ...s.queries,
+            post__not_in: [...s.queries.post__not_in, ...res.data.posts.map(x => x.id)]
+          },
+          loading: false,
         }
       });
-    }
-  }, [state.loading, state.endOfPost]);
+      if (isScrollEnd()) {
+        setState(s => ({
+          ...s,
+          loading: true,
+        }));
+      }
+    });
+  }
 
+  //로딩 시 포스트 불러오기
+  useEffect(() => {
+    const queries = state.queries;
+    if (state.loading && !state.endOfPost) {
+      getPost(queries)
+    }
+  }, [state.loading, state.endOfPost, state.queries]);
+
+  //스크롤이 끝인지 판단
   const isScrollEnd = () => {
     return document.getElementById("root").scrollTop + window.innerHeight >= document.getElementById("root").scrollHeight - 100;
   }
 
+  //스크롤 끝일때 로딩 지정
   useEffect(() => {
     document.getElementById("root").addEventListener('scroll', () => {
       if (isScrollEnd() && !state.endOfPost) {
@@ -144,42 +183,51 @@ function ProjectList({
     });
   }, [state.endOfPost]);
 
-  const { projects, queries, wholeCount, endOfPost, row } = state;
+  const { projects, queries, wholeCount, endOfPost, row, placeholder, searched } = state;
+
   const dummyCount = Math.min(queries.posts_per_page, wholeCount - projects.length);
+
   return (
     <ProjectListLayout>
       <ProjectContainer>
-        {projects.map(x => <ProejctItem
-          className="item"
-          key={x?.id}
-          title={x?.title}
-          thumbnail={x?.thumbnail_small}
-          designer={x?.designer_list?.map(y => y.name).join(",\n")}
-          onClick={() => {
-            goTo("/project/" + slug + "/" + x.id);
-          }}
-        />)}
-        {state.loading && getLengthArray(dummyCount).map(x => <ProejctItem className="item" />)}
-        {getLengthArray((row - ((projects.length + dummyCount) % row)) % row).map((x, i) => <PlaceHolder className="item"><img src={images['icon_' + (i + 1) + ".svg"]}></img></PlaceHolder>)}
+        {searched ?
+          <ProjectSearch
+            search={searched}
+            row={row}
+          />
+          :
+          <>{projects.map(x => <ProjectItem
+            className="item"
+            key={x?.id}
+            title={x?.title}
+            thumbnail={x?.thumbnail_small}
+            designer={x?.designer_list?.map(y => y.name).join(",\n")}
+            onClick={() => {
+              goTo("/project/" + slug + "/" + x.id);
+            }}
+          />)}
+            {state.loading && getLengthArray(dummyCount).map(x => <ProjectItem className="item" />)}
+            {getLengthArray((row - ((projects.length + dummyCount) % row)) % row).map((x, i) => <PlaceHolder className="item"><img src={placeholder[i]}></img></PlaceHolder>)}
+            {(endOfPost) &&
+              <div className="endoflist-wrap">
+                <img className="endoflist-icon" src={images['endoflist.svg']} alt="" />
+                <ChevronBtn>
+                  다른 카테고리 보기
+                </ChevronBtn>
+                <ChevronBtn>
+                  방명록 쓰러가기
+                </ChevronBtn>
+              </div>
+            }
+          </>}
       </ProjectContainer>
-      {(endOfPost) &&
-        <div className="endoflist-wrap">
-          <img className="endoflist-icon" src={images['endoflist.svg']} alt="" />
-          <ChevronBtn>
-            다른 카테고리 보기
-          </ChevronBtn>
-          <ChevronBtn>
-            방명록 쓰러가기
-          </ChevronBtn>
-        </div>
-      }
     </ProjectListLayout>
   );
 }
 
 export default ProjectList;
 
-function ProejctItem({
+export function ProjectItem({
   thumbnail,
   designer,
   title,
@@ -235,15 +283,19 @@ const PlaceHolder = styled.div`
   display:flex;
   align-items:center;
   justify-content:center;
+  img{
+    max-width:100%;
+    max-height:100%;
+  }
 `;
 
 const ChevronBtn = styled.button`
-  background-image: url("data:image/svg+xml,%3Csvg width='24' height='24' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%0A%3E%3Cpath d='M10.5858 6.34317L12 4.92896L19.0711 12L12 19.0711L10.5858 17.6569L16.2427 12L10.5858 6.34317Z' fill='%23fff' /%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg width='2rem' height='2rem' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%0A%3E%3Cpath d='M10.5858 6.34317L12 4.92896L19.0711 12L12 19.0711L10.5858 17.6569L16.2427 12L10.5858 6.34317Z' fill='%23fff' /%3E%3C/svg%3E");
   background-position-x:right;
-  background-position-y:55%;
+  background-position-y:65%;
   background-repeat:no-repeat;
   padding:0.5rem;
-  padding-right:1rem;
+  padding-right:1.5rem;
   display:flex;
   align-items:center;
   justify-content:center;
@@ -255,7 +307,7 @@ const ChevronBtn = styled.button`
   margin:0.5rem;
   transition: color .2s ease-in-out, background-image .2s ease-in-out;
   &:hover{
-    background-image: url("data:image/svg+xml,%3Csvg width='24' height='24' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%0A%3E%3Cpath d='M10.5858 6.34317L12 4.92896L19.0711 12L12 19.0711L10.5858 17.6569L16.2427 12L10.5858 6.34317Z' fill='%23${({ theme }) => theme.colors.primary.slice(1)}' /%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg width='2rem' height='2rem' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%0A%3E%3Cpath d='M10.5858 6.34317L12 4.92896L19.0711 12L12 19.0711L10.5858 17.6569L16.2427 12L10.5858 6.34317Z' fill='%23${({ theme }) => theme.colors.primary.slice(1)}' /%3E%3C/svg%3E");
     color:${({ theme }) => theme.colors.primary}
   }
 `;
@@ -270,11 +322,13 @@ const ProjectListLayout = styled(Layout)`
   background-attachment: fixed;
   flex-direction:column;
   .endoflist-wrap{
+    margin:4rem 0;
     opacity:0;
     animation:fadeIn forwards .4s ease-in-out;
     display: flex;
     flex-direction: column;
     align-items:center;
+    width:100%;
   }
   .endoflist-icon{
     max-width:320px;
@@ -297,11 +351,14 @@ const ProjectContainer = styled.div`
     }
     box-sizing:border-box;
     margin:3rem;
+    transition:transform .2s ease-in-out;
+    &:hover{
+      transform:scale(1.2);
+    }
   }
 `;
 
 const StyledProjectItem = styled.div`
-  transition:transform .2s ease-in-out;
   div.loading{
       content:"loading";
       display:flex;
@@ -341,8 +398,5 @@ const StyledProjectItem = styled.div`
     word-break:keep-all;
     line-height:1.4;
     font-weight:700;
-  }
-  &:hover{
-    transform:scale(1.2);
   }
 `;

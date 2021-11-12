@@ -20,6 +20,7 @@ const StyledHambergerMenu = styled.div`
     height:1.56rem;
     cursor:pointer;
     width:2.23rem;
+    flex-shrink: 0;
     &::after,
     &::before,
     .bar{
