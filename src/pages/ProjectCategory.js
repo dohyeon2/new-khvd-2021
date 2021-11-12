@@ -187,6 +187,7 @@ function ProjectCategory() {
         if (state.thumbnailList.length === 0) return;
         const thumbnailList = [...state.thumbnailList];
         const thumbnail = thumbnailList.pop();
+        thumbnailList.unshift(thumbnail);
         const src = thumbnail.thumbnail;
         setThumbnailImage(src).then((src, image) => {
             setState(s => {
@@ -206,7 +207,7 @@ function ProjectCategory() {
                         setState(s => {
                             return {
                                 ...s,
-                                thumbnailList: [...s.thumbnailList, ...posts.data.posts]
+                                thumbnailList: [...thumbnailList, ...posts.data.posts]
                             }
                         });
                     });

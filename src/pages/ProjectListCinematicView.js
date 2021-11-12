@@ -5,7 +5,7 @@ import images from '../images';
 import axios from "axios";
 import { apiURI } from "../vars/api";
 import { parseObjectToQuery } from "../utils/functions";
-import { useHistory, useParams } from "react-router";
+import {  useParams } from "react-router";
 import { HorizontalScrollAnimation } from '../components/ScrollAnimation';
 import useGlobal from "../hook/useGlobal";
 import { getSubFramePercent } from '../utils/functions';
@@ -17,7 +17,6 @@ import { isTouchDevice } from "../utils/functions";
 function ProjectListCinematicView({
     slug: slugAttr
 }) {
-    const history = useHistory();
     const { setGlobal, goTo } = useGlobal();
     const params = useParams();
     const INITIAL_STATE = {
@@ -59,7 +58,7 @@ function ProjectListCinematicView({
             const el = document.querySelector(".project-group");
             if (el) {
                 const { width: elWidth } = el.getBoundingClientRect();
-                wholeProjectWithFrameRef.current = elWidth + (window.innerWidth - elWidth/state.projects.length) / 2;
+                wholeProjectWithFrameRef.current = elWidth + (window.innerWidth - elWidth / state.projects.length) / 2;
                 setState(s => ({
                     ...s,
                     frames: {
@@ -105,6 +104,10 @@ function ProjectListCinematicView({
                 }));
             });
         }
+        setGlobal({ pageTitle: state.category?.meta.english_label });
+        return () => {
+            setGlobal({ pageTitle: false });
+        }
     }, [state.category]);
 
     useEffect(() => {
@@ -132,11 +135,9 @@ function ProjectListCinematicView({
 
     useEffect(() => {
         setGlobal({ footer: false });
-        setGlobal({ pageTitle: "Project" });
         document.querySelector("#root").style.overflow = 'hidden';
         return () => {
             setGlobal({ footer: true });
-            setGlobal({ pageTitle: false });
             document.querySelector("#root").style.overflow = null;
         }
     }, []);
@@ -588,13 +589,5 @@ const StyledProjectThumb = styled.div`
             animation:loadingPlaceholder ease-in-out infinite alternate 1s; 
         }
         
-    }
-    @keyframes loadingPlaceholder{
-        0%{
-            background-color: #999;
-        }
-        100%{
-            background-color: #333;
-        }
     }
 `;

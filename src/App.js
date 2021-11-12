@@ -13,11 +13,32 @@ import Main from './pages/Main';
 import Appbar from './components/Appbar';
 import Footer from './components/Footer';
 import ProjectCategory from './pages/ProjectCategory';
+import { createGlobalStyle } from 'styled-components';
+
+const GlobalStyle = createGlobalStyle`
+  @keyframes loadingPlaceholder{
+      0%{
+          background-color: #999;
+      }
+      100%{
+          background-color: #333;
+      }
+  }
+  @keyframes fadeIn{
+    0%{
+      opacity: 0;
+    }
+    100%{
+      opacity:1;
+    }
+  }
+`
 
 function App() {
   const { global } = useGlobal();
   return (
     <>
+      <GlobalStyle />
       <Appbar />
       <Switch>
         <Route path="/" exact>
