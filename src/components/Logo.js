@@ -27,6 +27,6 @@ const StyledLogo = styled.div`
     justify-content: center;
     cursor:pointer;
     img{
-        height:4.8rem;
+        height:3.8rem;
     }
 `;

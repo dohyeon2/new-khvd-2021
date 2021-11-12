@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Layout } from './Main';
 import styled from 'styled-components';
-import { useParams } from 'react-router';
+import { useHistory, useParams } from 'react-router';
 import { apiURI } from '../vars/api';
 import axios from 'axios';
 import useGlobal from '../hook/useGlobal';
@@ -13,7 +13,8 @@ import { getPostApi } from '../api/project';
 function ProjectList({
   slug: slugAttr,
 }) {
-  const { setGlobal, goTo, global } = useGlobal();
+  const { setGlobal, goTo } = useGlobal();
+  const history = useHistory();
   const INITIAL_STATE = {
     category: null,
     authors: null,
@@ -30,7 +31,7 @@ function ProjectList({
     currentProjectIdx: -1,
     wholeCount: null,
     row: null,
-    searched: "",
+    searched: history.location.search.match(/s=(.*)/) ? history.location.search.match(/s=(.*)/)[1] : "",
     queries: {
       paged: 1,
       nopaging: 0,
@@ -135,13 +136,12 @@ function ProjectList({
 
   const getPost = (queries) => {
     getPostApi(queries).then(res => {
-      console.log(res);
       setState(s => {
         const project = [...s.projects, ...res.data?.posts];
         return {
           ...s,
           projects: project,
-          endOfPost: (project.length >= s.wholeCount),
+          endOfPost: (project.length >= s.wholeCount || res.data.posts.length === 0),
           queries: {
             ...s.queries,
             post__not_in: [...s.queries.post__not_in, ...res.data.posts.map(x => x.id)]
@@ -161,10 +161,10 @@ function ProjectList({
   //로딩 시 포스트 불러오기
   useEffect(() => {
     const queries = state.queries;
-    if (state.loading && !state.endOfPost) {
+    if (state.loading && !state.endOfPost && !state.searched) {
       getPost(queries)
     }
-  }, [state.loading, state.endOfPost, state.queries]);
+  }, [state.loading, state.endOfPost, state.queries, state.searched]);
 
   //스크롤이 끝인지 판단
   const isScrollEnd = () => {
@@ -183,7 +183,7 @@ function ProjectList({
     });
   }, [state.endOfPost]);
 
-  const { projects, queries, wholeCount, endOfPost, row, placeholder, searched } = state;
+  const { projects, queries, wholeCount, endOfPost, row, placeholder, searched, category } = state;
 
   const dummyCount = Math.min(queries.posts_per_page, wholeCount - projects.length);
 
@@ -192,6 +192,7 @@ function ProjectList({
       <ProjectContainer>
         {searched ?
           <ProjectSearch
+            currentCategory={category}
             search={searched}
             row={row}
           />

@@ -36,7 +36,7 @@ function Appbar() {
   }
 
   const menuList = [
-    makeMenuObj("/", "UNBOXSING"),
+    makeMenuObj("/", "UNBOXING"),
     makeMenuObj("/project", "PROJECTS"),
     makeMenuObj("/participant", "PARTICIPANT"),
     makeMenuObj("/guestbook", "GUEST BOOK"),
@@ -194,7 +194,7 @@ const SearchBtn = styled.button`
 const StyledAppbar = styled.div`
   padding:1.5rem 5rem;
   @media screen and (max-width:900px){
-    padding:2.5rem;
+    padding:2rem 3.8rem;
   }
   display:flex;
   align-items: center;
@@ -214,7 +214,7 @@ const StyledAppbar = styled.div`
   }
   .left{
     position: relative;
-    margin:1rem;
+    margin-right:1rem;
   }
   &.searchInput{
     .center{
@@ -229,6 +229,7 @@ const StyledAppbar = styled.div`
     left:50%;
     font-size:2.23rem;
     color:${p => p.luma > 50 ? "#000" : "#fff"};
+    font-weight: 700;
     font-family: ${({ theme }) => theme.font.family.nanumSquare};
   }
   .right{
