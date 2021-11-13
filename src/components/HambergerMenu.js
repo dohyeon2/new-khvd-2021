@@ -44,7 +44,7 @@ const StyledHambergerMenu = styled.div`
         transition:transform .2s ease-in-out, bottom .2s ease-in-out, top .2s ease-in-out;
     }
     &::after{
-        bottom:0;
+        bottom:0; 
     }
     &::before{
         top:0;

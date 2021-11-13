@@ -3,6 +3,8 @@ import { ProjectItem } from '../ProjectList';
 import styled from 'styled-components';
 import { getPostApi } from '../../api/project';
 import useGlobal from '../../hook/useGlobal';
+import { LoadingSpinner } from '../../components/Loading';
+import { FlexCC } from '../../components/Layout';
 
 function ProjectSearch({ search }) {
 
@@ -37,6 +39,13 @@ function ProjectSearch({ search }) {
     const { searchedPost } = state;
     const keys = Object.keys(searchedPost);
     keys.sort((a, b) => searchedPost[a][0].category - searchedPost[b][0].category);
+    if (searchedPost.length === 0) {
+        return (
+            <FlexCC>
+                <LoadingSpinner scale={2} />
+            </FlexCC>
+        )
+    }
     return (
         <>
             {keys.map(x =>
@@ -62,7 +71,7 @@ function ProjectSearch({ search }) {
 
 export default ProjectSearch;
 
-const Section = styled.div`
+export const Section = styled.div`
     border-bottom: 0.2rem solid rgba(255,255,255,0.3);
     padding-bottom:1rem;
     width:100%;

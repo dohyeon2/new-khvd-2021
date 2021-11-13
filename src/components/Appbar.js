@@ -20,8 +20,10 @@ function Appbar() {
     invert: false,
     minimize: false,
     searchInput: false,
+    query: "",
   });
   const classList = [];
+  const berforeScrollTopRef = useRef(0);
 
   const handleClickHambergerMenu = () => {
     setHambergerMenu(s => !s);
@@ -48,20 +50,26 @@ function Appbar() {
     setHambergerMenu(false);
   });
 
-  function handleScorllEvent() {
+  function handleScorllEvent(event) {
     if (this.scrollTop > 100) {
-      if (!state.minimize) {
+      if (!state.minimize && berforeScrollTopRef.current < this.scrollTop) {
         setState(s => ({
           ...s,
           minimize: true,
         }))
       }
-      if (global.appbarScrollInvert) {
-        setGlobal({ appbarStyle: "invert" });
+      if (state.minimize && berforeScrollTopRef.current > this.scrollTop) {
         setState(s => ({
           ...s,
-          invert: true,
-        }));
+          minimize: false,
+        }))
+        if (global.appbarScrollInvert) {
+          setGlobal({ appbarStyle: "invert" });
+          setState(s => ({
+            ...s,
+            invert: true,
+          }));
+        }
       }
     } else {
       setState(s => ({
@@ -71,6 +79,7 @@ function Appbar() {
       }));
       setGlobal({ appbarStyle: null });
     }
+    berforeScrollTopRef.current = this.scrollTop;
   }
 
   useEffect(() => {
@@ -129,6 +138,7 @@ function Appbar() {
             }}
             ref={searchRef}
           />}
+          {state.query.length === 1 && <div></div>}
           {global.appbarSearch && <SearchBtn on={state.searchInput}
             onClick={() => {
               setState(s => ({
@@ -205,7 +215,7 @@ const StyledAppbar = styled.div`
   left:0;
   right:0;
   pointer-events:none;
-  transition:background-color .2s ease-in-out;
+  transition:top .2s ease-in-out, background-color .2s ease-in-out;
   &>div,
   &>input{
     pointer-events: auto;
@@ -229,7 +239,7 @@ const StyledAppbar = styled.div`
     left:50%;
     font-size:2.23rem;
     color:${p => p.luma > 50 ? "#000" : "#fff"};
-    font-weight: 700;
+    font-weight: 900;
     font-family: ${({ theme }) => theme.font.family.nanumSquare};
   }
   .right{
@@ -238,6 +248,9 @@ const StyledAppbar = styled.div`
     justify-content: flex-end;
     z-index:2;
     position: relative;
+  }
+  &.minimize{
+    top:-7rem;
   }
   &.project{
     background-color: rgba(255,255,255,.3);

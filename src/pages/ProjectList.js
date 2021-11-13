@@ -97,13 +97,17 @@ function ProjectList({
   }, [slug]);
 
   const appbarSearch = (value) => {
-    clearTimeout(searchPending.current);
-    searchPending.current = setTimeout(() => {
-      setState(s => ({
-        ...s,
-        searched: value,
-      }));
-    }, 500);
+    if (value.length <= 1) {
+      history.push(history.location.pathname);
+    } else {
+      clearTimeout(searchPending.current);
+      searchPending.current = setTimeout(() => {
+        setState(s => ({
+          ...s,
+          searched: value,
+        }));
+      }, 500)
+    }
   }
 
   useEffect(() => {
@@ -112,6 +116,7 @@ function ProjectList({
     setGlobal({ appbarSearch: true });
     setGlobal({ searchChange: appbarSearch });
   }, [state.category]);
+  
   useEffect(() => {
     return () => {
       setGlobal({ pageTitle: null });
@@ -212,10 +217,16 @@ function ProjectList({
             {(endOfPost) &&
               <div className="endoflist-wrap">
                 <img className="endoflist-icon" src={images['endoflist.svg']} alt="" />
-                <ChevronBtn>
+                <ChevronBtn onClick={() => {
+                  goTo('/project')
+                }}>
                   다른 카테고리 보기
                 </ChevronBtn>
-                <ChevronBtn>
+                <ChevronBtn
+                  onClick={() => {
+                    goTo('/guest-book')
+                  }}
+                >
                   방명록 쓰러가기
                 </ChevronBtn>
               </div>
@@ -313,7 +324,7 @@ const ChevronBtn = styled.button`
   }
 `;
 
-const ProjectListLayout = styled(Layout)`
+export const ProjectListLayout = styled(Layout)`
   padding:2rem;
   padding-top:10rem;
   display:flex;
@@ -338,7 +349,7 @@ const ProjectListLayout = styled(Layout)`
   }
 `
 
-const ProjectContainer = styled.div`
+export const ProjectContainer = styled.div`
   display:flex;
   justify-content:flex-start;
   flex-wrap:wrap;
@@ -359,7 +370,7 @@ const ProjectContainer = styled.div`
   }
 `;
 
-const StyledProjectItem = styled.div`
+export const StyledProjectItem = styled.div`
   div.loading{
       content:"loading";
       display:flex;
@@ -368,6 +379,7 @@ const StyledProjectItem = styled.div`
       opacity:0;
       animation:loadingPlaceholder ease-in-out infinite alternate 1s,fadeIn forwards .4s ease-in-out;
   }
+  .picture,
   .thumbnail{
     cursor: pointer;
     background-color: #000;
@@ -390,9 +402,10 @@ const StyledProjectItem = styled.div`
     width:100%;
     color:rgba(255,255,255,.6);
   }
+  .name,
   .title{
     margin-bottom:0.5rem;
-    min-height:1rem;
+    min-height:1.4rem;
     width:100%;
     color:#fff;
     font-size:1.4rem;

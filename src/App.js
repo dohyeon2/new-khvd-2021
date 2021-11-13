@@ -1,5 +1,5 @@
-import React, { useRef, useEffect } from 'react';
-import { Switch, Route, useHistory } from "react-router-dom";
+import React from 'react';
+import { Switch, Route } from "react-router-dom";
 import MyDashboardContainer from './pages/MyDashboardContainer';
 import 'normalize.css';
 import './App.css'
@@ -14,6 +14,8 @@ import Appbar from './components/Appbar';
 import Footer from './components/Footer';
 import ProjectCategory from './pages/ProjectCategory';
 import { createGlobalStyle } from 'styled-components';
+import ParticipantList from './pages/ParticipantList';
+import Participant from './pages/Participant';
 
 const GlobalStyle = createGlobalStyle`
   @keyframes loadingPlaceholder{
@@ -58,6 +60,12 @@ function App() {
         </Route>
         <Route path="/project">
           <ProjectCategory />
+        </Route>
+        <Route path="/participant/:id">
+          <Participant />
+        </Route>
+        <Route path="/participant">
+          <ParticipantList />
         </Route>
         <Route path="/my-dashboard/:page">
           <MyDashboardContainer />

@@ -4,6 +4,7 @@ import styled from 'styled-components';
 
 function LottieElement({
   lottieOption,
+  getLottie,
   className,
   initialSegment,
 }) {
@@ -25,6 +26,7 @@ function LottieElement({
         autoplay: true,
         ...lottieOption,
       });
+      getLottie && getLottie(lottieInstanceRef.current);
     }
   }, [lottieOption]);
 
