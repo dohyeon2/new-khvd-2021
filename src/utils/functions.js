@@ -87,6 +87,7 @@ export function isTouchDevice() {
  * @returns {float} luma = 밝음 정도
  */
 export function getColorBrightness(c) {
+    if(!c) return;
     c = c.substring(1);      // strip #
     let rgb = parseInt(c, 16);   // convert rrggbb to decimal
     let r = (rgb >> 16) & 0xff;  // extract red

@@ -3,7 +3,7 @@ import images from "../images";
 const theme = {
     colors: {
         primary: "#FF358E",
-        secondary: "#0039FF",
+        secondary: "#935DEE",
         foreground: "#fff",
         background: "#1E095B",
     },
@@ -21,7 +21,10 @@ const theme = {
         },
 
         translateLetterSpacing: (fontsize, letterSpace) => {
-            return (fontsize / 1000 * letterSpace) + "px";
+            return (fontsize / 1000 * letterSpace).toFixed(4) + "px";
+        },
+        translateLetterSpacingRem: (fontsize, letterSpace) => {
+            return (fontsize / 1000 * letterSpace).toFixed(4) + "rem";
         }
     },
     backgorundImage: `url(${images['intro-background.png']})`,

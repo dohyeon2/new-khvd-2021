@@ -261,6 +261,9 @@ const StyledAppbar = styled.div`
       filter:brightness(0%);
     }
   }
+  &.shadow{
+    filter:drop-shadow(0px 0px 0.5rem rgba(0,0,0,.2));
+  }
 `;
 
 const StyledMenuWrap = styled.div`

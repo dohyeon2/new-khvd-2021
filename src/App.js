@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Switch, Route } from "react-router-dom";
 import MyDashboardContainer from './pages/MyDashboardContainer';
 import 'normalize.css';
@@ -37,7 +37,10 @@ const GlobalStyle = createGlobalStyle`
 `
 
 function App() {
-  const { global } = useGlobal();
+  const { global, setGlobal } = useGlobal();
+  useEffect(()=>{
+    setGlobal({ footer: true });
+  },[]);
   return (
     <>
       <GlobalStyle />

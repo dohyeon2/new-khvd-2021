@@ -134,7 +134,7 @@ function ParticipantList() {
         goTo('/participant/' + x.ID);
     }
 
-    const printParticipant = (x) => <Participant
+    const printParticipant = (x) => <ParticipantItem
         onClick={() => { onClickItem(x) }}
         picture={x.profile_image.normal}
         hoverPicture={x.profile_image.confetti}
@@ -176,7 +176,7 @@ function ParticipantList() {
 
 export default ParticipantList;
 
-function Participant({ picture, hoverPicture, name, className, winner, onClick }) {
+export function ParticipantItem({ picture, hoverPicture, name, className, winner, onClick, onlyProfileImage }) {
     const pictureClassList = ["picture"];
     const nameClassList = ["name"];
     const lottieRef = useRef();
@@ -197,9 +197,9 @@ function Participant({ picture, hoverPicture, name, className, winner, onClick }
             lottieRef.current.goToAndPlay(0);
         }
     }
-    const matches = name.match(/([ㄱ-ㅎ|ㅏ-ㅣ|가-힣|\s]*)(.*)/);
-    const koreanName = matches[1].trim();
-    const englishName = matches[2].trim();
+    const matches = !onlyProfileImage ? name.match(/([ㄱ-ㅎ|ㅏ-ㅣ|가-힣|\s]*)(.*)/) : "";
+    const koreanName = matches && matches[1].trim();
+    const englishName = matches && matches[2].trim();
     return (
         <ParticipantItemLayout
             className={className}
@@ -218,13 +218,15 @@ function Participant({ picture, hoverPicture, name, className, winner, onClick }
                     }}
                     getLottie={getLottie}
                 />
-                <img className="normal" src={picture} loading="lazy" />
-                <img className="confetti" src={hoverPicture} loading="lazy" />
+                <div className="images">
+                    <img className="normal" src={picture} loading="lazy" />
+                    <img className="confetti" src={hoverPicture} loading="lazy" />
+                </div>
             </div>
-            <div className={nameClassList.join(" ")}>
+            {!onlyProfileImage && <div className={nameClassList.join(" ")}>
                 {koreanName}<br />
                 {englishName}
-            </div>
+            </div>}
         </ParticipantItemLayout>
     )
 }
@@ -243,7 +245,7 @@ const ParticipantLayout = styled(ProjectContainer)`
     .item{
         margin:2rem;
         width:calc(25% - 4rem);
-        @media screen and (max-width:${({ theme }) => theme.breakPoints.m}px){
+        @media screen and (max-width:${({ theme }) => theme.breakPoints.l}px){
             width:calc(33.333% - 4rem);
         }
         @media screen and (max-width:${({ theme }) => theme.breakPoints.s}px){
@@ -272,16 +274,17 @@ const ParticipantItemLayout = styled(StyledProjectItem)`
         text-align:center;
     }
     .picture{
-        &.loading{
-            animation:unset;
-            background-color: #D8D7D1;
-            opacity:1;
-        }
+        filter:drop-shadow(0.2rem 0.2rem 0.2rem rgba(0,0,0,0.5));
         position:relative;
         background-color: #D8D7D1;
         display:flex;
         justify-content:center;
         align-items:center;
+        &.loading{
+            animation:unset;
+            background-color: #D8D7D1;
+            opacity:1;
+        }
         .confetti_animation{
             pointer-events: none;
             z-index:4;

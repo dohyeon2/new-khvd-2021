@@ -267,11 +267,11 @@ const StyledProjectCover = styled.div`
 `;
 
 const StyledProjectContainer = styled(StyledEditWork)`
+    height:100%;
+    position:relative;
     a{
         color:unset !important;
     }
-    max-height:100%;
-    position:relative;
     .cdx-image-wrapper{
         img{
             cursor: pointer;
