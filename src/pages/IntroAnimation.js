@@ -113,7 +113,7 @@ const AnimationLayout = styled(Layout)`
             bottom:8.8vw;
             width:23.6rem;
         }
-        @media screen and (max-width:${({ theme }) => theme.breakPoints.m}px){
+        @media screen and (max-width:${({ theme }) => theme.breakPoints.l}px){
             background: rgb(0,0,0);
             align-items:flex-end;
             background: linear-gradient(0deg, rgba(27,15,71,1) 0%, rgba(27,15,71,0) 100%);
