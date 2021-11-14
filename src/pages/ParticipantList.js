@@ -1,17 +1,15 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 import { getUserApi } from '../api/user';
 import useGlobal from '../hook/useGlobal';
 import { ProjectContainer, StyledProjectItem, ProjectListLayout } from './ProjectList';
 import { Section } from './subpage/ProjectSearch';
-import LottieElement from '../components/LottieElement';
-import lotties from '../lotties';
 import { LoadingSpinner } from '../components/Loading';
 import { FlexCC } from '../components/Layout';
 import theme from '../themes';
 import { useHistory } from 'react-router';
-import { WinnerIcon } from '../components/Icon';
-
+import { ParticipantItem } from '../components/ParticipantItem';
+import {Layout} from '../components/Layout';
 
 function ParticipantList() {
     const history = useHistory();
@@ -170,69 +168,22 @@ function ParticipantList() {
                     </div>
                 }
             </ParticipantLayout>
+            <Layout className="layout" />
         </PraticipantLayout>
     );
 }
 
 export default ParticipantList;
 
-export function ParticipantItem({ picture, hoverPicture, name, className, winner, onClick, onlyProfileImage }) {
-    const pictureClassList = ["picture"];
-    const nameClassList = ["name"];
-    const lottieRef = useRef();
 
-    if (!picture) {
-        pictureClassList.push("loading");
-    }
-    if (!name) {
-        nameClassList.push("loading");
-    }
-
-    const getLottie = useCallback((lottie) => {
-        lottieRef.current = lottie;
-    }, []);
-
-    const onMouseEnter = () => {
-        if (lottieRef.current?.isPaused) {
-            lottieRef.current.goToAndPlay(0);
-        }
-    }
-    const matches = !onlyProfileImage ? name.match(/([ㄱ-ㅎ|ㅏ-ㅣ|가-힣|\s]*)(.*)/) : "";
-    const koreanName = matches && matches[1].trim();
-    const englishName = matches && matches[2].trim();
-    return (
-        <ParticipantItemLayout
-            className={className}
-            onMouseEnter={onMouseEnter}
-            onClick={onClick}
-        >
-            {winner && <WinnerIcon winner={winner} />}
-            <div className={pictureClassList.join(" ")} >
-                <LottieElement
-                    className="confetti_animation"
-                    lottieOption={{
-                        autoplay: false,
-                        animationData: lotties['confetti.json'],
-                        loop: false,
-                        initialSegment: [10, 31]
-                    }}
-                    getLottie={getLottie}
-                />
-                <div className="images">
-                    <img className="normal" src={picture} loading="lazy" />
-                    <img className="confetti" src={hoverPicture} loading="lazy" />
-                </div>
-            </div>
-            {!onlyProfileImage && <div className={nameClassList.join(" ")}>
-                {koreanName}<br />
-                {englishName}
-            </div>}
-        </ParticipantItemLayout>
-    )
-}
 
 const PraticipantLayout = styled(ProjectListLayout)`
-
+    .item{
+        .picture{
+            height:unset;
+            filter:drop-shadow(0.2rem 0.2rem 0.2rem rgba(0,0,0,0.5));
+        }
+    }
 `;
 
 const ParticipantSection = styled(Section)`
@@ -254,50 +205,3 @@ const ParticipantLayout = styled(ProjectContainer)`
     }
 `;
 
-const ParticipantItemLayout = styled(StyledProjectItem)`
-    position:relative;
-    &:hover{
-        img{
-            &.normal{
-                opacity:0;
-            }
-        }
-    }
-    .name{
-        text-align:center;
-    }
-    .picture{
-        filter:drop-shadow(0.2rem 0.2rem 0.2rem rgba(0,0,0,0.5));
-        position:relative;
-        background-color: #D8D7D1;
-        display:flex;
-        justify-content:center;
-        align-items:center;
-        &.loading{
-            animation:unset;
-            background-color: #D8D7D1;
-            opacity:1;
-        }
-        .confetti_animation{
-            pointer-events: none;
-            z-index:4;
-            position:absolute;
-            width:140%;
-            left:50%;
-            transform:translateX(-50%);
-            top:-10%;
-        }
-        img{
-            width:100%;
-            position:absolute;
-            inset:0;
-            &.normal{
-                z-index:2;
-                transition: opacity .2s ease-in-out;
-            }
-        }
-        &::before{
-            padding-top: 133%;
-        }
-    }
-`;

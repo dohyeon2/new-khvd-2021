@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import styled from 'styled-components';
 import useGlobal from '../hook/useGlobal';
 import lotties from '../lotties';
@@ -8,7 +8,7 @@ const LoadingLottie = React.memo((attr) =>
   <LottieElement {...attr} />
 );
 
-export function PageLoading({ className }) {
+export function PageLoading({ }) {
   const { setGlobal, global } = useGlobal();
   const classList = [];
   const { loading, loadingEnd } = global;
@@ -25,7 +25,9 @@ export function PageLoading({ className }) {
       lottie.onComplete = () => {
         setTimeout(() => {
           setGlobal({
-            loading: false,
+            loading: false
+          });
+          setGlobal({
             loadingEnd: false
           });
         }, 500);
@@ -46,7 +48,9 @@ export function PageLoading({ className }) {
           animationData: lotties['loading.json']
         }}
       />
-      Loading...
+      <div>
+        {loading && !loadingEnd ? "LOADING..." : "DONE!"}
+      </div>
     </StyledPageLoading>
   );
 }
@@ -80,6 +84,8 @@ const StyledPageLoading = styled.div`
   opacity: 0;
   pointer-events: none;
   transition: opacity .5s ease-in-out;
+  font-family: ${({ theme }) => theme.font.family.englishBold};
+  font-size:2rem;
   &.immediately{
     transition: unset;
   }

@@ -48,9 +48,6 @@ function App() {
     document.getElementById("root").scrollTo({ top: 0, left: 0 });
   });
   useEffect(() => {
-    if (history.location.pathname !== "/") {
-      setGlobal({ footer: true });
-    }
     if (getCookie("skip_intro") === "1") {
       setGlobal({ intro: false });
     }

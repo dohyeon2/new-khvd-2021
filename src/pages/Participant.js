@@ -5,7 +5,7 @@ import { getUserApi } from '../api/user';
 import { getPostApi } from '../api/project';
 import useGlobal from '../hook/useGlobal';
 import { Layout } from '../components/Layout';
-import { ParticipantItem } from './ParticipantList';
+import { ParticipantItem } from '../components/ParticipantItem';
 import { getColorBrightness } from '../utils/functions';
 import images from '../images';
 
@@ -191,6 +191,10 @@ const HeadLayout = styled.div`
       .picture{
         position:relative;
         background-color:transparent;
+        align-items:flex-start;
+        img{
+          top:0;
+        }
         &::before{
           padding-top:100%;
         }
@@ -210,6 +214,7 @@ const HeadLayout = styled.div`
     justify-content:space-between;
     flex-grow:1;
     .name{
+      margin-bottom:0.5rem;
       flex-shrink:0;
       display:flex;
       align-items:flex-end;

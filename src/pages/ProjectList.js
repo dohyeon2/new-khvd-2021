@@ -240,6 +240,7 @@ function ProjectList({
             }
           </>}
       </ProjectContainer>
+      <Layout className="layout" />
     </ProjectListLayout>
   );
 }
@@ -317,8 +318,15 @@ export const ProjectListLayout = styled(Layout)`
   justify-content: flex-start;
   align-items:center;
   box-sizing:border-box;
-  background-attachment: fixed;
   flex-direction:column;
+  background-image:none;
+  background-color: transparent;
+  .layout{
+    position:fixed;
+    pointer-events:none;
+    z-index:-1;
+    inset:0;
+  }
   .endoflist-wrap{
     margin:4rem 0;
     opacity:0;

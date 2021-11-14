@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import Loading from '../components/Loading';
 import MyDashboard from '../components/MyDashboard';
@@ -9,11 +9,30 @@ import UserConfigure from './dashboard/UserConfigure';
 import UserInfo from './dashboard/UserInfo';
 import UserList from './dashboard/UserList';
 import ProjectList from './dashboard/ProjectList';
+import useGlobal from '../hook/useGlobal';
 
 function MyDashboardContainer({ match }) {
+
+    const { setGlobal } = useGlobal();
     //global states
     const { user } = useSelector(s => s);
 
+    useEffect(() => {
+        setGlobal({
+            appbarVisibility: false,
+        });
+        setGlobal({
+            footer: false,
+        });
+        return () => {
+            setGlobal({
+                appbarVisibility: true,
+            });
+            setGlobal({
+                footer: true,
+            });
+        }
+    }, []);
     if (user.loading) {
         return (<Loading />);
     }

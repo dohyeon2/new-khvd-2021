@@ -57,7 +57,7 @@ function ProjectListComponent({ data, reload }) {
                     for (let i = 1, len = qrcodeCell.length; i < len; i++) {
                         const cell = qrcodeCell[i].querySelector(`[data-field="qrcode"]`);
                         if (!cell.querySelector("img")) {
-                            const qrcode = new QRCode(cell, `${window.location.origin}/project/${data.posts[i - 1].id}`);
+                            const qrcode = new QRCode(cell, `${window.location.origin}/project/${data.posts[i - 1].category_slug}/${data.posts[i - 1].id}`);
                             cell.querySelector('img').style.cssText = `width:100%`;
                         }
                     }
@@ -65,7 +65,7 @@ function ProjectListComponent({ data, reload }) {
                 onCellClick={(e) => {
                     switch (e.field) {
                         case "goto":
-                            history.push(`/project/${e.id}`);
+                            history.push(`/project/${e.category_slug}/${e.id}`);
                             break;
                         case "edit":
                             history.push(`/my-dashboard/edit-work/${e.id}`);

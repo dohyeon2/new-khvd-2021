@@ -7,7 +7,9 @@ function FloatingMenu() {
         <FloatingMenuLayout>
             <button className="circle-button" 
             onClick={() => {
-                document.getElementsByClassName('project-container')[0].scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+                if(document.getElementsByClassName('project-container')[0]){
+                    document.getElementsByClassName('project-container')[0].scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+                }
                 document.getElementById("root").scrollTo({ top: 0, left: 0, behavior: 'smooth' });
             }}>
                 <img src={images['upup-btn.png']} alt="" />

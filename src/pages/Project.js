@@ -9,6 +9,9 @@ import { apiURI } from '../vars/api';
 import Footer from '../components/Footer';
 import { StyledEditWork, StyledProjectContent } from './dashboard/EditWork';
 import { getColorBrightness } from '../utils/functions';
+import { WinnerIcon } from '../components/Icon';
+import images from '../images';
+import { ParticipantItem } from '../components/ParticipantItem';
 
 function getProtocolURL(URL) {
     const reg = new RegExp(/^http/);
@@ -21,27 +24,12 @@ function getProtocolURL(URL) {
 
 
 function ProjectContainer({ data }) {
-    const { setGlobal } = useGlobal();
+    const { setGlobal, goTo } = useGlobal();
     const INITIAL_STATE = {
         open: false,
         popup: false,
     }
     const [state, setState] = useState(INITIAL_STATE);
-    useEffect(() => {
-        setGlobal({
-            footer: false,
-            appbarStyle: 'project',
-            floatingMenu: true
-        });
-        if (!global.loading) {
-            setGlobal({ loading: "immediately" });
-        }
-        return () => {
-            setGlobal({ footer: true });
-            setGlobal({ appbarStyle: null });
-            setGlobal({ floatingMenu: false });
-        }
-    }, []);
 
     useEffect(() => {
         const image = new Image();
@@ -97,7 +85,9 @@ function ProjectContainer({ data }) {
                                         popup: data.thumbnail,
                                     }));
                                 }}
-                            ></div>
+                            >
+                                <WinnerIcon winner={data.winner} />
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -144,6 +134,60 @@ function ProjectContainer({ data }) {
                         }
                     })}
                 </StyledProjectContent>
+                {data.goods.length ? <div className="goods bottom-layout">
+                    <div className="bottom-title">Goods</div>
+                    {data.goods.map(x => <div className="goods-item">
+                        <div className="goods-thumb"
+                            style={{
+                                backgroundImage: `url(${x.thumbnail_small})`
+                            }}
+                        />
+                        <div className="goods-info">
+                            <div className="goods-title">{x.title}</div>
+                            <div className="bottom">
+                                <button
+                                    className="goto"
+                                    onClick={() => {
+                                        goTo('/project/' + x.category_slug + "/" + x.id, true);
+                                    }}
+                                >
+                                    <img src={images['click-image.png']} alt="" />
+                                </button>
+                                <div className="caption">
+                                    작품과 연계된 굿즈를 만나보고 싶다면?<br />
+                                    &lt;UNBOXING POP-UP STORE&gt;를 방문해보세요!
+                                </div>
+                            </div>
+                        </div>
+                    </div>)}
+                </div> : null}
+                <div className="designers bottom-layout">
+                    <div className="bottom-title">Designer</div>
+                    <div className="designer-wrap">
+                        {data.new_designer_list.map(x =>
+                            <>
+                                <div className="designer"
+                                    onClick={() => {
+                                        goTo('/participant/' + x.ID)
+                                    }}
+                                >
+                                    <ParticipantItem
+                                        className="designer-picture"
+                                        circle={true}
+                                        onlyProfileImage={true}
+                                        picture={x.profile_image.normal}
+                                        hoverPicture={x.profile_image.confetti}
+                                    />
+                                    <div className="name">
+                                        {x.display_name}
+                                    </div>
+                                    <div className="q4">
+                                        {x.meta.question_4.value}
+                                    </div>
+                                </div>
+                            </>)}
+                    </div>
+                </div>
             </div>
             <StyledProjectCover className={[(state.open && "open")].join(" ")} style={{ backgroundImage: `url(${data.thumbnail})` }}>
                 <div className="title-container">
@@ -191,6 +235,30 @@ function Project({ match }) {
     };
     const { setGlobal } = useGlobal();
     const [state, setState] = useState(initialState);
+
+    useEffect(() => {
+        setGlobal({
+            footer: false,
+            appbarStyle: 'project',
+            floatingMenu: true
+        });
+        if (!global.loading) {
+            setGlobal({ loading: "immediately" });
+        }
+        return () => {
+            setGlobal({ footer: true });
+            setGlobal({ appbarStyle: null });
+            setGlobal({ floatingMenu: false });
+        }
+    }, []);
+
+    useEffect(() => {
+        setState(s => ({
+            ...s,
+            loading: true,
+        }));
+    }, [params.id]);
+
     useEffect(() => {
         if (state.loading) {
             (async () => {
@@ -200,9 +268,11 @@ function Project({ match }) {
                     draft.loading = false;
                 }));
             })();
+        } else {
+            setGlobal({ loading: "immediately" });
         }
     }, [state.loading]);
-    if (state.loading) return <Loading></Loading>
+    if (state.loading) return null;
     return (
         <ProjectContainer data={state.data} />
     );
@@ -235,18 +305,23 @@ const StyledProjectCover = styled.div`
         display:flex;
         flex-direction: column;
         z-index:3;
+        padding:2rem;
+        word-break:keep-all;
         h1{
+            word-break:keep-all;
             color:#fff;
             font-size:4.5rem;
             margin-bottom:1.67rem;
             line-height: 1;
         }
         h2{
+            word-break:keep-all;
             margin-bottom:1.56rem;
             font-size:1.67rem;
             color:#fff;
         }
         .designer-list{
+            word-break:keep-all;
             font-size:1.38rem;
             color:#fff;
         }
@@ -337,6 +412,97 @@ const StyledProjectContainer = styled(StyledEditWork)`
         padding-top: 10.5rem;
         margin:0 auto;
         margin-bottom:11.12rem;
+        
+        .bottom-title{
+            line-height: 2.2rem;
+            font-size:2.5rem;
+            font-family: ${({ theme }) => theme.font.family.englishBold};
+            margin-bottom:1.89rem;
+        }
+        .goods{
+            margin-top:12.5rem;
+            @media screen and (max-width:${({ theme }) => theme.breakPoints.m}px){
+                padding:0 4rem;
+            }
+            .goods-item{
+                margin:1.89rem 0;
+                display: flex;
+                position:relative;
+                .goods-thumb{
+                    flex-shrink: 0;
+                    flex-grow:0;
+                    width:16.6rem;
+                    height:23.575rem;
+                    border:1px solid #707070;
+                    margin-right:2.983rem;
+                    background-size:cover;
+                    background-position:center;
+                }
+                .goods-info{
+                    display:flex;
+                    flex-direction:column;
+                    justify-content:space-between;
+                }
+                .goto{
+                    cursor:pointer;
+                    margin:0;
+                    padding:0;
+                    border:0;
+                    background:transparent;
+                    max-width:20rem;
+                    width:100%;
+                    margin-bottom:2rem;
+                    img{
+                        width:100%;
+                    }
+                }
+                .caption{
+                    font-size:1rem;
+                    word-break: keep-all;
+                    line-height:1.6;
+                }
+                .goods-title{
+                    word-break: keep-all;
+                    font-size:1.4rem;
+                    font-weight:700;
+                }
+            }
+       
+        }
+        .designers{
+            margin-top:12.5rem;
+            @media screen and (max-width:${({ theme }) => theme.breakPoints.m}px){
+                padding: 0 4rem;
+            }
+            .bottom-title{
+                margin-bottom:4.72rem;
+            }
+            .designer-wrap{
+                display:flex;
+                margin:0 -3.8rem;
+            }
+            .designer{
+                margin:0 3.8rem;
+                max-width:18rem;
+                width:100%;
+                .designer-picture{
+                    margin-bottom:3rem;
+                }
+                .name{
+                    font-size:1.38rem;
+                    font-weight:700;
+                    margin-bottom:1.78rem;
+                    word-break: keep-all;
+                    letter-spacing:${({ theme }) => theme.font.translateLetterSpacingRem(1.78, -20)}
+                }
+                .q4{
+                    word-break: keep-all;
+                    font-size:1.1rem;
+                    letter-spacing:${({ theme }) => theme.font.translateLetterSpacingRem(1.78, -20)}
+                }
+            }
+
+        }
         .work-meta{
             .left{
                 margin-right:2.78rem;
@@ -376,9 +542,6 @@ const StyledProjectContainer = styled(StyledEditWork)`
                         .name{
                             font-weight:800;
                         }
-                        .line{
-
-                        }
                     }
                 }
             }
@@ -387,6 +550,24 @@ const StyledProjectContainer = styled(StyledEditWork)`
                     background-size: cover;
                     background-position:center;
                     cursor:pointer;
+                    overflow:visible;
+                    position:relative;
+                    min-width:20rem;
+                    .winner-mark{
+                        left:unset;
+                        bottom:unset;
+                        position:absolute;
+                        right:-5vw;
+                        top:-8vw;
+                        width:15vw;
+                        min-width:170px;
+                        @media screen and (max-width:${({ theme }) => theme.breakPoints.m}px){
+                            right:-13vw;
+                            top:-13vw;
+                            width:35vw;
+                            min-width:unset;
+                        }
+                    }
                     img{
                         position:absolute;
                         left:0;

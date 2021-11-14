@@ -48,6 +48,10 @@ function Appbar() {
 
   history.listen(() => {
     setHambergerMenu(false);
+    setState(s => ({
+      ...s,
+      minimize: false,
+    }))
   });
 
   function handleScorllEvent(event) {
@@ -223,7 +227,7 @@ const StyledAppbar = styled.div`
   left:0;
   right:0;
   pointer-events:none;
-  transition:top .2s ease-in-out, background-color .2s ease-in-out;
+  transition:transform .2s ease-in-out, background-color .2s ease-in-out;
   &>div,
   &>input{
     pointer-events: auto;
@@ -258,7 +262,7 @@ const StyledAppbar = styled.div`
     position: relative;
   }
   &.minimize{
-    top:-7rem;
+    transform: translateY(-100%);
   }
   &.project{
     background-color: rgba(255,255,255,.3);
