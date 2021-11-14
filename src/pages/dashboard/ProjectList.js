@@ -37,7 +37,7 @@ function ProjectListComponent({ data, reload }) {
             id: x.id,
             idx: i + 1,
             category: x.category_name,
-            category_slug:x.category_slug,
+            category_slug: x.category_slug,
             title: x.title,
             related_project: x.related_project || "-",
             desginers: x.designer_list.map(x => x.name).join(", "),
@@ -64,9 +64,10 @@ function ProjectListComponent({ data, reload }) {
                     }
                 }}
                 onCellClick={(e) => {
+                    const slug = data.posts.find(x => x.id === e.id).category_slug;
                     switch (e.field) {
                         case "goto":
-                            history.push(`/project/${e.category_slug}/${e.id}`);
+                            history.push(`/project/${slug}/${e.id}`);
                             break;
                         case "edit":
                             history.push(`/my-dashboard/edit-work/${e.id}`);
