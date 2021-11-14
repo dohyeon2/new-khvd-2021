@@ -9,8 +9,8 @@ import lotties from '../lotties';
 import { LoadingSpinner } from '../components/Loading';
 import { FlexCC } from '../components/Layout';
 import theme from '../themes';
-import images from '../images';
 import { useHistory } from 'react-router';
+import { WinnerIcon } from '../components/Icon';
 
 
 function ParticipantList() {
@@ -206,7 +206,7 @@ export function ParticipantItem({ picture, hoverPicture, name, className, winner
             onMouseEnter={onMouseEnter}
             onClick={onClick}
         >
-            {winner && <img className="winner-mark" src={images['winner/' + winner + ".png"]} />}
+            {winner && <WinnerIcon winner={winner} />}
             <div className={pictureClassList.join(" ")} >
                 <LottieElement
                     className="confetti_animation"
@@ -256,13 +256,6 @@ const ParticipantLayout = styled(ProjectContainer)`
 
 const ParticipantItemLayout = styled(StyledProjectItem)`
     position:relative;
-    .winner-mark{
-        position:absolute;
-        width:8.5rem;
-        top:-4rem;
-        right:-3rem;
-        z-index:5;
-    }
     &:hover{
         img{
             &.normal{

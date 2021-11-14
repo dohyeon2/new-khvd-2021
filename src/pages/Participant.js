@@ -4,7 +4,7 @@ import styled from 'styled-components';
 import { getUserApi } from '../api/user';
 import { getPostApi } from '../api/project';
 import useGlobal from '../hook/useGlobal';
-import { Layout } from './Main';
+import { Layout } from '../components/Layout';
 import { ParticipantItem } from './ParticipantList';
 import { getColorBrightness } from '../utils/functions';
 import images from '../images';
@@ -22,9 +22,11 @@ function Participant() {
   useEffect(() => {
     setGlobal({ pageTitle: "Participant" });
     setGlobal({ appbarStyle: 'participant invert shadow' });
+    setGlobal({ floatingMenu: true });
     return () => {
       setGlobal({ pageTitle: null });
       setGlobal({ appbarStyle: null });
+      setGlobal({ floatingMenu: false });
     }
   }, []);
 
@@ -99,7 +101,7 @@ function Participant() {
             </div> : null}
             <div className="project-label">Project</div>
             <div className="projects">
-              {projects.map(x => <div className="project" onClick={() => { goTo('/project/' + x.category_slug + "/" + x.id) }} style={{ backgroundImage: `url(${x.thumbnail_small})` }} />)}
+              {projects.map(x => <div className="project" onClick={() => { goTo('/project/' + x.category_slug + "/" + x.id, true) }} style={{ backgroundImage: `url(${x.thumbnail_small})` }} />)}
             </div>
           </div>
         </div>

@@ -36,6 +36,7 @@ function ProjectSearch({ search }) {
             }));
         });
     }, [search]);
+
     const { searchedPost } = state;
     const keys = Object.keys(searchedPost);
     keys.sort((a, b) => searchedPost[a][0].category - searchedPost[b][0].category);
@@ -58,6 +59,7 @@ function ProjectSearch({ search }) {
                             }}
                             className="item"
                             key={y.id}
+                            winner={y.winner}
                             title={y.title}
                             designer={y.designer_list.map(y => y.name).join(",\n")}
                             thumbnail={y.thumbnail_small}

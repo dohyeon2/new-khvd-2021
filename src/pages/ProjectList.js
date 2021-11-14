@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Layout } from './Main';
+import { Layout } from '../components/Layout';
 import styled from 'styled-components';
 import { useHistory, useParams } from 'react-router';
 import { apiURI } from '../vars/api';
@@ -9,6 +9,8 @@ import images from '../images';
 import theme from '../themes';
 import ProjectSearch from './subpage/ProjectSearch';
 import { getPostApi } from '../api/project';
+import { WinnerIcon } from '../components/Icon';
+import { ChevronBtn } from '../components/Btns';
 
 function ProjectList({
   slug: slugAttr,
@@ -111,18 +113,22 @@ function ProjectList({
   }
 
   useEffect(() => {
-    setGlobal({ pageTitle: state.category?.meta.english_label });
-    setGlobal({ appbarScrollInvert: true });
-    setGlobal({ appbarSearch: true });
-    setGlobal({ searchChange: appbarSearch });
+    setGlobal({
+      pageTitle: state.category?.meta.english_label,
+      appbarScrollInvert: true,
+      appbarSearch: true,
+      searchChange: appbarSearch
+    });
   }, [state.category]);
-  
+
   useEffect(() => {
     return () => {
-      setGlobal({ pageTitle: null });
-      setGlobal({ appbarSearch: false });
-      setGlobal({ searchChange: null });
-      setGlobal({ appbarScrollInvert: null });
+      setGlobal({
+        pageTitle: null,
+        appbarScrollInvert: null,
+        appbarSearch: false,
+        searchChange: null,
+      });
     }
   }, []);
 
@@ -209,8 +215,9 @@ function ProjectList({
             thumbnail={x?.thumbnail_small}
             designer={x?.designer_list?.map(y => y.name).join(",\n")}
             onClick={() => {
-              goTo("/project/" + slug + "/" + x.id);
+              goTo("/project/" + slug + "/" + x.id, true);
             }}
+            winner={x.winner}
           />)}
             {state.loading && getLengthArray(dummyCount).map(x => <ProjectItem className="item" />)}
             {getLengthArray((row - ((projects.length + dummyCount) % row)) % row).map((x, i) => <PlaceHolder className="item"><img src={placeholder[i]}></img></PlaceHolder>)}
@@ -218,7 +225,7 @@ function ProjectList({
               <div className="endoflist-wrap">
                 <img className="endoflist-icon" src={images['endoflist.svg']} alt="" />
                 <ChevronBtn onClick={() => {
-                  goTo('/project')
+                  goTo('/project');
                 }}>
                   다른 카테고리 보기
                 </ChevronBtn>
@@ -244,7 +251,8 @@ export function ProjectItem({
   designer,
   title,
   className,
-  onClick
+  onClick,
+  winner
 }) {
   const thumbnailClassList = ["thumbnail"];
   const titleClassList = ["title"];
@@ -273,6 +281,7 @@ export function ProjectItem({
 
   return (
     <StyledProjectItem className={className} onClick={onClick}>
+      {winner && <WinnerIcon winner={winner} />}
       <div
         className={thumbnailClassList.join(" ")}
         style={{
@@ -298,29 +307,6 @@ const PlaceHolder = styled.div`
   img{
     max-width:100%;
     max-height:100%;
-  }
-`;
-
-const ChevronBtn = styled.button`
-  background-image: url("data:image/svg+xml,%3Csvg width='2rem' height='2rem' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%0A%3E%3Cpath d='M10.5858 6.34317L12 4.92896L19.0711 12L12 19.0711L10.5858 17.6569L16.2427 12L10.5858 6.34317Z' fill='%23fff' /%3E%3C/svg%3E");
-  background-position-x:right;
-  background-position-y:65%;
-  background-repeat:no-repeat;
-  padding:0.5rem;
-  padding-right:1.5rem;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  background-color:transparent;
-  border:0;
-  cursor:pointer;
-  color:#fff;
-  font-size:1.4rem;
-  margin:0.5rem;
-  transition: color .2s ease-in-out, background-image .2s ease-in-out;
-  &:hover{
-    background-image: url("data:image/svg+xml,%3Csvg width='2rem' height='2rem' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%0A%3E%3Cpath d='M10.5858 6.34317L12 4.92896L19.0711 12L12 19.0711L10.5858 17.6569L16.2427 12L10.5858 6.34317Z' fill='%23${({ theme }) => theme.colors.primary.slice(1)}' /%3E%3C/svg%3E");
-    color:${({ theme }) => theme.colors.primary}
   }
 `;
 
@@ -371,6 +357,14 @@ export const ProjectContainer = styled.div`
 `;
 
 export const StyledProjectItem = styled.div`
+  position: relative;
+  .winner-mark{
+      position:absolute;
+      width:8.5rem;
+      top:-4rem;
+      right:-3rem;
+      z-index:5;
+  }
   div.loading{
       content:"loading";
       display:flex;

@@ -19,13 +19,26 @@ function useGlobal() {
     dispatch(setGlobalReducer(data));
   }
 
-  const goTo = (to) => {
-    if (history.location.pathname === to) {
-      history.go(0);
+  const goTo = (to, loading = false) => {
+    const g = () => {
+      if (history.location.pathname === to) {
+        history.go(0);
+      }
+      history.push(to);
     }
-    history.push(to);
+    if (loading) {
+      setGlobal({
+        loading: true,
+      });
+      setTimeout(() => {
+        g();
+      }, 500);
+    } else {
+      g();
+    }
+
   }
-  
+
   return { global, setGlobal, goTo };
 }
 

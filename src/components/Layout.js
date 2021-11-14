@@ -7,3 +7,13 @@ export const FlexCC = styled.div`
     position: fixed;
     inset:0;
 `;
+
+export const Layout = styled.div`
+  position:relative;
+  width:100%;
+  min-height:100%;
+  background-image:${({ theme }) => theme.backgorundImage};
+  background-size:cover;
+  background-position:center;
+  background-color:${({ theme }) => theme.colors.background};
+`;

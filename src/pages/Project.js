@@ -8,7 +8,6 @@ import Loading from '../components/Loading';
 import { apiURI } from '../vars/api';
 import Footer from '../components/Footer';
 import { StyledEditWork, StyledProjectContent } from './dashboard/EditWork';
-import theme from '../themes';
 import { getColorBrightness } from '../utils/functions';
 
 function getProtocolURL(URL) {
@@ -29,16 +28,30 @@ function ProjectContainer({ data }) {
     }
     const [state, setState] = useState(INITIAL_STATE);
     useEffect(() => {
-        setGlobal({ footer: false });
-        setGlobal({ appbarStyle: 'project' });
+        setGlobal({
+            footer: false,
+            appbarStyle: 'project',
+            floatingMenu: true
+        });
+        if (!global.loading) {
+            setGlobal({ loading: "immediately" });
+        }
         return () => {
             setGlobal({ footer: true });
             setGlobal({ appbarStyle: null });
+            setGlobal({ floatingMenu: false });
         }
     }, []);
 
     useEffect(() => {
-        console.log(getColorBrightness(data.backgorund_color));
+        const image = new Image();
+        image.src = data.thumbnail;
+        image.addEventListener("load", () => {
+            setGlobal({ loadingEnd: true });
+        });
+    }, [data]);
+
+    useEffect(() => {
         setGlobal({ appbarBrightness: getColorBrightness(data.backgorund_color) });
         return () => {
             setGlobal({ appbarBrightness: null });
@@ -46,7 +59,7 @@ function ProjectContainer({ data }) {
     }, [data]);
 
     return (
-        <StyledProjectContainer className={[(state.open && "open")].join(" ")} style={{
+        <StyledProjectContainer className={['project-container', (state.open && "open")].join(" ")} style={{
             backgroundColor: data.backgorund_color,
             color: data.text_color,
             overflowY: ((state.popup !== false || !state.open) ? "hidden" : null)
@@ -176,6 +189,7 @@ function Project({ match }) {
         post_data: null,
         error: false,
     };
+    const { setGlobal } = useGlobal();
     const [state, setState] = useState(initialState);
     useEffect(() => {
         if (state.loading) {

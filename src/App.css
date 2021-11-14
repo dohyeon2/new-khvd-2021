@@ -21,6 +21,7 @@ body,
 }
 #root {
   overflow-y: auto;
+ 
 }
 
 @media screen and (min-width: 600px) {

@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import ArtAndDesignHall from '../components/ArtAndDesignHall';
 import axios from 'axios';
 import { apiURI } from '../vars/api';
-import { Layout } from './Main';
+import { Layout } from '../components/Layout';
 import { parseObjectToQuery } from '../utils/functions';
 import Swiper from 'swiper';
 import theme from '../themes';
@@ -70,7 +70,7 @@ function ProjectCategory() {
             posts_per_page: count,
             orderby: "rand",
             nopaging: 0,
-            category__not_in:5,
+            category__not_in: 5,
             post__not_in: state.thumbnailList.map(x => x.ID).join(","),
             thumbSize: 788,
             fields: "thumbnail"
@@ -160,8 +160,9 @@ function ProjectCategory() {
         if (state.eventBinded === false) {
             wrapperRef.current.addEventListener('mousemove', (e) => {
                 if (swiperRef.current !== null) return;
+                const { scrollTop } = document.getElementById("root");
                 mouseStokerRef.current.style.left = e.x + "px";
-                mouseStokerRef.current.style.top = e.y + "px";
+                mouseStokerRef.current.style.top = e.y + scrollTop + "px";
             });
             setState(s => ({
                 ...s,
@@ -197,12 +198,12 @@ function ProjectCategory() {
                 }
             });
             setTimeout(() => {
-                if(state.projectEndOfList){
-                    setState(s=>({
+                if (state.projectEndOfList) {
+                    setState(s => ({
                         ...s,
-                        seed:s.seed + 1
+                        seed: s.seed + 1
                     }));
-                }else{
+                } else {
                     const posts = getProjectsWithThumbnail(1).then((posts) => {
                         setState(s => {
                             return {

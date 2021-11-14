@@ -10,7 +10,7 @@ import images from '../images';
 function Logo({ to }) {
     const history = useHistory();
     return (
-        <StyledLogo onClick={() => {
+        <StyledLogo className="logo" onClick={() => {
             history.push(to);
         }}>
             <img src={images['logo.png']} alt="KHVD" />

@@ -1,10 +1,52 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import styled from 'styled-components';
+import useGlobal from '../hook/useGlobal';
+import lotties from '../lotties';
+import LottieElement from './LottieElement';
 
-export function PageLoading() {
+const LoadingLottie = React.memo((attr) =>
+  <LottieElement {...attr} />
+);
+
+export function PageLoading({ className }) {
+  const { setGlobal, global } = useGlobal();
+  const classList = [];
+  const { loading, loadingEnd } = global;
+  if (loading) {
+    classList.push("loading");
+  }
+  if (loading === "immediately") {
+    classList.push("immediately");
+  }
+  const getLottie = useCallback((lottie) => {
+    if (loadingEnd) {
+      lottie.playSegments([15, 61], true);
+      lottie.loop = false;
+      lottie.onComplete = () => {
+        setTimeout(() => {
+          setGlobal({
+            loading: false,
+            loadingEnd: false
+          });
+        }, 500);
+      };
+    }
+  }, [global.loadingEnd]);
+
   return (
-    <StyledPageLoading>
-      ...loading
+    <StyledPageLoading className={classList.join(" ")}
+      immediately={global.loading === 'immediately'}
+    >
+      <LoadingLottie
+        getLottie={getLottie}
+        lottieOption={{
+          initialSegment: loading ? [3, 15] : [60, 60],
+          loop: loading ? true : false,
+          autoplay: loading ? true : false,
+          animationData: lotties['loading.json']
+        }}
+      />
+      Loading...
     </StyledPageLoading>
   );
 }
@@ -27,12 +69,24 @@ export default Loading;
 
 const StyledPageLoading = styled.div`
   position:fixed;
-  z-index:99;
-  background-color: #fff;
-  top:0;
-  left:0;
-  bottom:0;
-  right:0;
+  z-index:9999;
+  color:#fff;
+  background-color: ${({ theme }) => theme.colors.secondary};
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content: center;
+  flex-direction: column;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .5s ease-in-out;
+  &.immediately{
+    transition: unset;
+  }
+  &.loading{
+    pointer-events: auto;
+    opacity: 1;
+  }
 `;
 
 const StyledLoadingSpinner = styled.div`

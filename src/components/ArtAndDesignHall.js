@@ -1,6 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import images from '../images';
+import { LoadingSpinner } from './Loading';
 
 function ArtAndDesignHall({ image }) {
     return (
@@ -10,9 +11,11 @@ function ArtAndDesignHall({ image }) {
             </svg>
 
             <div className="clipped">
-                <div className={"projected-thumbnail" + (!image ? " loading" : "")} style={{
-                    backgroundImage: `url(${image || images['loading.gif']})`
-                }} />
+                {image ? <div className={"projected-thumbnail" + (!image ? " loading" : "")} style={{
+                    backgroundImage: `url(${image})`
+                }} /> :
+                    <LoadingSpinner className="loading-spinner" scale={4}/>
+                }
                 <img className="background" src={images['andhall.png']} />
             </div>
         </ANDHallWrap>
@@ -38,6 +41,13 @@ const ANDHallWrap = styled.div`
         -webkit-transform:translateZ(1px);
         position:relative;
         display:flex;
+        justify-content: center;
+        align-items: center;
+        .loading-spinner{
+            position:absolute;
+            z-index:2;
+            filter:invert(1);
+        }
         img{
             position:relative;
             width:100%;

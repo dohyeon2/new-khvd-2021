@@ -88,9 +88,17 @@ function Appbar() {
 
   useEffect(() => {
     const root = document.getElementById("root");
+    const projectContainer = document.getElementsByClassName("project-container")[0];
     root.removeEventListener("scroll", handleScorllEvent);
     root.addEventListener("scroll", handleScorllEvent);
+    if (projectContainer) {
+      projectContainer.removeEventListener("scroll", handleScorllEvent);
+      projectContainer.addEventListener("scroll", handleScorllEvent);
+    }
     return () => {
+      if (projectContainer) {
+        projectContainer.removeEventListener("scroll", handleScorllEvent);
+      }
       root.removeEventListener("scroll", handleScorllEvent);
     }
   }, [global, state]);
