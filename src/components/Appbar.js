@@ -244,6 +244,9 @@ const StyledAppbar = styled.div`
     }
   }
   .center{
+    @media screen and (max-width:${({ theme }) => theme.breakPoints.m}px){
+      display:none;
+    }
     z-index:1;
     position: absolute;
     transform:translate(-50%,-50%);
