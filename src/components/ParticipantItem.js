@@ -101,6 +101,7 @@ const ParticipantItemLayout = styled(StyledProjectItem)`
             overflow:hidden;
             img{
                 top:0;
+                border-radius: 99px;
             }
             &::before{
                 padding-top: 100%;

@@ -21,6 +21,9 @@ import { getCookie } from './utils/functions';
 import FloatingMenu from './components/FloatingMenu';
 import { PageLoading } from './components/Loading';
 import IntroAnimation from './pages/IntroAnimation';
+import Guestbook from './pages/Guestbook';
+import GuestbookEditor from './components/GuestbookEditor';
+import GuestbookViewer from './components/GuestbookViewer';
 
 const GlobalStyle = createGlobalStyle`
   @keyframes loadingPlaceholder{
@@ -82,6 +85,9 @@ function App() {
         <Route path="/participant">
           <ParticipantList />
         </Route>
+        <Route path="/guestbook">
+          <Guestbook />
+        </Route>
         <Route path="/my-dashboard/:page">
           <MyDashboardContainer />
         </Route>
@@ -92,6 +98,12 @@ function App() {
       {<PageLoading />}
       {global.floatingMenu && <FloatingMenu />}
       {global.footer && <Footer />}
+      {global.editorVisible &&
+        <GuestbookEditor {...global.editorData} />
+      }
+      {global.guestbookData &&
+        <GuestbookViewer {...global.guestbookData} />
+      }
     </>
   );
 }

@@ -5,8 +5,7 @@ import images from '../images';
 import theme from '../themes';
 import { getSubFramePercent, setCookie } from '../utils/functions'
 import { ChevronBtn } from '../components/Btns';
-import LottieElement from '../components/LottieElement';
-import lotties from '../lotties';
+import { ScrollDown } from '../components/Icon';
 
 function Intro() {
     const { setGlobal } = useGlobal();
@@ -132,13 +131,13 @@ function Intro() {
     return (
         <>
             <ChevronBtn className="skip-btn"
-            style={{
-                    position:'fixed',
-                    top:'1rem',
-                    right:'1rem',
-                    zIndex:30,
-                    fontSize:'1rem',
-            }}
+                style={{
+                    position: 'fixed',
+                    top: '1rem',
+                    right: '1rem',
+                    zIndex: 30,
+                    fontSize: '1rem',
+                }}
                 onClick={() => {
                     setCookie("skip_intro", "1", 1);
                     setGlobal({ intro: false });
@@ -514,20 +513,11 @@ function Intro() {
                 {test && <TestConsole>
                     frame: {frame}<br />
                 </TestConsole>}
-                <div className="scroll-down"
+                <ScrollDown
+                    className="scroll-down"
                     style={{
                         opacity: (1 - getSubFramePercent(frame, 0, 40, 1))
-                    }}
-                >
-                    <LottieElement
-                        lottieOption={{
-                            animationData: lotties['scroll-custom.json']
-                        }}
-                    />
-                    <div className="description">
-                        SCROLL DOWN
-                    </div>
-                </div>
+                    }} />
             </CustomWrapper>
         </>
     );

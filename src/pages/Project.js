@@ -12,6 +12,7 @@ import { getColorBrightness } from '../utils/functions';
 import { WinnerIcon } from '../components/Icon';
 import images from '../images';
 import { ParticipantItem } from '../components/ParticipantItem';
+import GuestbookList from './subpage/GuestbookList';
 
 function getProtocolURL(URL) {
     const reg = new RegExp(/^http/);
@@ -220,6 +221,7 @@ function ProjectContainer({ data }) {
                 </button>
                 <img src={state.popup} alt="" />
             </div>}
+            <GuestbookList />
             <Footer />
         </StyledProjectContainer >
     )
@@ -246,9 +248,12 @@ function Project({ match }) {
             setGlobal({ loading: "immediately" });
         }
         return () => {
-            setGlobal({ footer: true });
-            setGlobal({ appbarStyle: null });
-            setGlobal({ floatingMenu: false });
+            setGlobal({
+                footer: true,
+                appbarStyle: null,
+                floatingMenu: false,
+                currentProjectId: null
+            });
         }
     }, []);
 
@@ -257,6 +262,9 @@ function Project({ match }) {
             ...s,
             loading: true,
         }));
+        setGlobal({
+            currentProjectId: params.id
+        });
     }, [params.id]);
 
     useEffect(() => {
@@ -267,11 +275,13 @@ function Project({ match }) {
                     draft.data = res.data;
                     draft.loading = false;
                 }));
+                console.log(res);
             })();
         } else {
             setGlobal({ loading: "immediately" });
         }
     }, [state.loading]);
+
     if (state.loading) return null;
     return (
         <ProjectContainer data={state.data} />

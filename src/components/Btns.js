@@ -30,6 +30,21 @@ export const SecondaryBtn = styled(PrimaryBtn)`
     color:#fff;
 `;
 
+export const FrontPrimaryBtn = styled.button`
+    padding:0.5rem 1rem;
+    margin:0;
+    border:0;
+    justify-content:center;
+    align-items:center;
+    font-size:1.2rem;
+    cursor:pointer;
+    background-color: ${({ theme }) => theme.colors.primary};
+    color:#fff;
+    display:inline-flex;
+    align-items: center;
+    border-radius:99px;
+`;
+
 export const ChevronBtn = styled.button`
 background-image: url("data:image/svg+xml,%3Csvg width='2rem' height='2rem' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%0A%3E%3Cpath d='M10.5858 6.34317L12 4.92896L19.0711 12L12 19.0711L10.5858 17.6569L16.2427 12L10.5858 6.34317Z' fill='%23fff' /%3E%3C/svg%3E");
 background-position-x:right;
@@ -51,4 +66,31 @@ transition: color .2s ease-in-out, background-image .2s ease-in-out;
   background-image: url("data:image/svg+xml,%3Csvg width='2rem' height='2rem' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%0A%3E%3Cpath d='M10.5858 6.34317L12 4.92896L19.0711 12L12 19.0711L10.5858 17.6569L16.2427 12L10.5858 6.34317Z' fill='%23${({ theme }) => theme.colors.primary.slice(1)}' /%3E%3C/svg%3E");
   color:${({ theme }) => theme.colors.primary}
 }
+`;
+
+export const FloatingBtn = ({ onClick, children, className }) => {
+    return <StyledFloatingBtn className={"circle-button " + className}
+        onClick={onClick}>{
+            children
+        }
+    </StyledFloatingBtn>
+}
+
+const StyledFloatingBtn = styled.button`
+    padding:0;
+    border:0;
+    margin:0;
+    background-color: transparent;
+    cursor:pointer;
+    display:flex;
+    flex-direction: column;
+    align-items: center;
+    font-family:${({ theme }) => theme.font.family.englishBold};
+    color:${({ theme }) => theme.colors.primary};
+    text-align:center;
+    width: 100%;
+    img{
+        height:4.444rem;
+        margin-bottom:0.8rem;
+    }
 `;

@@ -3,6 +3,8 @@ import { getCookie, setCookie } from "../utils/functions";
 const INITIAL_STATE = {
     intro: getCookie("intro_skip") === "1" ? false : true,
     appbarVisibility: true,
+    guestbookSeed: Date.now(),
+    footer: true,
 };
 
 const SET_GLOBAL = 'global/SET_GLOBAL';
