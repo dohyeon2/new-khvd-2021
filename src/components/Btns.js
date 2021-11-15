@@ -45,6 +45,10 @@ export const FrontPrimaryBtn = styled.button`
     border-radius:99px;
 `;
 
+export const FrontSecondaryBtn = styled(FrontPrimaryBtn)`
+    background-color: ${({ theme }) => theme.colors.secondary};
+`;
+
 export const ChevronBtn = styled.button`
 background-image: url("data:image/svg+xml,%3Csvg width='2rem' height='2rem' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%0A%3E%3Cpath d='M10.5858 6.34317L12 4.92896L19.0711 12L12 19.0711L10.5858 17.6569L16.2427 12L10.5858 6.34317Z' fill='%23fff' /%3E%3C/svg%3E");
 background-position-x:right;

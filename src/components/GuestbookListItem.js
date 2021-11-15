@@ -33,6 +33,7 @@ const StyledGuestbookListItem = styled.div`
     background-size:cover;
     position:relative;
     cursor: pointer;
+    color:#000;
     .name{
         font-size:1.22rem;
         font-weight: 700;
@@ -42,6 +43,7 @@ const StyledGuestbookListItem = styled.div`
         font-size:0.8rem;
         font-weight: 700;
         margin-bottom:0.9rem;
+        color:${({ theme }) => theme.colors.primary};
     }
     .content{
         text-overflow:hidden;

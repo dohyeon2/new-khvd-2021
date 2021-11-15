@@ -7,6 +7,7 @@ function LottieElement({
   getLottie,
   className,
   initialSegment,
+  noReset,
   play,
 }) {
   const classList = ["lottie-element"];
@@ -29,7 +30,7 @@ function LottieElement({
       });
       getLottie && getLottie(lottieInstanceRef.current);
     }
-  }, [lottieOption]);
+  }, [(noReset ? null : lottieOption)]);
 
   useEffect(() => {
     if (play) {

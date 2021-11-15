@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 import styled from 'styled-components';
 import images from '../images';
 import { FloatingBtn } from './Btns';
@@ -8,7 +8,7 @@ import useGlobal from '../hook/useGlobal';
 import { updateProjectCheer } from '../api/project';
 
 function FloatingMenu() {
-    const { global } = useGlobal();
+    const { global, setGlobal } = useGlobal();
     const upupBtn = useRef();
     const lottieRef = useRef();
     const handleScrollEvent = (container) => () => {
@@ -28,7 +28,7 @@ function FloatingMenu() {
         return () => {
             container.removeEventListener('scroll', handleScrollEvent(container));
         }
-    }, [global]);
+    }, []);
     return (
         <FloatingMenuLayout>
             <FloatingBtn
@@ -39,25 +39,30 @@ function FloatingMenu() {
                         if (current.currentFrame >= current.totalFrames - 1
                             || current.currentFrame === 0) {
                             current.goToAndPlay(0);
-                            updateProjectCheer(global.currentProjectId);
+                            updateProjectCheer(global.currentProjectId).then(res => {
+                                setGlobal({ currentPostCheer: res.data });
+                            });
                         }
                     }
                 }}>
-                <LottieElement
+                {<LottieElement
                     getLottie={getLottie}
                     className="cheer-animation"
+                    noReset={true}
                     lottieOption={{
                         loop: false,
                         autoplay: false,
                         animationData: lotties['cheers.json']
                     }}
-                />
+                />}
                 <div className="placeholder"></div>
                 Cheers!
             </FloatingBtn>
             <div
-                className="upup-btn"
                 ref={upupBtn}
+                style={{
+                    display:"none"
+                }}
             >
                 <FloatingBtn
                     onClick={() => {
@@ -85,9 +90,6 @@ const FloatingMenuLayout = styled.div`
     bottom:4.72rem;
     right:1rem;
     z-index:33;
-    .upup-btn{
-        display:none;
-    }
     .cheer-btn{
         position:relative;
         margin-bottom:2rem;

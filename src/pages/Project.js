@@ -1,6 +1,6 @@
 import axios from 'axios';
 import produce from 'immer';
-import React, { useDebugValue, useEffect, useState } from 'react';
+import React, { useDebugValue, useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router';
 import useGlobal from '../hook/useGlobal';
 import styled from 'styled-components';
@@ -13,6 +13,7 @@ import { WinnerIcon } from '../components/Icon';
 import images from '../images';
 import { ParticipantItem } from '../components/ParticipantItem';
 import GuestbookList from './subpage/GuestbookList';
+import { GuestbookInlineEditor } from '../components/GuestbookEditor';
 
 function getProtocolURL(URL) {
     const reg = new RegExp(/^http/);
@@ -25,204 +26,236 @@ function getProtocolURL(URL) {
 
 
 function ProjectContainer({ data }) {
-    const { setGlobal, goTo } = useGlobal();
+    const { setGlobal, goTo, global } = useGlobal();
     const INITIAL_STATE = {
         open: false,
         popup: false,
+        visibleCheerCount: false,
     }
     const [state, setState] = useState(INITIAL_STATE);
+    const timoutRef = useRef();
 
     useEffect(() => {
         const image = new Image();
-        image.src = data.thumbnail;
+        image.src = data?.thumbnail;
         image.addEventListener("load", () => {
             setGlobal({ loadingEnd: true });
         });
     }, [data]);
 
     useEffect(() => {
-        setGlobal({ appbarBrightness: getColorBrightness(data.backgorund_color) });
+        setGlobal({ appbarBrightness: getColorBrightness(data?.backgorund_color) });
         return () => {
             setGlobal({ appbarBrightness: null });
         }
     }, [data]);
 
+    useEffect(() => {
+        setState(s => ({
+            ...s,
+            visibleCheerCount: true,
+            cheerCount: global.currentPostCheer,
+        }));
+        clearTimeout(timoutRef.current);
+        timoutRef.current = setTimeout(() => {
+            setState(s => ({
+                ...s,
+                visibleCheerCount: false,
+            }));
+        }, 3000);
+    }, [global.currentPostCheer]);
+
+    useEffect(() => {
+        return () => {
+            setGlobal({ currentPostCheer: null });
+        }
+    }, []);
+
     return (
         <StyledProjectContainer className={['project-container', (state.open && "open")].join(" ")} style={{
-            backgroundColor: data.backgorund_color,
-            color: data.text_color,
+            backgroundColor: data?.backgorund_color,
+            color: data?.text_color,
             overflowY: ((state.popup !== false || !state.open) ? "hidden" : null)
         }}>
-            <div className="project-wrap">
-                <div className="work-meta">
-                    <div className="flex">
-                        <div className="left">
-                            <h3 className="project-title">{data.title}</h3>
-                            <h4 className="project-category" style={{
-                                color: data.feature_color,
-                            }}>{data.category_name}</h4>
-                            <div className="description">
-                                {data.description}
+            {data ? <>
+                <div className="project-wrap">
+                    <div className="work-meta">
+                        <div className="flex">
+                            <div className="left">
+                                <h3 className="project-title">{data?.title}</h3>
+                                <h4 className="project-category" style={{
+                                    color: data?.feature_color,
+                                }}>{data.category_name}</h4>
+                                <div className="description">
+                                    {data?.description}
+                                </div>
+                                <div>
+                                    <h2 className="desinger-section-title" style={{
+                                        color: data?.feature_color,
+                                    }}>Designer</h2>
+                                    <ul className="designer-list">
+                                        {data.designer_list.map((x, i) => <li>
+                                            <div className="name">{x.name}</div>
+                                            {/* <div className="line">{x.common.question_4.value}</div> */}
+                                        </li>)}
+                                    </ul>
+                                </div>
                             </div>
-                            <div>
-                                <h2 className="desinger-section-title" style={{
-                                    color: data.feature_color,
-                                }}>Designer</h2>
-                                <ul className="designer-list">
-                                    {data.designer_list.map((x, i) => <li>
-                                        <div className="name">{x.name}</div>
-                                        {/* <div className="line">{x.common.question_4.value}</div> */}
-                                    </li>)}
-                                </ul>
-                            </div>
-                        </div>
-                        <div className="right">
-                            <div
-                                className={["thumbnail"].join(" ")}
-                                style={{ backgroundImage: `url('${data.thumbnail}')` }}
-                                onClick={() => {
-                                    setState(s => ({
-                                        ...s,
-                                        popup: data.thumbnail,
-                                    }));
-                                }}
-                            >
-                                <WinnerIcon winner={data.winner} />
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <StyledProjectContent>
-                    {data.editor_output.blocks.map((x, i) => {
-                        if (x.data === false) return null;
-                        switch (x.type) {
-                            case "paragraph":
-                                return <p dangerouslySetInnerHTML={{ __html: x.data?.text.replace(`">`, '" target="_blank">') }}></p>;
-                            case "image":
-                                const classList = ["cdx-image-wrapper", (x.data?.centered ? "centered" : null), (x.data?.stretched ? "stretched" : null)];
-                                return <div className={classList.join(" ")}><img src={x.data?.src} onClick={() => {
-                                    if (x.data?.href) {
-                                        window.open(getProtocolURL(x.data?.href));
-                                    } else {
+                            <div className="right">
+                                <div
+                                    className={["thumbnail"].join(" ")}
+                                    style={{ backgroundImage: `url('${data?.thumbnail}')` }}
+                                    onClick={() => {
                                         setState(s => ({
                                             ...s,
-                                            popup: x.data?.src,
+                                            popup: data?.thumbnail,
                                         }));
-                                    }
-                                }} /></div>;
-                            case "book":
-                                return <div className={"cdx-embed-wrapper"}>
-                                    <div className={"iframe-wrapper"}>
-                                        <iframe src={x.data.src} height="800" style={{
-                                            width: "100%",
-                                            maxWidth: "100%",
-                                            border: 0
-                                        }}></iframe>
-                                    </div>
-                                </div>;
-                            case "embed":
-                                return <div className={"cdx-embed-wrapper"}>
-                                    <div className={"iframe-wrapper"} style={
-                                        {
-                                            width: `${x.data.width}%`
-                                        }
-                                    }>
-                                        <iframe src={x.data.src} title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-                                    </div>
-                                </div>;
-                            default:
-                                return;
-                        }
-                    })}
-                </StyledProjectContent>
-                {data.goods.length ? <div className="goods bottom-layout">
-                    <div className="bottom-title">Goods</div>
-                    {data.goods.map(x => <div className="goods-item">
-                        <div className="goods-thumb"
-                            style={{
-                                backgroundImage: `url(${x.thumbnail_small})`
-                            }}
-                        />
-                        <div className="goods-info">
-                            <div className="goods-title">{x.title}</div>
-                            <div className="bottom">
-                                <button
-                                    className="goto"
-                                    onClick={() => {
-                                        goTo('/project/' + x.category_slug + "/" + x.id, true);
                                     }}
                                 >
-                                    <img src={images['click-image.png']} alt="" />
-                                </button>
-                                <div className="caption">
-                                    작품과 연계된 굿즈를 만나보고 싶다면?<br />
-                                    &lt;UNBOXING POP-UP STORE&gt;를 방문해보세요!
+                                    <WinnerIcon winner={data?.winner} />
                                 </div>
                             </div>
                         </div>
-                    </div>)}
-                </div> : null}
-                <div className="designers bottom-layout">
-                    <div className="bottom-title">Designer</div>
-                    <div className="designer-wrap">
-                        {data.new_designer_list.map(x =>
-                            <>
-                                <div className="designer"
-                                    onClick={() => {
-                                        goTo('/participant/' + x.ID)
-                                    }}
-                                >
-                                    <ParticipantItem
-                                        className="designer-picture"
-                                        circle={true}
-                                        onlyProfileImage={true}
-                                        picture={x.profile_image.normal}
-                                        hoverPicture={x.profile_image.confetti}
-                                    />
-                                    <div className="name">
-                                        {x.display_name}
-                                    </div>
-                                    <div className="q4">
-                                        {x.meta.question_4.value}
+                    </div>
+                    <StyledProjectContent>
+                        {data.editor_output.blocks.map((x, i) => {
+                            if (x.data === false) return null;
+                            switch (x.type) {
+                                case "paragraph":
+                                    return <p dangerouslySetInnerHTML={{ __html: x.data?.text.replace(`">`, '" target="_blank">') }}></p>;
+                                case "image":
+                                    const classList = ["cdx-image-wrapper", (x.data?.centered ? "centered" : null), (x.data?.stretched ? "stretched" : null)];
+                                    return <div className={classList.join(" ")}><img src={x.data?.src} onClick={() => {
+                                        if (x.data?.href) {
+                                            window.open(getProtocolURL(x.data?.href));
+                                        } else {
+                                            setState(s => ({
+                                                ...s,
+                                                popup: x.data?.src,
+                                            }));
+                                        }
+                                    }} /></div>;
+                                case "book":
+                                    return <div className={"cdx-embed-wrapper"}>
+                                        <div className={"iframe-wrapper"}>
+                                            <iframe src={x.data.src} height="800" style={{
+                                                width: "100%",
+                                                maxWidth: "100%",
+                                                border: 0
+                                            }}></iframe>
+                                        </div>
+                                    </div>;
+                                case "embed":
+                                    return <div className={"cdx-embed-wrapper"}>
+                                        <div className={"iframe-wrapper"} style={
+                                            {
+                                                width: `${x.data.width}%`
+                                            }
+                                        }>
+                                            <iframe src={x.data.src} title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                                        </div>
+                                    </div>;
+                                default:
+                                    return;
+                            }
+                        })}
+                    </StyledProjectContent>
+                    {data.goods.length ? <div className="goods bottom-layout">
+                        <div className="bottom-title">Goods</div>
+                        {data.goods.map(x => <div className="goods-item">
+                            <div className="goods-thumb"
+                                style={{
+                                    backgroundImage: `url(${x.thumbnail_small})`
+                                }}
+                            />
+                            <div className="goods-info">
+                                <div className="goods-title">{x.title}</div>
+                                <div className="bottom">
+                                    <button
+                                        className="goto"
+                                        onClick={() => {
+                                            goTo('/project/' + x.category_slug + "/" + x.id, true);
+                                        }}
+                                    >
+                                        <img src={images['click-image.png']} alt="" />
+                                    </button>
+                                    <div className="caption">
+                                        작품과 연계된 굿즈를 만나보고 싶다면?<br />
+                                        &lt;UNBOXING POP-UP STORE&gt;를 방문해보세요!
                                     </div>
                                 </div>
-                            </>)}
+                            </div>
+                        </div>)}
+                    </div> : null}
+                    <div className="designers bottom-layout">
+                        <div className="bottom-title">Designer</div>
+                        <div className="designer-wrap">
+                            {data.new_designer_list.map(x =>
+                                <>
+                                    <div className="designer"
+                                        onClick={() => {
+                                            goTo('/participant/' + x.ID)
+                                        }}
+                                    >
+                                        <ParticipantItem
+                                            className="designer-picture"
+                                            circle={true}
+                                            onlyProfileImage={true}
+                                            picture={x.profile_image.normal}
+                                            hoverPicture={x.profile_image.confetti}
+                                        />
+                                        <div className="name">
+                                            {x.display_name}
+                                        </div>
+                                        <div className="q4">
+                                            {x.meta.question_4.value}
+                                        </div>
+                                    </div>
+                                </>)}
+                        </div>
                     </div>
                 </div>
-            </div>
-            <StyledProjectCover className={[(state.open && "open")].join(" ")} style={{ backgroundImage: `url(${data.thumbnail})` }}>
-                <div className="title-container">
-                    <h1>{data.title}</h1>
-                    <h2>{data.subtitle}</h2>
-                    <div className="designer-list">
-                        {data.designer_list.map((x, i) => x.name).join(", ")}
+                <StyledProjectCover className={[(state.open && "open")].join(" ")} style={{ backgroundImage: `url(${data.thumbnail})` }}>
+                    <div className="title-container">
+                        <h1>{data.title}</h1>
+                        <h2>{data.subtitle}</h2>
+                        <div className="designer-list">
+                            {data.designer_list.map((x, i) => x.name).join(", ")}
+                        </div>
                     </div>
-                </div>
-                <button className="open-button" onClick={() => {
-                    setState(s => ({
-                        ...s,
-                        open: true,
-                    }));
-                }}>
-                    <img src="/img/open-btn.png" alt="" />
-                </button>
-            </StyledProjectCover>
-            {state.popup && <div className="image-modal">
-                <button className="x-btn" onClick={() => {
-                    setState(s => ({
-                        ...s,
-                        popup: false,
-                    }));
-                }}>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16">
-                        <path fill-rule="evenodd" d="M13.854 2.146a.5.5 0 0 1 0 .708l-11 11a.5.5 0 0 1-.708-.708l11-11a.5.5 0 0 1 .708 0Z" />
-                        <path fill-rule="evenodd" d="M2.146 2.146a.5.5 0 0 0 0 .708l11 11a.5.5 0 0 0 .708-.708l-11-11a.5.5 0 0 0-.708 0Z" />
-                    </svg>
-                </button>
-                <img src={state.popup} alt="" />
-            </div>}
-            <GuestbookList />
-            <Footer />
+                    <button className="open-button" onClick={() => {
+                        setState(s => ({
+                            ...s,
+                            open: true,
+                        }));
+                    }}>
+                        <img src="/img/open-btn.png" alt="" />
+                    </button>
+                </StyledProjectCover>
+                {state.popup && <div className="image-modal">
+                    <button className="x-btn" onClick={() => {
+                        setState(s => ({
+                            ...s,
+                            popup: false,
+                        }));
+                    }}>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16">
+                            <path fill-rule="evenodd" d="M13.854 2.146a.5.5 0 0 1 0 .708l-11 11a.5.5 0 0 1-.708-.708l11-11a.5.5 0 0 1 .708 0Z" />
+                            <path fill-rule="evenodd" d="M2.146 2.146a.5.5 0 0 0 0 .708l11 11a.5.5 0 0 0 .708-.708l-11-11a.5.5 0 0 0-.708 0Z" />
+                        </svg>
+                    </button>
+                    <img src={state.popup} alt="" />
+                </div>}
+                <GuestbookInlineEditor relatePostId={data.id} />
+                <GuestbookList relatePostId={data.id} />
+                <Footer />
+                {state.visibleCheerCount
+                    && <CheerCountContainer>
+                        <div className="cheer-count">
+                            {global.currentPostCheer}번째 화이팅!
+                        </div>
+                    </CheerCountContainer>
+                }</> : null}
         </StyledProjectContainer >
     )
 }
@@ -275,20 +308,59 @@ function Project({ match }) {
                     draft.data = res.data;
                     draft.loading = false;
                 }));
-                console.log(res);
             })();
         } else {
             setGlobal({ loading: "immediately" });
         }
     }, [state.loading]);
 
-    if (state.loading) return null;
     return (
         <ProjectContainer data={state.data} />
     );
 }
 
 export default Project;
+
+const CheerCountContainer = styled.div`
+    position: fixed;
+    width:100%;
+    height:20%;
+    bottom:0;
+    pointer-events: none;
+    z-index:99;
+    opacity: 0;
+    background: linear-gradient(0deg, rgba(255,53,142,1) 0%, rgba(255,53,142,0) 100%);
+    animation:1s ease-in-out in forwards, 1s ease-in-out 2s out forwards;
+    .cheer-count{
+        position:absolute;
+        bottom:0;
+        width:100%;
+        display:flex;
+        justify-content: center;
+        padding:1rem;
+        color:#fff;
+        text-align:center;
+        font-weight:900;
+        font-size:1.6rem;
+        box-sizing:border-box;
+    }
+    @keyframes in{
+        0%{
+            opacity: 0;
+        }
+        100%{
+            opacity: 1;
+        }
+    }
+    @keyframes out{
+        0%{
+            opacity: 1;
+        }
+        100%{
+            opacity: 0;
+        }
+    }
+`;
 
 const StyledProjectCover = styled.div`
     background-size:cover;

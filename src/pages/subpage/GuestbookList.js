@@ -6,7 +6,7 @@ import { TextInput } from '../../components/Input';
 import useGlobal from '../../hook/useGlobal';
 import images from '../../images';
 
-function GuestbookList() {
+function GuestbookList({ relatePostId }) {
     const COUNT = 9;
     const INITIAL_STATE = {
         loading: true,
@@ -25,6 +25,11 @@ function GuestbookList() {
             posts_per_page: COUNT,
             paged: page,
         };
+        if (relatePostId) {
+            params['meta_query'] = "relate_post_id";
+            params['meta_value'] = relatePostId;
+            params['meta_compare'] = "'='";
+        }
         if (search) {
             params['s'] = search;
             params['nopaging'] = 1;
@@ -88,9 +93,9 @@ function GuestbookList() {
                 {data.posts.length ? <GuestbookLayout>
                     {data.posts?.map(x => <GuestbookListItem {...x} onClick={() => { openViewer(x); }} />)}
                 </GuestbookLayout> : <div style={{
-                    textAlign:'center'
+                    textAlign: 'center'
                 }}>
-                    방명록이 없어요!<br/>
+                    방명록이 없어요!<br />
                     방명록의 첫 주인이 되어보세요!
                 </div>}
                 <div className="footer">
