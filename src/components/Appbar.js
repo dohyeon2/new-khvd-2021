@@ -10,7 +10,7 @@ import images from '../images';
 /**
  * 앱바
  */
-function Appbar() {
+const Appbar = React.memo(() => {
   const menuWrapperClass = [];
   const { global, goTo } = useGlobal();
   const history = useHistory();
@@ -174,7 +174,7 @@ function Appbar() {
       </StyledMenuWrap>
     </>
   );
-}
+});
 
 export default Appbar;
 
