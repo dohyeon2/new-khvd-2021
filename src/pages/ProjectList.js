@@ -46,6 +46,9 @@ function ProjectList({
   };
   const params = useParams();
   const slug = slugAttr || params.categorySlug;
+  if (Number.isInteger(params.categorySlug * 1)) {
+    goTo("/project/undefined/" + params.categorySlug);
+  }
   const [state, setState] = useState(INITIAL_STATE);
   const windowResizeEventRef = useRef(false);
   const searchPending = useRef(null);
