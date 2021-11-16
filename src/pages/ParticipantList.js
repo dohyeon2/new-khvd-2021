@@ -62,7 +62,6 @@ function ParticipantList() {
                 professors: pres.data.users,
                 loading: false,
             }));
-            setGlobal({ pageTitle: "Participants" });
         })();
     }, []);
 
@@ -71,7 +70,8 @@ function ParticipantList() {
         setGlobal({
             appbarScrollInvert: true,
             appbarSearch: true,
-            searchChange: appbarSearch
+            searchChange: appbarSearch,
+            pageTitle: "Participants"
         });
     }, []);
 
@@ -85,6 +85,9 @@ function ParticipantList() {
             });
         }
     }, []);
+    const onClickItem = (x) => {
+        goTo('/participant/' + x.ID);
+    }
 
     const { users: usersList, adiministrator_users: adminUsersList, search, loading, professors: professorsList } = state;
 
@@ -102,33 +105,44 @@ function ParticipantList() {
     const adiministrator_users = getFilteredList(adminUsersList, search);
     const professors = getFilteredList(professorsList, search);
 
-    const onClickItem = (x) => {
-        goTo('/participant/' + x.ID);
-    }
-
-    const printParticipant = (x) => <ParticipantItem
-        onClick={() => { x.meta.length !== 0 && onClickItem(x) }}
-        picture={x.profile_image.normal}
-        hoverPicture={x.profile_image.confetti}
-        key={x.ID}
-        className="item"
-        name={x.display_name}
-        winner={x.award}
-    />
     return (
         <PraticipantLayout>
             <ParticipantLayout>
                 {users?.length > 0 && <>
                     <ParticipantSection>전시 참여자</ParticipantSection>
-                    {users?.map(printParticipant)}
+                    {users?.map((x) => <ParticipantItem
+                        onClick={() => { x.meta.length !== 0 && onClickItem(x) }}
+                        picture={x.profile_image.normal}
+                        hoverPicture={x.profile_image.confetti}
+                        key={x.ID}
+                        className="item"
+                        name={x.display_name}
+                        winner={x.award}
+                    />)}
                 </>}
                 {adiministrator_users?.length > 0 && <>
                     <ParticipantSection>졸업전시준비위원회</ParticipantSection>
-                    {adiministrator_users?.map(printParticipant)}
+                    {adiministrator_users?.map((x) => <ParticipantItem
+                        onClick={() => { x.meta.length !== 0 && onClickItem(x) }}
+                        picture={x.profile_image.normal}
+                        hoverPicture={x.profile_image.confetti}
+                        key={x.ID}
+                        className="item"
+                        name={x.display_name}
+                        winner={x.award}
+                    />)}
                 </>}
                 {professors?.length > 0 && <>
                     <ParticipantSection>전임교수 / 지도교수</ParticipantSection>
-                    {professors?.map(printParticipant)}
+                    {professors?.map((x) => <ParticipantItem
+                        onClick={() => { x.meta.length !== 0 && onClickItem(x) }}
+                        picture={x.profile_image.normal}
+                        hoverPicture={x.profile_image.confetti}
+                        key={x.ID}
+                        className="item"
+                        name={x.display_name}
+                        winner={x.award}
+                    />)}
                 </>}
                 {loading &&
                     <FlexCC>

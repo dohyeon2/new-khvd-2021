@@ -33,7 +33,7 @@ export function ParticipantItem({
         }
     }
     useEffect(() => {
-        className.includes('active') && lottieRef.current.goToAndPlay(0);
+        className?.includes('active') && lottieRef.current.goToAndPlay(0);
     }, [className]);
 
     const matches = !onlyProfileImage ? name.match(/([ㄱ-ㅎ|ㅏ-ㅣ|가-힣|\s]*)(.*)/) : "";
@@ -48,6 +48,7 @@ export function ParticipantItem({
             {winner && <WinnerIcon winner={winner} />}
             <LottieElement
                 className="confetti_animation"
+                noReset={true}
                 lottieOption={{
                     autoplay: false,
                     animationData: lotties['confetti.json'],
