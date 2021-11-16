@@ -4,6 +4,7 @@ import lotties from '../lotties';
 import { WinnerIcon } from '../components/Icon';
 import styled from 'styled-components';
 import { StyledProjectItem } from '../pages/ProjectList';
+import Sticker from './Sticker';
 
 export function ParticipantItem({
     picture, hoverPicture, name, className, winner, onClick, onlyProfileImage, circle
@@ -57,8 +58,9 @@ export function ParticipantItem({
             />
             <div className={pictureClassList.join(" ")} >
                 <div className="images">
-                    <img className="normal" src={picture} />
-                    <img className="confetti" src={hoverPicture} />
+                    <img className="normal" src={picture} loading="lazy" />
+                    <img className="confetti" src={hoverPicture} loading="lazy" />
+                    {!picture && <Sticker className="sticker" noRandomRotate={true} />}
                 </div>
             </div>
             {!onlyProfileImage && <div className={nameClassList.join(" ")}>
@@ -124,6 +126,11 @@ const ParticipantItemLayout = styled(StyledProjectItem)`
                 z-index:2;
                 transition: opacity .2s ease-in-out;
             }
+        }
+        .sticker img{
+            top:50%;
+            left:50%;
+            transform: translate(-50%,-50%);
         }
         &::before{
             padding-top: 133%;

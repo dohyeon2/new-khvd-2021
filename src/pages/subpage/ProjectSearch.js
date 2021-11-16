@@ -20,6 +20,10 @@ function ProjectSearch({ search }) {
     const [state, setState] = useState(INITIAL_STATE);
 
     useEffect(() => {
+        document.getElementById("root").scrollTo({ top: 0, left: 0 });
+    }, []);
+
+    useEffect(() => {
         setState(s => ({
             ...s,
             searched: false,

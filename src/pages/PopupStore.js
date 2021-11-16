@@ -3,14 +3,18 @@ import React from 'react';
 import { Layout } from '../components/Layout';
 import AnimationWrap from './subpage/AnimationWrap';
 import ProjectList from './ProjectList';
+import useGlobal from '../hook/useGlobal';
 
 function PopupStore() {
+    const { global } = useGlobal();
+
     return (
         <>
-            <AnimationWrap></AnimationWrap>
+            {!global.searchValue && <AnimationWrap></AnimationWrap>}
             <div style={{
                 position: 'relative',
                 zIndex: 2,
+                minHeight:'100%',
             }}>
                 <ProjectList slug="goods" />
             </div>

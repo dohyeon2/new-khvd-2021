@@ -51,9 +51,6 @@ function AnimationWrap() {
     if (end) return null;
     return (
         <ScrollAnimationSticky ref={WrapperRef}>
-            <div className="test">
-                {frame}
-            </div>
             <div className="animationwrap">
                 <div className="text-animations-wrap">
                     <div className="title border sequence"
@@ -75,7 +72,7 @@ function AnimationWrap() {
                         style={(() => {
                             const value = getSubFramePercent(frame, 0, 200, 1);
                             const value2 = getSubFramePercent(frame, 400, 600, 1);
-                            const value3 = getSubFramePercent(frame, 800, 1000, 1);
+                            const value3 = getSubFramePercent(frame, 1000, 1200, 1);
                             const fontSize = 4.22 + (2.4 * (value - value2));
                             return {
                                 position: 'absolute',
@@ -232,6 +229,7 @@ const ScrollAnimationSticky = styled.div`
             flex-direction: column;
             .map-image-wrap{
                 margin-right: 0;
+                margin-bottom:2rem;
             }
             .info{
                 width:100%;

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 import styled from 'styled-components';
 import useGlobal from '../hook/useGlobal';
 import lotties from '../lotties';
@@ -11,6 +11,7 @@ const LoadingLottie = React.memo((attr) =>
 export function PageLoading({ }) {
   const { setGlobal, global } = useGlobal();
   const classList = [];
+  const lottieElement = useRef();
   const { loading, loadingEnd } = global;
   if (loading) {
     classList.push("loading");
@@ -18,16 +19,19 @@ export function PageLoading({ }) {
   if (loading === "immediately") {
     classList.push("immediately");
   }
-  const getLottie = useCallback((lottie) => {
-    if (loadingEnd) {
-      lottie.playSegments([15, 61], true);
+  const getLottie = (lottie) => {
+    lottieElement.current = lottie;
+  };
+
+  useEffect(() => {
+    const lottie = lottieElement.current;
+    if (global.loadingEnd) {
       lottie.loop = false;
+      lottie.playSegments([15, 63], true);
       lottie.onComplete = () => {
         setTimeout(() => {
           setGlobal({
-            loading: false
-          });
-          setGlobal({
+            loading: false,
             loadingEnd: false
           });
         }, 500);
@@ -35,16 +39,25 @@ export function PageLoading({ }) {
     }
   }, [global.loadingEnd]);
 
+  useEffect(()=>{
+    if(loading){
+      const lottie = lottieElement.current;
+      lottie.playSegments([0, 15], true);
+      lottie.loop = true;
+    }
+  },[global.loading]);
+
   return (
     <StyledPageLoading className={classList.join(" ")}
       immediately={global.loading === 'immediately'}
     >
       <LoadingLottie
+        className="loading-lottie"
         getLottie={getLottie}
+        noReset={true}
         lottieOption={{
-          initialSegment: loading ? [3, 15] : [60, 60],
-          loop: loading ? true : false,
-          autoplay: loading ? true : false,
+          autoplay: false,
+          loop: false,
           animationData: lotties['loading.json']
         }}
       />
@@ -92,6 +105,10 @@ const StyledPageLoading = styled.div`
   &.loading{
     pointer-events: auto;
     opacity: 1;
+  }
+  .loading-lottie{
+    max-width:53.3rem;
+    width:100vw;
   }
 `;
 

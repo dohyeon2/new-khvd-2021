@@ -76,9 +76,8 @@ function Participant() {
     }
     return result;
   });
-
   return (
-    <ParticipantLayout>
+    <ParticipantLayout nointerviewpicture={user?.profile_image?.interview ? false : true}>
       <HeadLayout>
         <ParticipantItem
           picture={user?.profile_image?.normal}
@@ -132,20 +131,24 @@ function Participant() {
             })}
           </div>
           <div className='backgorund'>
-            <div className="top"
-              style={{
-                backgroundImage: `url(${user?.profile_image?.interview})`
-              }} />
-            <div className="mid"
-              style={{
-                backgroundImage: `url(${images['background-mid-image.png']})`
-              }}
-            />
-            <div className="bottom"
-              style={{
-                backgroundImage: `url(${user?.profile_image?.interview})`
-              }} />
+            {user?.profile_image?.interview &&
+              <>
+                <div className="top"
+                  style={{
+                    backgroundImage: `url(${user?.profile_image?.interview})`
+                  }} />
+                <div className="mid"
+                  style={{
+                    backgroundImage: (user?.profile_image?.interview && `url(${images['background-mid-image.png']})`)
+                  }}
+                />
+                <div className="bottom"
+                  style={{
+                    backgroundImage: `url(${user?.profile_image?.interview})`
+                  }} />
+              </>}
           </div>
+
         </> : null}
       </div>
       {user?.profile_image?.groupimage && <div className="group-photo">
@@ -334,6 +337,7 @@ const ParticipantLayout = styled(Layout)`
       flex-direction:column;
       position:absolute;
       inset:0;
+      background-color: #D8D7D1;
       .top,
       .bottom{
         flex-shrink:0;
@@ -342,6 +346,7 @@ const ParticipantLayout = styled(Layout)`
         position:relative;
         background-position:bottom;
         background-size:100% auto;
+        background-color: #D8D7D1;
         &::before{
           content:"";
           display:block;
@@ -353,6 +358,7 @@ const ParticipantLayout = styled(Layout)`
         background-size:100% auto;
         background-position:center;
         background-repeat:repeat;
+        background-color: #D8D7D1;
       }
       .bottom{
         top:-1px;
@@ -370,9 +376,9 @@ const ParticipantLayout = styled(Layout)`
       z-index:2;
       position:relative;
       top:0;
-      padding:6.67rem 7.22rem 55vw;
+      padding:6.67rem 7.22rem ${p => p.nointerviewpicture ? "" : "55vw"};
       @media screen and (max-width:${({ theme }) => theme.breakPoints.m}px){
-        padding:2rem 2rem 55vw;
+        padding:2rem 2rem ${p => p.nointerviewpicture ? "" : "55vw"};
       }
       word-break: keep-all;
       line-height:1.5;

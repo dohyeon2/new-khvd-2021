@@ -227,7 +227,7 @@ function ProjectContainer({ data }) {
                         </div>
                     </div> : null}
                     <div className="designers bottom-layout">
-                        <div className="bottom-title">Designer</div>
+                        <div className="bottom-title designer-title">Designer</div>
                         <div className="designer-wrap">
                             {data.new_designer_list.map(x =>
                                 <>
@@ -526,6 +526,7 @@ const StyledProjectContainer = styled(StyledEditWork)`
         box-sizing:border-box;
         max-width: 1280px;
         overflow-x:hidden;
+        overflow-y:hidden;
         @media screen and (max-width:1440px){
             max-width: 1080px;
         }
@@ -541,7 +542,12 @@ const StyledProjectContainer = styled(StyledEditWork)`
             line-height: 2.2rem;
             font-size:2.5rem;
             font-family: ${({ theme }) => theme.font.family.englishBold};
-            margin-bottom:1.89rem;
+            margin-bottom:2rem;
+            &:not(.designer-title){
+                @media screen and (max-width:${({ theme }) => theme.breakPoints.m}px){
+                    text-align:center;
+                }
+            }
         }
         .goods{
             margin-top:12.5rem;
@@ -555,6 +561,7 @@ const StyledProjectContainer = styled(StyledEditWork)`
                 @media screen and (max-width:${({ theme }) => theme.breakPoints.m}px){
                     display:flex;
                     flex-direction:column;
+                    align-items:center;
                 }
                 .goods-thumb{
                     flex-shrink: 0;
@@ -565,11 +572,20 @@ const StyledProjectContainer = styled(StyledEditWork)`
                     margin-right:2.983rem;
                     background-size:cover;
                     background-position:center;
+                    @media screen and (max-width:${({ theme }) => theme.breakPoints.m}px){
+                        text-align:center;
+                        margin-right:0;
+                        margin-bottom:1rem;
+                    }
                 }
                 .goods-info{
                     display:flex;
                     flex-direction:column;
                     justify-content:space-between;
+                    @media screen and (max-width:${({ theme }) => theme.breakPoints.m}px){
+                        margin-top:1rem;
+                        text-align:center;
+                    }
                 }
                 .goto{
                     cursor:pointer;
@@ -593,6 +609,10 @@ const StyledProjectContainer = styled(StyledEditWork)`
                     word-break: keep-all;
                     font-size:1.4rem;
                     font-weight:700;
+                    @media screen and (max-width:${({ theme }) => theme.breakPoints.m}px){
+                        margin-bottom:1rem;
+                        text-align:center;
+                    }
                 }
             }
        

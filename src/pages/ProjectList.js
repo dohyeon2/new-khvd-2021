@@ -96,7 +96,6 @@ function ProjectList({
         loading: true,
       }));
     });
-    console.log(slug);
   }, [slug]);
 
   const appbarSearch = (value) => {
@@ -106,6 +105,9 @@ function ProjectList({
         ...s,
         searched: value,
       }));
+      setGlobal({
+        searchValue: value,
+      });
     }, 500)
   }
 
@@ -125,6 +127,7 @@ function ProjectList({
         appbarScrollInvert: null,
         appbarSearch: false,
         searchChange: null,
+        searchValue: null,
       });
     }
   }, []);
@@ -170,7 +173,7 @@ function ProjectList({
   useEffect(() => {
     const queries = state.queries;
     if (state.loading && !state.endOfPost && !state.searched) {
-      getPost(queries)
+      getPost(queries);
     }
   }, [state.loading, state.endOfPost, state.queries, state.searched]);
 

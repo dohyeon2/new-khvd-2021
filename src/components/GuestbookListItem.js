@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import images from '../images';
 import Sticker from './Sticker';
 
-function GuestbookListItem({ content, author_name, date, onClick }) {
+function GuestbookListItem({ content, author_name, date, onClick, relate_post_name }) {
     return (
         <StyledGuestbookListItem className="guestbook-list-item" onClick={onClick}>
             <Sticker className="sticker" noRandomRotate={true} />
@@ -18,8 +18,8 @@ function GuestbookListItem({ content, author_name, date, onClick }) {
                     dangerouslySetInnerHTML={{
                         __html: content,
                     }}
-                >
-                </div>
+                />
+                {relate_post_name && <div className="related">TO. {relate_post_name}</div>}
             </div>
         </StyledGuestbookListItem>
     );
@@ -73,6 +73,17 @@ const StyledGuestbookListItem = styled.div`
         padding:2rem;
         padding-top:2.4rem;
         padding-bottom:24%;
+        .related{
+            position:absolute;
+            bottom:2rem;
+            font-size:0.8rem;
+            font-weight:700;
+            max-width:60%;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow:ellipsis;
+            z-index:2;
+        }
     }
     &::before{
         content:"";

@@ -25,6 +25,7 @@ import Guestbook from './pages/Guestbook';
 import GuestbookEditor from './components/GuestbookEditor';
 import GuestbookViewer from './components/GuestbookViewer';
 import PopupStore from './pages/PopupStore';
+import Banner from './pages/Banner';
 
 const GlobalStyle = createGlobalStyle`
   @keyframes loadingPlaceholder{
@@ -91,6 +92,9 @@ function App() {
         </Route>
         <Route path="/popupstore">
           <PopupStore />
+        </Route>
+        <Route path="/banner">
+          <Banner />
         </Route>
         <Route path="/my-dashboard/:page">
           <MyDashboardContainer />

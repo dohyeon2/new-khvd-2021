@@ -6,12 +6,10 @@ import { StyledProjectItem, ProjectListLayout } from './ProjectList';
 import { Section } from './subpage/ProjectSearch';
 import { LoadingSpinner } from '../components/Loading';
 import { FlexCC } from '../components/Layout';
-import theme from '../themes';
 import { useHistory } from 'react-router';
 import { ParticipantItem } from '../components/ParticipantItem';
 import { Layout } from '../components/Layout';
 import { ProjectContainer } from '../components/Container';
-import images from '../images';
 import NoResult from '../components/NoResult';
 
 function ParticipantList() {
@@ -42,63 +40,32 @@ function ParticipantList() {
         }, 500);
     }
 
-    const handleWindowResizeEvent = () => {
-        const { innerWidth } = window;
-        let row = 4;
-        if (theme.breakPoints.m > innerWidth) {
-            row = 3;
-        }
-        if (theme.breakPoints.s > innerWidth) {
-            row = 2;
-        }
-        setState(s => ({
-            ...s,
-            row: row,
-        }));
-    }
-
     //초기화
     useEffect(() => {
-        getUserApi({
-            exclude: '1',
-            role: 'Author'
-        }).then((res) => {
+        (async () => {
+            const ures = await getUserApi({
+                exclude: '1',
+                role: 'Author'
+            });
+            const ares = await getUserApi({
+                exclude: '1',
+                role: 'Administrator'
+            });
+            const pres = await getUserApi({
+                exclude: '1',
+                role: 'Contributor'
+            });
             setState(s => ({
                 ...s,
-                users: res.data.users
+                users: ures.data.users,
+                adiministrator_users: ares.data.users,
+                professors: pres.data.users,
+                loading: false,
             }));
-        });
-        getUserApi({
-            exclude: '1',
-            role: 'Administrator'
-        }).then((res) => {
-            setState(s => ({
-                ...s,
-                adiministrator_users: res.data.users
-            }));
-        });
-        getUserApi({
-            exclude: '1',
-            role: 'Contributor'
-        }).then((res) => {
-            setState(s => ({
-                ...s,
-                professors: res.data.users
-            }));
-        });
-        setGlobal({ pageTitle: "Participants" });
-        setState(s => ({
-            ...s,
-            loading: false,
-        }));
+            setGlobal({ pageTitle: "Participants" });
+        })();
     }, []);
 
-    useEffect(() => {
-        window.addEventListener("resize", handleWindowResizeEvent);
-        return () => {
-            window.removeEventListener("resize", handleWindowResizeEvent);
-        }
-    }, []);
 
     useEffect(() => {
         setGlobal({
@@ -140,7 +107,7 @@ function ParticipantList() {
     }
 
     const printParticipant = (x) => <ParticipantItem
-        onClick={() => { onClickItem(x) }}
+        onClick={() => { x.meta.length !== 0 && onClickItem(x) }}
         picture={x.profile_image.normal}
         hoverPicture={x.profile_image.confetti}
         key={x.ID}

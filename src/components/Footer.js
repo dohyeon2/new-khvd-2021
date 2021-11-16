@@ -49,7 +49,7 @@ const FooterLayout = styled.div`
   position: relative;
   overflow: hidden;
   width:100%;
-  z-index:30;
+  z-index:2;
   .text-layout{
     width:100%;
     padding:2.4rem 5.5rem;
