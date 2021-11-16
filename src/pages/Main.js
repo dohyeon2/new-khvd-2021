@@ -27,7 +27,7 @@ function Main() {
     <MainLayout>
       <div className="top-element">
         <img className="main-sticker" src={images['main-sticker.png']} alt="" />
-        {topElements.map(x => <div key={x} className={"elements" + " " + x.name + "-container"}
+        {topElements.map(x => <div key={x.name} className={"elements" + " " + x.name + "-container"}
           onClick={() => {
             setTimeout(() => {
               goTo(x.name);
@@ -56,7 +56,7 @@ function Main() {
         </div>)}
       </div>
       <div className="bottom-element">
-        {bottomElements.map(x => <div key={x} className={"elements" + " " + x.name + "-container"}
+        {bottomElements.map(x => <div  key={x.name} className={"elements" + " " + x.name + "-container"}
           onClick={() => {
             setTimeout(() => {
               goTo(x.name);

@@ -1,4 +1,4 @@
-import React, { createElement, useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 import { uploadFile } from '../api/file';
 import { writeGuestbook } from '../api/guestbook';
@@ -29,7 +29,7 @@ function GuestbookEditor({ title, author_name, content, id }) {
     };
     const onSubmit = (event) => {
         event.preventDefault();
-        const { name, content, title, pwd, id } = state.input;
+        const { name, content, pwd, id } = state.input;
         writeGuestbook({
             ID: id,
             post_content: content,
@@ -68,12 +68,14 @@ function GuestbookEditor({ title, author_name, content, id }) {
                 id: id,
             }
         }));
-    }, []);
+    }, [title, author_name, content, id]);
+    
     useEffect(() => {
         return () => {
             setGlobal({ editorData: null });
         }
     }, []);
+
     useEffect(() => {
         window.addEventListener('keyup', escapeByEsc);
         return () => {
@@ -300,7 +302,7 @@ export function GuestbookInlineEditor({ relatePostId }) {
         <form onSubmit={onSubmit}>
             <div className="head">
                 <input className="name" type="text" name="name" placeholder="이름" {...inputCommonAttrs} value={state.input.name} />
-                <input className="pwd" type="password" name="pwd" placeholder="비밀번호"{...inputCommonAttrs} value={state.input.pwd}/>
+                <input className="pwd" type="password" name="pwd" placeholder="비밀번호"{...inputCommonAttrs} value={state.input.pwd} />
                 {/* <input className="title" type="text" name="title" placeholder="제목"{...inputCommonAttrs} value={state.input.title} /> */}
             </div>
             <div className="body">

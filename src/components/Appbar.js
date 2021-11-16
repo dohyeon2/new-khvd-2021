@@ -54,43 +54,42 @@ function Appbar() {
     }))
   });
 
-  function handleScorllEvent(event) {
-    if (this.scrollTop > 100) {
-      if (!state.minimize && berforeScrollTopRef.current < this.scrollTop) {
-        setState(s => ({
-          ...s,
-          minimize: true,
-        }))
-      }
-      if (state.minimize && berforeScrollTopRef.current > this.scrollTop) {
-        setState(s => ({
-          ...s,
-          minimize: false,
-        }))
-        if (global.appbarScrollInvert) {
-          setGlobal({ appbarStyle: "invert" });
-          setState(s => ({
-            ...s,
-            invert: true,
-          }));
-        }
-      }
-    } else {
-      setState(s => ({
-        ...s,
-        invert: false,
-        minimize: false,
-      }));
-      setGlobal({ appbarStyle: null });
-    }
-    berforeScrollTopRef.current = this.scrollTop;
-  }
-
   useEffect(() => {
     searchRef.current?.focus();
   }, [state.searchInput]);
 
   useEffect(() => {
+    function handleScorllEvent(event) {
+      if (this.scrollTop > 100) {
+        if (!state.minimize && berforeScrollTopRef.current < this.scrollTop) {
+          setState(s => ({
+            ...s,
+            minimize: true,
+          }))
+        }
+        if (state.minimize && berforeScrollTopRef.current > this.scrollTop) {
+          setState(s => ({
+            ...s,
+            minimize: false,
+          }))
+          if (global.appbarScrollInvert) {
+            setGlobal({ appbarStyle: "invert" });
+            setState(s => ({
+              ...s,
+              invert: true,
+            }));
+          }
+        }
+      } else {
+        setState(s => ({
+          ...s,
+          invert: false,
+          minimize: false,
+        }));
+        setGlobal({ appbarStyle: null });
+      }
+      berforeScrollTopRef.current = this.scrollTop;
+    }
     const root = document.getElementById("root");
     const projectContainer = document.getElementsByClassName("project-container")[0];
     root.removeEventListener("scroll", handleScorllEvent);
@@ -151,7 +150,7 @@ function Appbar() {
             ref={searchRef}
           />}
           {state.query.length === 1 && <div></div>}
-          {global.appbarSearch && <SearchBtn on={state.searchInput}
+          {global.appbarSearch && <SearchBtn ison={state.searchInput}
             onClick={() => {
               setState(s => ({
                 ...s,

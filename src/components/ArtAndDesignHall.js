@@ -14,9 +14,9 @@ function ArtAndDesignHall({ image }) {
                 {image ? <div className={"projected-thumbnail" + (!image ? " loading" : "")} style={{
                     backgroundImage: `url(${image})`
                 }} /> :
-                    <LoadingSpinner className="loading-spinner" scale={4}/>
+                    <LoadingSpinner className="loading-spinner" scale={4} />
                 }
-                <img className="background" src={images['andhall.png']} />
+                <img className="background" src={images['andhall.png']} alt="andhall" />
             </div>
         </ANDHallWrap>
     );

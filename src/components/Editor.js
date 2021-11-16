@@ -32,7 +32,7 @@ function Editor({ onSave, data }) {
         return () => {
             editor.current.destroy();
         }
-    }, []);
+    }, [Paragraph, data]);
 
     return (
         <>

@@ -1,7 +1,6 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Switch, Route } from "react-router-dom";
 import MyDashboardContainer from './pages/MyDashboardContainer';
-import { useHistory } from 'react-router';
 import 'normalize.css';
 import './App.css'
 import Project from './pages/Project';
@@ -17,7 +16,6 @@ import ProjectCategory from './pages/ProjectCategory';
 import { createGlobalStyle } from 'styled-components';
 import ParticipantList from './pages/ParticipantList';
 import Participant from './pages/Participant';
-import { getCookie } from './utils/functions';
 import FloatingMenu from './components/FloatingMenu';
 import { PageLoading } from './components/Loading';
 import IntroAnimation from './pages/IntroAnimation';
@@ -47,13 +45,7 @@ const GlobalStyle = createGlobalStyle`
 `
 
 function App() {
-  const { global, setGlobal } = useGlobal();
-  const history = useHistory();
-  useEffect(() => {
-    if (getCookie("skip_intro") === "1") {
-      setGlobal({ intro: false });
-    }
-  }, []);
+  const { global } = useGlobal();
   return (
     <>
       <GlobalStyle />
