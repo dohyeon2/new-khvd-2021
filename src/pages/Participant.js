@@ -302,7 +302,10 @@ const ParticipantLayout = styled(Layout)`
   padding-right:2.5rem;
   padding-left:2.5rem;
   margin:0 auto;
-  margin-bottom:11.12rem;  
+  margin-bottom:11.12rem; 
+  @media screen and (max-width:${({ theme }) => theme.breakPoints.m}px){
+    margin-bottom:0; 
+  } 
   .group-photo{
     margin-top:10.67rem;
     .title{
@@ -320,6 +323,10 @@ const ParticipantLayout = styled(Layout)`
   }
   .body{
     position:relative;
+    @media screen and (max-width:${({ theme }) => theme.breakPoints.m}px){
+      width:100vw;
+      left:-2.5rem;
+    }
     .backgorund{
       width:100%;
       user-select:none;
@@ -364,6 +371,9 @@ const ParticipantLayout = styled(Layout)`
       position:relative;
       top:0;
       padding:6.67rem 7.22rem 55vw;
+      @media screen and (max-width:${({ theme }) => theme.breakPoints.m}px){
+        padding:2rem 2rem 55vw;
+      }
       word-break: keep-all;
       line-height:1.5;
       .interview-row{

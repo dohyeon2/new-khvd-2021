@@ -10,16 +10,14 @@ function IntroAnimation() {
     const { setGlobal } = useGlobal();
     const [state, setState] = useState({
         seed: 1,
+        animationOn: false,
     });
+    const lottieElement = useRef();
     useEffect(() => {
-        window.addEventListener('resize', () => {
-            setState(s => ({
-                ...s,
-                seed: s.seed + 1
-            }));
-        });
+
     }, []);
     const getLottie = (lottie) => {
+        lottieElement.current = lottie;
         setTimeout(() => {
             lottie.play();
             lottie.onComplete = (e) => {
@@ -27,9 +25,21 @@ function IntroAnimation() {
             }
         }, 1000);
     }
+    useEffect(() => {
+        const lottie = lottieElement.current;
+        setTimeout(() => {
+            lottie.play();
+            lottie.onComplete = (e) => {
+                lottie.playSegments([67, 264], true);
+            }
+            setState(s => ({
+                animationOn: true,
+            }));
+        }, 1000);
+    }, [global.animation]);
     return (
         <AnimationLayout>
-            {state.seed && <div className="lottie-wrap">
+            <div className="lottie-wrap">
                 <LottieElement
                     getLottie={getLottie}
                     lottieOption={{
@@ -40,8 +50,8 @@ function IntroAnimation() {
                         preserveAspectRatio: 'xMidYMid meet',
                     }}
                 />
-            </div>}
-            <div className="description">
+            </div>
+            {state.animationOn && <div className="description">
                 <img className="logo" src={images['unboxing.png']} alt="" />
                 <div className="text-wrap">
                     <div className="text text-1">
@@ -59,7 +69,7 @@ function IntroAnimation() {
                         setGlobal({ intro: false });
                     }}
                 />
-            </div>
+            </div>}
         </AnimationLayout>
     );
 }

@@ -46,7 +46,7 @@ function Guestbook() {
     }
 
     useEffect(() => {
-        const count = 40;
+        const count = 20 + (100*(window.innerWidth/1920));
         for (let i = 0; i < count; i++) {
             makeSticker();
         }
@@ -98,7 +98,7 @@ const GeustbookLayout = styled(Layout)`
         position:absolute;
         left:4.38rem;
         top:7.27rem;
-        width:23.5rem;
+        max-width:23.5rem;
         z-index:2;
     }
     .balloon-container{
@@ -112,11 +112,19 @@ const GeustbookLayout = styled(Layout)`
         user-select:none;
         .balloon{
             max-width:10rem;
-            margin:0 -2.4rem;
+            margin:0 -2.3rem;
             transform:translateY(0%) rotate(0deg);
             animation: 3s ease-in-out updownAndRotate infinite alternate;
             &.b{
                 max-width:12rem;
+            }
+            @media screen and (max-width:${({theme})=>theme.breakPoints.m}px){
+                margin:0 -4vw;
+                max-width:18vw;
+                width:24vw;
+                &.b{
+                    max-width:22vw;
+                }
             }
             &:nth-of-type(2n){
                 animation-name:updownAndRotateReverse;

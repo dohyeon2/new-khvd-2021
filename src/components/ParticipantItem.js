@@ -57,8 +57,8 @@ export function ParticipantItem({
             />
             <div className={pictureClassList.join(" ")} >
                 <div className="images">
-                    <img className="normal" src={picture} loading="lazy" />
-                    <img className="confetti" src={hoverPicture} loading="lazy" />
+                    <img className="normal" src={picture} />
+                    <img className="confetti" src={hoverPicture} />
                 </div>
             </div>
             {!onlyProfileImage && <div className={nameClassList.join(" ")}>

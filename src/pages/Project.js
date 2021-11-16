@@ -43,10 +43,11 @@ function ProjectContainer({ data }) {
     }, [data]);
 
     useEffect(() => {
-        setState(s=>({
+        setState(s => ({
             ...s,
             open: false,
         }));
+        setGlobal({ appbarVisibility: false });
         if (document.getElementsByClassName('project-container')[0]) {
             document.getElementsByClassName('project-container')[0].scrollTo({ top: 0, left: 0, behavior: 'smooth' });
         }
@@ -55,6 +56,12 @@ function ProjectContainer({ data }) {
             setGlobal({ appbarBrightness: null });
         }
     }, [data]);
+
+    useEffect(()=>{
+        if(state.open){
+            setGlobal({ appbarVisibility: true });
+        }
+    },[state.open]);
 
     useEffect(() => {
         setState(s => ({
@@ -476,7 +483,9 @@ const StyledProjectContainer = styled(StyledEditWork)`
         color:unset !important;
     }
     .cdx-image-wrapper{
+        width:100%;
         img{
+            width:100%;
             cursor: pointer;
         }
     }
@@ -516,6 +525,7 @@ const StyledProjectContainer = styled(StyledEditWork)`
         z-index:1;
         box-sizing:border-box;
         max-width: 1280px;
+        overflow-x:hidden;
         @media screen and (max-width:1440px){
             max-width: 1080px;
         }
@@ -542,6 +552,10 @@ const StyledProjectContainer = styled(StyledEditWork)`
                 margin:1.89rem 0;
                 display: flex;
                 position:relative;
+                @media screen and (max-width:${({ theme }) => theme.breakPoints.m}px){
+                    display:flex;
+                    flex-direction:column;
+                }
                 .goods-thumb{
                     flex-shrink: 0;
                     flex-grow:0;
@@ -594,11 +608,19 @@ const StyledProjectContainer = styled(StyledEditWork)`
             .designer-wrap{
                 display:flex;
                 margin:0 -3.8rem;
+                @media screen and (max-width:${({ theme }) => theme.breakPoints.m}px){
+                   flex-wrap:wrap;
+                   margin:0 -2rem;
+                }
             }
             .designer{
                 margin:0 3.8rem;
                 max-width:18rem;
                 width:100%;
+                @media screen and (max-width:${({ theme }) => theme.breakPoints.m}px){
+                   max-width:calc(50% - 4rem);
+                   margin:2rem;
+                }
                 .designer-picture{
                     margin-bottom:3rem;
                 }
@@ -622,7 +644,7 @@ const StyledProjectContainer = styled(StyledEditWork)`
                 margin-right:2.78rem;
                 @media screen and (max-width:${({ theme }) => theme.breakPoints.m}px){
                     margin-right:0;
-                    padding:4rem;
+                    padding:3rem;
                 }
                 .project-title{
                     border:0;

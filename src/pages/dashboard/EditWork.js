@@ -637,7 +637,7 @@ export const StyledEditWork = styled.div`
             .right{
                 order:1;
                 width:100%;
-                padding:4rem;
+                padding:3rem;
                 box-sizing:border-box;
                 .thumbnail{
                     width:100%;

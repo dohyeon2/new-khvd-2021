@@ -166,7 +166,6 @@ function Intro() {
                         right: '10%',
                         bottom: '0',
                         color: '#fff',
-                        fontSize: '1.6rem',
                         textAlign: 'right',
                     }}
                     frameStyleHandler={(currentProceed, getSubFramePercent) => {
@@ -213,7 +212,6 @@ function Intro() {
                         height: 'auto',
                         left: '10%',
                         color: '#fff',
-                        fontSize: '1.6rem',
                     }}
                     frameStyleHandler={(currentProceed, getSubFramePercent) => {
                         const subFrame = getSubFramePercent(320, 360, 1);
@@ -263,7 +261,6 @@ function Intro() {
                         left: '10%',
                         top: '5%',
                         color: '#fff',
-                        fontSize: '1.6rem',
                     }}
                     frameStyleHandler={(currentProceed, getSubFramePercent) => {
                         const subFrame = getSubFramePercent(520, 560, 1);
@@ -377,7 +374,6 @@ function Intro() {
                         height: 'auto',
                         textAlign: "center",
                         color: '#fff',
-                        fontSize: '1.6rem',
                     }}
                     wrapperStyle={{
                         display: 'flex',
@@ -409,7 +405,6 @@ function Intro() {
                         height: 'auto',
                         textAlign: "center",
                         color: '#fff',
-                        fontSize: '1.6rem',
                     }}
                     wrapperStyle={{
                         display: 'flex',
@@ -445,7 +440,6 @@ function Intro() {
                         alignItems: 'center',
                         textAlign: "center",
                         color: '#fff',
-                        fontSize: '1.6rem',
                     }}
                     wrapperStyle={{
                         display: 'flex',
@@ -650,6 +644,7 @@ const CustomWrapper = styled(Wrapper)`
     .message{
         font-weight:400;
         font-family:${({ theme }) => theme.font.family.notoSans};
+        font-size:1.3rem;
         &>div{
             line-height:1.6;
         }
@@ -667,6 +662,9 @@ const StyledBoxWrapper = styled.div`
     width:100%;
     height:100%;
     & > div{
+        padding:1rem;
+        box-sizing:border-box;
+        word-break:keep-all;
         position: absolute;
         width:100%;
         height:100%;

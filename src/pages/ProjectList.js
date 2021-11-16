@@ -49,7 +49,7 @@ function ProjectList({
   const [state, setState] = useState(INITIAL_STATE);
   const windowResizeEventRef = useRef(false);
   const searchPending = useRef(null);
-
+  const scrollPatient = 200;
   const handleWindowResizeEvent = () => {
     const { innerWidth } = window;
     let row = 3;
@@ -176,7 +176,7 @@ function ProjectList({
 
   //스크롤이 끝인지 판단
   const isScrollEnd = () => {
-    return document.getElementById("root").scrollTop + window.innerHeight >= document.getElementById("root").scrollHeight - 100;
+    return document.getElementById("root").scrollTop + window.innerHeight >= document.getElementById("root").scrollHeight - scrollPatient;
   }
 
   //스크롤 끝일때 로딩 지정
