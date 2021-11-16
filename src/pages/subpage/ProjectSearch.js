@@ -5,21 +5,25 @@ import { getPostApi } from '../../api/project';
 import useGlobal from '../../hook/useGlobal';
 import { LoadingSpinner } from '../../components/Loading';
 import { FlexCC } from '../../components/Layout';
+import NoResult from '../../components/NoResult';
 
 function ProjectSearch({ search }) {
-
     const { goTo } = useGlobal();
-
     const queries = {
         nopaging: 1,
         s: search,
     };
     const INITIAL_STATE = {
-        searchedPost: [],
+        searched: false,
+        searchedPost: {},
     }
     const [state, setState] = useState(INITIAL_STATE);
 
     useEffect(() => {
+        setState(s => ({
+            ...s,
+            searched: false,
+        }));
         getPostApi(queries).then(res => {
             const classification = {};
             for (let i in res.data.posts) {
@@ -32,15 +36,14 @@ function ProjectSearch({ search }) {
             }
             setState(s => ({
                 ...s,
+                searched: true,
                 searchedPost: classification,
             }));
         });
     }, [search]);
-
-    const { searchedPost } = state;
-    const keys = Object.keys(searchedPost);
-    keys.sort((a, b) => searchedPost[a][0].category - searchedPost[b][0].category);
-    if (searchedPost.length === 0) {
+    const keys = Object.keys(state.searchedPost);
+    keys.sort((a, b) => state.searchedPost[a][0].category - state.searchedPost[b][0].category);
+    if (keys.length === 0 && !state.searched) {
         return (
             <FlexCC>
                 <LoadingSpinner scale={2} />
@@ -52,7 +55,7 @@ function ProjectSearch({ search }) {
             {keys.map(x =>
                 <>
                     <Section>{x}</Section>
-                    {searchedPost[x].map(y =>
+                    {state.searchedPost[x].map(y =>
                         <ProjectItem
                             onClick={() => {
                                 goTo("/project/" + y.category_slug + "/" + y.id);
@@ -67,6 +70,7 @@ function ProjectSearch({ search }) {
                     )}
                 </>
             )}
+            {(state.searched && keys.length === 0) && <NoResult />}
         </>
     );
 }

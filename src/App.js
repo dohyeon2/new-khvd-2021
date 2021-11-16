@@ -24,6 +24,7 @@ import IntroAnimation from './pages/IntroAnimation';
 import Guestbook from './pages/Guestbook';
 import GuestbookEditor from './components/GuestbookEditor';
 import GuestbookViewer from './components/GuestbookViewer';
+import PopupStore from './pages/PopupStore';
 
 const GlobalStyle = createGlobalStyle`
   @keyframes loadingPlaceholder{
@@ -87,6 +88,9 @@ function App() {
         </Route>
         <Route path="/guestbook">
           <Guestbook />
+        </Route>
+        <Route path="/popupstore">
+          <PopupStore />
         </Route>
         <Route path="/my-dashboard/:page">
           <MyDashboardContainer />

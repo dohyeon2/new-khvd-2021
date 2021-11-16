@@ -143,7 +143,7 @@ function Appbar() {
         </div>
         <div className="right">
           {state.searchInput && <SearchInput
-            onChange={(e) => {
+            onInput={(e) => {
               const target = e.target;
               const value = target.value;
               global.searchChange(value);

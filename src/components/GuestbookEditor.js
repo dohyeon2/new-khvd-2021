@@ -405,7 +405,8 @@ export const GuestbookEditorLayout = styled.div`
     align-items: center;
     justify-content: center;
     .editor-wrap{
-        width:unset;
+        width:100%;
+        align-items:center;
         height:100%;
         display:flex;
         flex-direction:column;
@@ -424,7 +425,7 @@ export const GuestbookEditorLayout = styled.div`
             background-color: #fff;
             border:1px solid #707070;
             max-width:34.56rem;
-            width:100vw;
+            width:100%;
             .error{
                 color:${({ theme }) => theme.colors.primary};
             }

@@ -31,9 +31,10 @@ export function ParticipantItem({
             lottieRef.current.goToAndPlay(0);
         }
     }
-    useEffect(()=>{
+    useEffect(() => {
         className.includes('active') && lottieRef.current.goToAndPlay(0);
-    },[className]);
+    }, [className]);
+
     const matches = !onlyProfileImage ? name.match(/([ㄱ-ㅎ|ㅏ-ㅣ|가-힣|\s]*)(.*)/) : "";
     const koreanName = matches && matches[1].trim();
     const englishName = matches && matches[2].trim();

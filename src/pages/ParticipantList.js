@@ -2,14 +2,17 @@ import React, { useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 import { getUserApi } from '../api/user';
 import useGlobal from '../hook/useGlobal';
-import { ProjectContainer, StyledProjectItem, ProjectListLayout } from './ProjectList';
+import { StyledProjectItem, ProjectListLayout } from './ProjectList';
 import { Section } from './subpage/ProjectSearch';
 import { LoadingSpinner } from '../components/Loading';
 import { FlexCC } from '../components/Layout';
 import theme from '../themes';
 import { useHistory } from 'react-router';
 import { ParticipantItem } from '../components/ParticipantItem';
-import {Layout} from '../components/Layout';
+import { Layout } from '../components/Layout';
+import { ProjectContainer } from '../components/Container';
+import images from '../images';
+import NoResult from '../components/NoResult';
 
 function ParticipantList() {
     const history = useHistory();
@@ -98,17 +101,21 @@ function ParticipantList() {
     }, []);
 
     useEffect(() => {
-        setGlobal({ appbarScrollInvert: true });
-        setGlobal({ appbarSearch: true });
-        setGlobal({ searchChange: appbarSearch });
+        setGlobal({
+            appbarScrollInvert: true,
+            appbarSearch: true,
+            searchChange: appbarSearch
+        });
     }, []);
 
     useEffect(() => {
         return () => {
-            setGlobal({ pageTitle: null });
-            setGlobal({ appbarSearch: false });
-            setGlobal({ searchChange: null });
-            setGlobal({ appbarScrollInvert: null });
+            setGlobal({
+                pageTitle: null,
+                appbarSearch: false,
+                searchChange: null,
+                appbarScrollInvert: null
+            });
         }
     }, []);
 
@@ -153,7 +160,7 @@ function ParticipantList() {
                     {adiministrator_users?.map(printParticipant)}
                 </>}
                 {professors?.length > 0 && <>
-                    <ParticipantSection>지도교수</ParticipantSection>
+                    <ParticipantSection>전임교수 / 지도교수</ParticipantSection>
                     {professors?.map(printParticipant)}
                 </>}
                 {loading &&
@@ -163,9 +170,7 @@ function ParticipantList() {
                 }
                 {(!users?.length && !adiministrator_users?.length && !loading && !professors?.length)
                     &&
-                    <div>
-                        검색결과가 없습니다.
-                    </div>
+                    <NoResult />
                 }
             </ParticipantLayout>
             <Layout className="layout" />

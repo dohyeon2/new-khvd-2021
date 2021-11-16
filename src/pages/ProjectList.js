@@ -11,6 +11,7 @@ import ProjectSearch from './subpage/ProjectSearch';
 import { getPostApi } from '../api/project';
 import { WinnerIcon } from '../components/Icon';
 import { ChevronBtn } from '../components/Btns';
+import { ProjectContainer } from '../components/Container';
 
 function ProjectList({
   slug: slugAttr,
@@ -33,7 +34,7 @@ function ProjectList({
     currentProjectIdx: -1,
     wholeCount: null,
     row: null,
-    searched: history.location.search.match(/s=(.*)/) ? history.location.search.match(/s=(.*)/)[1] : "",
+    searched: "",
     queries: {
       paged: 1,
       nopaging: 0,
@@ -99,17 +100,13 @@ function ProjectList({
   }, [slug]);
 
   const appbarSearch = (value) => {
-    if (value.length <= 1) {
-      history.push(history.location.pathname);
-    } else {
-      clearTimeout(searchPending.current);
-      searchPending.current = setTimeout(() => {
-        setState(s => ({
-          ...s,
-          searched: value,
-        }));
-      }, 500)
-    }
+    clearTimeout(searchPending.current);
+    searchPending.current = setTimeout(() => {
+      setState(s => ({
+        ...s,
+        searched: value,
+      }));
+    }, 500)
   }
 
   useEffect(() => {
@@ -203,9 +200,7 @@ function ProjectList({
       <ProjectContainer>
         {searched ?
           <ProjectSearch
-            currentCategory={category}
             search={searched}
-            row={row}
           />
           :
           <>{projects.map(x => <ProjectItem
@@ -342,27 +337,6 @@ export const ProjectListLayout = styled(Layout)`
     margin:1rem;
   }
 `
-
-export const ProjectContainer = styled.div`
-  display:flex;
-  justify-content:flex-start;
-  flex-wrap:wrap;
-  width:100%;
-  max-width:1280px;
-  margin:-2rem -3rem 0;
-  .item{
-    width:calc(33.333% - 6rem);
-    @media screen and (max-width:${({ theme }) => theme.breakPoints.m}px){
-      width:calc(50% - 6rem);
-    }
-    box-sizing:border-box;
-    margin:3rem;
-    transition:transform .2s ease-in-out;
-    &:hover{
-      transform:scale(1.2);
-    }
-  }
-`;
 
 export const StyledProjectItem = styled.div`
   position: relative;

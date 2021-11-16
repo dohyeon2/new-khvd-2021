@@ -1,10 +1,9 @@
 import axios from 'axios';
 import produce from 'immer';
-import React, { useDebugValue, useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router';
 import useGlobal from '../hook/useGlobal';
 import styled from 'styled-components';
-import Loading from '../components/Loading';
 import { apiURI } from '../vars/api';
 import Footer from '../components/Footer';
 import { StyledEditWork, StyledProjectContent } from './dashboard/EditWork';
@@ -44,6 +43,13 @@ function ProjectContainer({ data }) {
     }, [data]);
 
     useEffect(() => {
+        setState(s=>({
+            ...s,
+            open: false,
+        }));
+        if (document.getElementsByClassName('project-container')[0]) {
+            document.getElementsByClassName('project-container')[0].scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+        }
         setGlobal({ appbarBrightness: getColorBrightness(data?.backgorund_color) });
         return () => {
             setGlobal({ appbarBrightness: null });
@@ -186,6 +192,32 @@ function ProjectContainer({ data }) {
                                 </div>
                             </div>
                         </div>)}
+                    </div> : null}
+                    {data.related_project_post ? <div className="goods bottom-layout">
+                        <div className="bottom-title">Related Project</div>
+                        <div className="goods-item">
+                            <div className="goods-thumb"
+                                style={{
+                                    backgroundImage: `url(${data.related_project_post.thumbnail_small})`
+                                }}
+                            />
+                            <div className="goods-info">
+                                <div className="goods-title">{data.related_project_post.title}</div>
+                                <div className="bottom">
+                                    <button
+                                        className="goto"
+                                        onClick={() => {
+                                            goTo('/project/' + data.related_project_post.category_slug + "/" + data.related_project_post.id, true);
+                                        }}
+                                    >
+                                        <img src={images['click-image.png']} alt="" />
+                                    </button>
+                                    <div className="caption">
+                                        굿즈와 관련된 프로젝트를 감상해보세요!
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div> : null}
                     <div className="designers bottom-layout">
                         <div className="bottom-title">Designer</div>

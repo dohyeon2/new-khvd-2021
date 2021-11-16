@@ -329,6 +329,7 @@ const ProjectCategoryLayout = styled(Layout)`
         .swiper-slide{
             text-align:center;
             width:65vw;
+            font-size:5vw;
             &.swiper-slide-active{
                 color: #fff;
                 -webkit-text-stroke:unset;
