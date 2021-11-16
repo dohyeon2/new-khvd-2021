@@ -42,6 +42,7 @@ function IntroAnimation() {
             <div className="lottie-wrap">
                 <LottieElement
                     getLottie={getLottie}
+                    noReset={true}
                     lottieOption={{
                         animationData: lotties['poster.json'],
                         renderer: 'canvas',

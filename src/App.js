@@ -49,9 +49,6 @@ const GlobalStyle = createGlobalStyle`
 function App() {
   const { global, setGlobal } = useGlobal();
   const history = useHistory();
-  history.listen(x => {
-    document.getElementById("root").scrollTo({ top: 0, left: 0 });
-  });
   useEffect(() => {
     if (getCookie("skip_intro") === "1") {
       setGlobal({ intro: false });
