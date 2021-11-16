@@ -16,4 +16,5 @@ export const Layout = styled.div`
   background-size:cover;
   background-position:center;
   background-color:${({ theme }) => theme.colors.background};
+  overflow: hidden;
 `;

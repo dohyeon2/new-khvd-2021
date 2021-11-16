@@ -17,7 +17,6 @@ function ProjectList({
   slug: slugAttr,
 }) {
   const { setGlobal, goTo } = useGlobal();
-  const history = useHistory();
   const INITIAL_STATE = {
     category: null,
     authors: null,
@@ -97,6 +96,7 @@ function ProjectList({
         loading: true,
       }));
     });
+    console.log(slug);
   }, [slug]);
 
   const appbarSearch = (value) => {
@@ -226,7 +226,7 @@ function ProjectList({
                 </ChevronBtn>
                 <ChevronBtn
                   onClick={() => {
-                    goTo('/guest-book')
+                    goTo('/guestbook')
                   }}
                 >
                   방명록 쓰러가기
