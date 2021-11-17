@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 import { getUserApi } from '../api/user';
 import useGlobal from '../hook/useGlobal';
-import { StyledProjectItem, ProjectListLayout } from './ProjectList';
+import { ProjectListLayout } from './ProjectList';
 import { Section } from './subpage/ProjectSearch';
 import { LoadingSpinner } from '../components/Loading';
 import { FlexCC } from '../components/Layout';
@@ -45,8 +45,8 @@ function ParticipantList() {
         (async () => {
             const ures = await getUserApi({
                 exclude: '1',
-                role: 'Author'
-            });
+                role: 'Author',
+            })
             const ares = await getUserApi({
                 exclude: '1',
                 role: 'Administrator'
@@ -89,21 +89,21 @@ function ParticipantList() {
         goTo('/participant/' + x.ID);
     }
 
-    const { users: usersList, adiministrator_users: adminUsersList, search, loading, professors: professorsList } = state;
+    const { users, adiministrator_users, search, loading, professors } = state;
 
-    const getFilteredList = (list, search) => {
-        const fitered = search !== "" ? list.filter(x => x.display_name.includes(decodeURI(search))) : list;
-        const result = fitered.sort((a, b) => {
-            if (!b.profile_image.normal && !a.profile_image.normal) return 0;
-            if (!b.profile_image.normal) return -1;
-            return 0;
-        });
-        return result;
-    }
+    // const getFilteredList = (list, search) => {
+    //     const fitered = search !== "" ? list.filter(x => x.display_name.includes(decodeURI(search))) : list;
+    //     const result = fitered.sort((a, b) => {
+    //         if (!b.profile_image.normal && !a.profile_image.normal) return 0;
+    //         if (!b.profile_image.normal) return -1;
+    //         return 0;
+    //     });
+    //     return result;
+    // }
 
-    const users = getFilteredList(usersList, search);
-    const adiministrator_users = getFilteredList(adminUsersList, search);
-    const professors = getFilteredList(professorsList, search);
+    // const users = getFilteredList(usersList, search);
+    // const adiministrator_users = getFilteredList(adminUsersList, search);
+    // const professors = getFilteredList(professorsList, search);
 
     return (
         <PraticipantLayout>
