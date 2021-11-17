@@ -41,6 +41,9 @@ function ProjectContainer({ data }) {
             image.addEventListener("load", () => {
                 setGlobal({ loadingEnd: true });
             });
+            image.addEventListener("error", () => {
+                setGlobal({ loadingEnd: true });
+            });
         } catch (error) {
             setGlobal({ loadingEnd: true });
         }
