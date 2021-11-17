@@ -26,7 +26,7 @@ function ParticipantList() {
     const { setGlobal } = useGlobal();
     const [state, setState] = useState(INITIAL_STATE);
     const { goTo } = useGlobal();
-    const { users:usersList, adiministrator_users:adminUsersList, search, loading, professors:professorsList } = state;
+    const { users: usersList, adiministrator_users: adminUsersList, search, loading, professors: professorsList } = state;
 
     const appbarSearch = (value) => {
         if (value.length < 1) {
@@ -85,7 +85,7 @@ function ParticipantList() {
                 });
             }, 300);
         }
-    }, [state.users]);
+    }, [state.usercount, state.users]);
 
 
     useEffect(() => {
@@ -185,12 +185,7 @@ export default ParticipantList;
 
 
 const PraticipantLayout = styled(ProjectListLayout)`
-    .item{
-        .picture{
-            height:unset;
-            filter:drop-shadow(0.2rem 0.2rem 0.2rem rgba(0,0,0,0.5));
-        }
-    }
+
 `;
 
 const ParticipantSection = styled(Section)`
