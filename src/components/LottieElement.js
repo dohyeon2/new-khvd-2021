@@ -30,6 +30,14 @@ function LottieElement({
     }
   }, []);
 
+  useEffect(() => {
+    return () => {
+      if ('destroy' in lottieInstanceRef.current) {
+        lottieInstanceRef.current.destroy();
+      }
+    }
+  }, []);
+
   return (
     <StyledlottieElement
       className={classList.join(" ")}
