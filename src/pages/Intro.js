@@ -147,7 +147,7 @@ function Intro() {
                     fontSize: '1rem',
                 }}
                 onClick={() => {
-                    setCookie("skip_intro", "1", 1);
+                    setCookie("intro_skip", "1", 1);
                     setGlobal({ intro: false });
                 }}
             >

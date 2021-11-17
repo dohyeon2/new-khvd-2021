@@ -26,6 +26,7 @@ function ParticipantList() {
     const { setGlobal } = useGlobal();
     const [state, setState] = useState(INITIAL_STATE);
     const { goTo } = useGlobal();
+    const { users:usersList, adiministrator_users:adminUsersList, search, loading, professors:professorsList } = state;
 
     const appbarSearch = (value) => {
         if (value.length < 1) {
@@ -46,7 +47,7 @@ function ParticipantList() {
             const ures = await getUserApi({
                 exclude: '1',
                 role: 'Author',
-            })
+            });
             const ares = await getUserApi({
                 exclude: '1',
                 role: 'Administrator'
@@ -61,9 +62,30 @@ function ParticipantList() {
                 adiministrator_users: ares.data.users,
                 professors: pres.data.users,
                 loading: false,
+                usercount: ures.data.user_count
             }));
         })();
     }, []);
+
+    useEffect(() => {
+        if (state.usercount > users.length) {
+            setTimeout(() => {
+                getUserApi({
+                    exclude: (["1", ...users.map(x => x.ID)].join(",")),
+                    role: 'Author',
+                }).then(res => {
+                    setState(s => ({
+                        ...s,
+                        users: [
+                            ...s.users,
+                            ...res.data.users
+                        ],
+                        loading: false,
+                    }));
+                });
+            }, 300);
+        }
+    }, [state.users]);
 
 
     useEffect(() => {
@@ -89,21 +111,20 @@ function ParticipantList() {
         goTo('/participant/' + x.ID);
     }
 
-    const { users, adiministrator_users, search, loading, professors } = state;
 
-    // const getFilteredList = (list, search) => {
-    //     const fitered = search !== "" ? list.filter(x => x.display_name.includes(decodeURI(search))) : list;
-    //     const result = fitered.sort((a, b) => {
-    //         if (!b.profile_image.normal && !a.profile_image.normal) return 0;
-    //         if (!b.profile_image.normal) return -1;
-    //         return 0;
-    //     });
-    //     return result;
-    // }
+    const getFilteredList = (list, search) => {
+        const fitered = search !== "" ? list.filter(x => x.display_name.includes(decodeURI(search))) : list;
+        const result = fitered.sort((a, b) => {
+            if (!b.profile_image.normal && !a.profile_image.normal) return 0;
+            if (!b.profile_image.normal) return -1;
+            return 0;
+        });
+        return result;
+    }
 
-    // const users = getFilteredList(usersList, search);
-    // const adiministrator_users = getFilteredList(adminUsersList, search);
-    // const professors = getFilteredList(professorsList, search);
+    const users = getFilteredList(usersList, search);
+    const adiministrator_users = getFilteredList(adminUsersList, search);
+    const professors = getFilteredList(professorsList, search);
 
     return (
         <PraticipantLayout>

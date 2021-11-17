@@ -1,5 +1,5 @@
 import React from 'react';
-import { Switch, Route } from "react-router-dom";
+import { Switch, Route, useHistory } from "react-router-dom";
 import MyDashboardContainer from './pages/MyDashboardContainer';
 import 'normalize.css';
 import './App.css'
@@ -46,6 +46,11 @@ const GlobalStyle = createGlobalStyle`
 
 function App() {
   const { global } = useGlobal();
+  const history = useHistory();
+  history.listen(() => {
+    const root = document.getElementById("root");
+    root.scrollTo({ left: 0, top: 0 });
+  });
   return (
     <>
       <GlobalStyle />

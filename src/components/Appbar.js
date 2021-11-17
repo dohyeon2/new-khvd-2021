@@ -64,9 +64,7 @@ const Appbar = React.memo(() => {
       if (this.scrollTop > 100) {
         appBar.current.classList.add("minimize");
         if (berforeScrollTopRef.current > this.scrollTop) {
-          if (global.appbarStyle?.includes("invert")) {
-            appBar.current.classList.add("invert");
-          }
+          appBar.current.classList.add("invert");
           appBar.current.classList.remove("minimize");
         }
       } else {
