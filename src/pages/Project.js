@@ -84,7 +84,10 @@ function ProjectContainer({ data }) {
 
     useEffect(() => {
         return () => {
-            setGlobal({ currentPostCheer: null });
+            setGlobal({ 
+                currentPostCheer: null,
+                loadingEnd:true,
+             });
         }
     }, []);
 

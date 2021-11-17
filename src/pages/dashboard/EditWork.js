@@ -537,6 +537,7 @@ export const StyledEditWork = styled.div`
                 font-weight: bold;
                 box-sizing:border-box;
                 margin-bottom: 22px;
+                word-break:keep-all;
             }
             .project-subtitle{
                 width:100%;
