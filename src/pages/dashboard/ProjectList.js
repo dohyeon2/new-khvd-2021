@@ -115,7 +115,7 @@ function ProjectList() {
         if (data.loading) {
             (async () => {
                 try {
-                    const userListData = await axios.get(apiURI + `khvd/v1/project?author=${user.data.wordpressData.id}&cat=2,3,4,5`, {
+                    const userListData = await axios.get(apiURI + `khvd/v1/project?author=${user.data.wordpressData.id}`, {
                         headers: {
                             Authorization: "Bearer " + localStorage.getItem("khvd_user_token"),
                         }
