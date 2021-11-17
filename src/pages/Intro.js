@@ -221,7 +221,7 @@ function Intro() {
                         }
                     }}
                 >
-                    'Unboxsing'의 사전적 정의는<br />
+                    'Unboxing'의 사전적 정의는<br />
                     '상자에 들어간 물건을 꺼내다'<br />
                     정도로 그칠 지 모릅니다.
                 </AnimationObj>
