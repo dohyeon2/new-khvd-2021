@@ -6,8 +6,8 @@ import styled from 'styled-components';
 import { StyledProjectItem } from '../pages/ProjectList';
 import Sticker from './Sticker';
 
-export function ParticipantItem({
-    picture, hoverPicture, name, className, winner, onClick, onlyProfileImage, circle
+export const ParticipantItem = React.memo(function ({
+    picture, hoverPicture, name, winner, onClick, onlyProfileImage, circle
 }) {
     const pictureClassList = ["picture"];
     const nameClassList = ["name"];
@@ -32,10 +32,6 @@ export function ParticipantItem({
             lottieRef.current.goToAndPlay(0);
         }
     }
-    useEffect(() => {
-        className?.includes('active') && lottieRef.current.goToAndPlay(0);
-    }, [className]);
-
     const matches = !onlyProfileImage ? name.match(/([ㄱ-ㅎ|ㅏ-ㅣ|가-힣|\s]*)(.*)/) : "";
     const koreanName = matches && matches[1].trim();
     const englishName = matches && matches[2].trim();
@@ -49,18 +45,18 @@ export function ParticipantItem({
             <LottieElement
                 className="confetti_animation"
                 noReset={true}
+                getLottie={getLottie}
                 lottieOption={{
                     autoplay: false,
                     animationData: lotties['confetti.json'],
                     loop: false,
                     initialSegment: [10, 31]
                 }}
-                getLottie={getLottie}
             />
             <div className={pictureClassList.join(" ")} >
                 <div className="images">
-                    <img className="normal" src={picture} loading="lazy" />
-                    <img className="confetti" src={hoverPicture} loading="lazy" />
+                    {picture && <img className="normal" src={picture} />}
+                    {hoverPicture && <img className="confetti" src={hoverPicture} />}
                     {!picture && <Sticker className="sticker" noRandomRotate={true} />}
                 </div>
             </div>
@@ -70,7 +66,7 @@ export function ParticipantItem({
             </div>}
         </ParticipantItemLayout>
     )
-}
+});
 const ParticipantItemLayout = styled(StyledProjectItem)`
     position:relative;
     &.active,
