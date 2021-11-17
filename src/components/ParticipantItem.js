@@ -42,7 +42,7 @@ export const ParticipantItem = React.memo(function ({
             onClick={onClick}
         >
             {winner && <WinnerIcon winner={winner} />}
-            <LottieElement
+            {/* <LottieElement
                 className="confetti_animation"
                 noReset={true}
                 getLottie={getLottie}
@@ -52,7 +52,7 @@ export const ParticipantItem = React.memo(function ({
                     loop: false,
                     initialSegment: [10, 31]
                 }}
-            />
+            /> */}
             <div className={pictureClassList.join(" ")} >
                 <div className="images">
                     {picture && <img className="normal" src={picture} />}
