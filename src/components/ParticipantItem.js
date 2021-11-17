@@ -7,7 +7,7 @@ import { StyledProjectItem } from '../pages/ProjectList';
 import Sticker from './Sticker';
 
 export const ParticipantItem = React.memo(function ({
-    picture, hoverPicture, name, winner, onClick, onlyProfileImage, circle
+    picture, hoverPicture, name, winner, onClick, onlyProfileImage, className, circle
 }) {
     const pictureClassList = ["picture"];
     const nameClassList = ["name"];
