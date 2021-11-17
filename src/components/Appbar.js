@@ -11,6 +11,7 @@ import images from '../images';
  * 앱바
  */
 const Appbar = React.memo(() => {
+  const appBar = useRef();
   const menuWrapperClass = [];
   const { global, goTo } = useGlobal();
   const history = useHistory();
@@ -61,32 +62,16 @@ const Appbar = React.memo(() => {
   useEffect(() => {
     function handleScorllEvent(event) {
       if (this.scrollTop > 100) {
-        if (!state.minimize && berforeScrollTopRef.current < this.scrollTop) {
-          setState(s => ({
-            ...s,
-            minimize: true,
-          }))
-        }
-        if (state.minimize && berforeScrollTopRef.current > this.scrollTop) {
-          setState(s => ({
-            ...s,
-            minimize: false,
-          }))
-          if (global.appbarScrollInvert) {
-            setGlobal({ appbarStyle: "invert" });
-            setState(s => ({
-              ...s,
-              invert: true,
-            }));
+        appBar.current.classList.add("minimize");
+        if (berforeScrollTopRef.current > this.scrollTop) {
+          if (global.appbarStyle?.includes("invert")) {
+            appBar.current.classList.add("invert");
           }
+          appBar.current.classList.remove("minimize");
         }
       } else {
-        setState(s => ({
-          ...s,
-          invert: false,
-          minimize: false,
-        }));
-        setGlobal({ appbarStyle: null });
+        appBar.current.classList.remove("minimize");
+        appBar.current.classList.remove("invert");
       }
       berforeScrollTopRef.current = this.scrollTop;
     }
@@ -104,7 +89,7 @@ const Appbar = React.memo(() => {
       }
       root.removeEventListener("scroll", handleScorllEvent);
     }
-  }, [global, state]);
+  }, [global.appbarVisibility, global.appbarStyle]);
 
   useEffect(() => {
     setState(s => ({
@@ -133,7 +118,7 @@ const Appbar = React.memo(() => {
 
   return (
     <>
-      <StyledAppbar className={classList.join(" ")} luma={global.appbarBrightness}>
+      <StyledAppbar ref={appBar} className={classList.join(" ")} luma={global.appbarBrightness}>
         <div className="left">
           <Logo to={"/"} />
         </div>

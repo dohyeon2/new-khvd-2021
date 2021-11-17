@@ -35,19 +35,23 @@ function ProjectContainer({ data }) {
     const timoutRef = useRef();
 
     useEffect(() => {
-        const image = new Image();
-        image.src = data?.thumbnail;
-        image.addEventListener("load", () => {
+        try {
+            const image = new Image();
+            image.src = data?.thumbnail;
+            image.addEventListener("load", () => {
+                setGlobal({ loadingEnd: true });
+            });
+        } catch (error) {
             setGlobal({ loadingEnd: true });
-        });
+        }
     }, [data]);
 
     useEffect(() => {
+        setGlobal({ appbarVisibility: false });
         setState(s => ({
             ...s,
             open: false,
         }));
-        setGlobal({ appbarVisibility: false });
         if (document.getElementsByClassName('project-container')[0]) {
             document.getElementsByClassName('project-container')[0].scrollTo({ top: 0, left: 0, behavior: 'smooth' });
         }
@@ -57,11 +61,11 @@ function ProjectContainer({ data }) {
         }
     }, [data]);
 
-    useEffect(()=>{
-        if(state.open){
+    useEffect(() => {
+        if (state.open) {
             setGlobal({ appbarVisibility: true });
         }
-    },[state.open]);
+    }, [state.open]);
 
     useEffect(() => {
         setState(s => ({

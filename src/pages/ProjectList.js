@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Layout } from '../components/Layout';
 import styled from 'styled-components';
-import { useHistory, useParams } from 'react-router';
+import { useParams } from 'react-router';
 import { apiURI } from '../vars/api';
 import axios from 'axios';
 import useGlobal from '../hook/useGlobal';
