@@ -87,6 +87,7 @@ function ProjectContainer({ data }) {
             setGlobal({ 
                 currentPostCheer: null,
                 loadingEnd:true,
+                appbarVisibility:true,
              });
         }
     }, []);

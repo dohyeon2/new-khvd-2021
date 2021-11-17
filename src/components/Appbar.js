@@ -4,7 +4,6 @@ import useGlobal from '../hook/useGlobal';
 import Logo from './Logo';
 import HambergerMenu from './HambergerMenu';
 import { useHistory } from 'react-router';
-import { setGlobal } from '../reducers/global';
 import images from '../images';
 
 /**
@@ -61,6 +60,7 @@ const Appbar = React.memo(() => {
 
   useEffect(() => {
     function handleScorllEvent(event) {
+      if (!appBar.current) return;
       if (this.scrollTop > 100) {
         appBar.current.classList.add("minimize");
         if (berforeScrollTopRef.current > this.scrollTop) {

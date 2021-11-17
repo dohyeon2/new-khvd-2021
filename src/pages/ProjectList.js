@@ -80,9 +80,13 @@ function ProjectList({
   useEffect(() => {
     handleWindowResizeEvent();
     if (!windowResizeEventRef.current) {
-      window.addEventListener("resize", () => {
-        handleWindowResizeEvent();
-      });
+      window.addEventListener("resize", handleWindowResizeEvent);
+    }
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      window.removeEventListener("resize", handleWindowResizeEvent);
     }
   }, []);
 

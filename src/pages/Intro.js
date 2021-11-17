@@ -75,7 +75,7 @@ function Intro() {
     }, []);
 
     useEffect(() => {
-        WrapperRef.current.addEventListener('scroll', (event) => {
+        const frameHandler = (event) => {
             if (frameRef.current >= maxFrame) {
                 return;
             }
@@ -87,13 +87,21 @@ function Intro() {
                 scrollFraction * maxFrame
             );
             setFrameHanlder(frameIndex);
-        });
-        WrapperRef.current.addEventListener("mousemove", (event) => {
+        }
+        const mouseMove = (event) => {
             mousePos.current = {
                 x: event.x,
                 y: event.y,
             };
-        });
+        };
+        WrapperRef.current.addEventListener('scroll', frameHandler);
+        WrapperRef.current.addEventListener("mousemove", mouseMove);
+        return () => {
+            if (WrapperRef.current) {
+                WrapperRef.current.removeEventListener('scroll', frameHandler);
+                WrapperRef.current.removeEventListener("mousemove", mouseMove);
+            }
+        }
     }, []);
 
     useEffect(() => {

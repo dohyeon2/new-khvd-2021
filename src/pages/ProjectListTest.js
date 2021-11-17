@@ -28,6 +28,7 @@ function ListComponent(data) {
       { field: 'title', headerName: '제목', flex: 1 },
       { field: 'related_project', headerName: '연관', flex: 1 },
       { field: 'designer_list', headerName: '디자이너 리스트' },
+      { field: 'edit', headerName: '수정하기', width: 100 },
       { field: 'goto', headerName: '보러가기', width: 100 },
     ]
   };
@@ -46,6 +47,9 @@ function ListComponent(data) {
           switch (e.field) {
             case "goto":
               history.push(`/project/${e.id}`);
+              break;
+            case "edit":
+              history.push(`/my-dashboard/edit-work/${e.id}`);
               break;
           }
         }}
@@ -80,7 +84,7 @@ function ProjectListTest() {
     if (data.loading && data.loggedIn) {
       (async () => {
         try {
-          const userListData = await axios.get(apiURI + `khvd/v1/project`);
+          const userListData = await axios.get(apiURI + `khvd/v1/project?cat=2,3,4,5`);
           setData(s => ({
             ...s,
             loading: false,
