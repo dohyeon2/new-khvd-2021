@@ -185,7 +185,11 @@ export default ParticipantList;
 
 
 const PraticipantLayout = styled(ProjectListLayout)`
-
+    .item{
+        .picture{
+            height:unset;
+        }
+    }
 `;
 
 const ParticipantSection = styled(Section)`
