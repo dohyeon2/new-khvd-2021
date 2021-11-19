@@ -6,7 +6,7 @@ import useGlobal from '../hook/useGlobal';
 import images from '../images';
 import { FrontPrimaryBtn, FrontSecondaryBtn } from './Btns';
 
-function GuestbookEditor({ title, author_name, content, id }) {
+function GuestbookEditor({ title, author_name, content, id, relate_post_id }) {
     const INITIAL_STATE = {
         input: {
             id: 0,
@@ -65,6 +65,7 @@ function GuestbookEditor({ title, author_name, content, id }) {
                 title: title,
                 name: author_name,
                 content: content,
+                relate_post_id:relate_post_id,
                 id: id,
             }
         }));

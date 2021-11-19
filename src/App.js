@@ -57,8 +57,9 @@ function App() {
       <Appbar />
       <Switch>
         <Route path="/" exact>
-          {global.intro ? <Intro /> : <Main />}
-          {global.intro && <IntroAnimation />}
+          {/* {global.intro ? <Intro /> : <Main />}
+          {global.intro && <IntroAnimation />} */}
+          <Main />
         </Route>
         <Route path="/login">
           <LoginCallBack />
